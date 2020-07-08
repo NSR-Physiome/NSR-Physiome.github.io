@@ -1,0 +1,213 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Physical Units in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p> This document describes using physical units in MML models.  This
+feature is useful both for documenting models and for insuring they are
+dimensionally correct.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a> 
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#phys">Physical Units</a></li>
+<li><a href="#example">Some Examples with Units</a></li>
+<li><a href="#more">More About Units</a></li>
+<li><a href="#def">Defining Additional Units</a></li>
+<li><a href="MML_Units_NSR.html">JSim Standard Units file</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="phys">Physical Units</a></h2>
+
+<p>    MML variables may be assigned physical units (e.g. meter/sec) for either
+documentation or calculation purposes.  Using MML units requires three
+steps:</p>
+
+<ol>
+<li> defining the system of units to be used;</li>
+<li> deciding on a unit conversion policy;</li>
+<li> declaring variables with units clauses.</li>
+</ol>
+
+<p> (1) JSim has no predefined units policy.  The unit system is 
+flexible enough to allow intermixing of e.g. CGS, MKS, English and user 
+custom units as needed.  The radian unit is predefined, but all other 
+units must be declared in the model file.  Most users will wish to 
+import the NSR unit library (nsrunit.mod) that is distributed with JSim. 
+A subsequent section describes how model files may define additional 
+units.</p>
+
+<p> You may examine the NSR unit library definition file (nsrunit.mod) 
+to see what units are predefined in that file.  This file may be found 
+in common/nsrunit.mod within the JSim distribution directory.  A single 
+unit may have multiple names.  For example, meters may be written either 
+as "meter" or as "m", but not as "meters".  Also, unit name space is 
+separate from variable name space, so there is no problem defining a 
+variable with name "m", even though this is also the name of a physical 
+unit.</p>
+
+<p> (2) To use JSim units, a model file must declare either "unit 
+conversion on" or "unit conversion off".  With unit conversion on, 
+variable constraints are checked for unit consistency and conversion 
+factors are calculated internally.  Any constraint that is not 
+consistent will generate an error. With unit conversion off, a variable 
+may still be declared with units, but the declaration is merely 
+documentation and has no effect on the run-time calculations.</p>
+
+<p> (3) Declaring variables with units simply requires a unit expression 
+following the variable name.  The unit expression may combine any of the 
+previously defined units using the operators * (multiply), / (divide), ^ 
+(exponentiation), and 1/ (inverse).  Examples:</p>
+
+<pre>
+      realDomain t sec;         // time in seconds
+      real area m^2;            // area in square meters
+      real f(t) kg*m/sec^2;     // force in newtons
+      real h(t) 1/sec;          // frequency in Hertz
+</pre>
+
+<h2>  <a name="example">Some examples with units</a></h2>
+
+<p> A simple, complete example follows.  Note that the import and unit 
+conversion directives come before the math block.:</p>
+
+<?php jsTextDownApp("examples/MML_Units/units1.proj"); ?>
+
+<p> The run-time output of this model is as follows:</p>
+
+<pre>
+      dist1 = 3 m
+      dist2 = 2 m
+      dist3 = 500 cm    
+</pre>
+
+<p> To obtain the same results from a model with unit conversion off, 
+the explicit conversion of meters to centimeters must be written into 
+the MML:</p>
+
+<?php jsTextDownApp("examples/MML_Units/units2.proj"); ?>
+
+<p> The run-time output of this model is as follows:</p>
+
+<pre>
+      dist1 = 3 m
+      dist2 = 2 m
+      dist3 = 500 cm
+</pre>
+
+<p> With unit conversion on, JSim rejects unit-inconsistent models. This 
+can be a handy debugging tool when complicated equations are involved.  
+The "c=a+b" constraint below will generate a unit inconsistency error 
+since kilograms and seconds are incompatible.:</p>
+
+<pre>
+import nsrunit;
+unit conversion on;
+math example6c {
+  real a kg, b sec, c sec;  
+  a = 3;
+  b = 2;
+  c = a + b;
+}
+</pre>
+
+<h2>  <a name="more">More About Units</a></h2>
+
+<p> Combined variable declaration and constraints assign variable units 
+as might be expected:</p>
+
+<pre>
+      real a = 4 kg/sec;   //  a will be in kg/sec
+</pre>
+
+<p> Some formulas require numeric constants with units to be 
+dimensionally correct. Such expressions usually require enclosing 
+parentheses:</p>
+
+<pre>
+      real dt = 10 sec;
+      real dist km;
+      dist = dt * (12 km/sec);  // distance = elapsed time * speed
+</pre>
+
+<p> With unit conversion on, variables declared without units will be 
+assigned units that are compatible with its constraints:</p>
+
+<pre>
+      real a km;
+      real b sec;
+      real c = a/b;     // c will be in km/sec
+</pre>
+
+<p> The automatically assigned unit will almost always be dimensionally 
+consistent, but it may not be the unit the MML author has in mind.  
+Authors particular about the desired unit should assign it to the 
+variable explicitly.  In (usually rare) cases no reasonable guess can be 
+made for a variable's unit, so it will be set dimensionless.  If this 
+assignment results in inconsistencies, the model writer should add an 
+explicit unit declaration.</p>
+
+<p> Dimensionless variables should so declared:</p>
+
+<pre>
+      real a km, b cm;
+      real c dimensionless;
+      b = c*a;
+</pre>
+
+<p> The predefined radian unit is equivalent to "dimensionless". Note 
+that built-in trigonometric and logarithmic functions require arguments 
+in radians, so appropriate conversion constants may be required.  For 
+example:</p>
+
+<?php jsTextDownApp("examples/MML_Units/units4.proj"); ?>
+
+      math sinewave {
+          real t sec;   // time in seconds
+          t.min=0; t.max=2*PI; t.ct=33;
+          real u(t) = sin(t/(1 sec));  // dimensionless u has period 2*PI seconds
+      }
+
+<p>    The "import nsrunit", unit declaration and unit conversion statements
+may appear in any order so long as any unit declaration(s) follow the
+"import nsrunit" statement.</p>
+
+<h2>  <a name="def">Defining Additional Units</a></h2>
+<p>    You may define additional units for a model using the "unit" 
+clause:</p>
+
+<?php jsTextDownApp("examples/MML_Units/units3.proj"); ?>
+
+<p>    The "prefixable" declaration above, enables the standard SI prefixes
+(milli, kilo, micro, etc.) for the unit "teaspoon".  "furlongs" is not
+declared as prefixable in this example, so the declaration "megafurlong"
+would result in an error. A unit defined as "fundamental" is a new unit that cannot be expressed as any other defined units. The variable "car" has units of mySpecialOne/furlong.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

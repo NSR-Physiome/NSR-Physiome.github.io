@@ -1,0 +1,104 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Functions and Procedures in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction </h2>
+<p>    Functions and procedures are mechanisms for incorporating code from
+procedural languages such as Java, C, C++, Fortran and Matlab into
+MML models.  Some general principles are explained in this document, and
+pointers to implementation of specific languages are provided. </p>
+
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+<li>Familiarity with Java or C programming (recommended)</li>
+</ul>
+
+<p>    MML functions and procedures (F&P) provide mechanisms for
+incorporating procedural code into MML models.  Functions treat all
+arguments as inputs and return a real value.  Procedures have no return
+value, but have both input and output arguments. To use a function or
+procedure in an MML model, it must be defined and then called in an
+appropriate context.</p>
+<p>    There are three mechanisms for defining F&P.  Source F&P are defined
+by source code embedded within an MML model, which is compiled at model
+build time or run time.  Native F&P are defined by object code that has
+been previously created by C, C++, Fortran or other native code compilers.  
+Class F&P are defined by pre-compiled Java classes which are linked into
+the model at run-time.</p>
+<p>    Procedural code blocks within these F&P definitions must conform to the
+relevant JSim Application Programmer's Interface (API) so that values
+computed will properly communicate with the rest of the MML model and the
+JSim application. </p>
+<p>    However a function or procedure is defined, it doesn't do any useful
+work until it is called one or more times in an appropriate context.  A
+function may be used in any algebraic expression within an MML equation or
+relation constraint.  A procedure may be used, standing by itself or
+modified by a "when" clause, as an MML constraint.  The MML @ construct is
+provided to ensure dimensional compatibility between F&P definition and
+usage.  These concepts are illustrated by the examples that follow:</p>
+
+<ul>
+<li><a href="MML_Func_Java.html">Using Java Code within MML</a></li>
+<li><a href="MML_Func_C.html">Using C Code within MML</a></li>
+<li><a href="MML_Func_CC.html">Using C++ Code within MML</a></li>
+<li><a href="MML_Func_Matlab.html">Using Matlab Code within MML</a></li>
+<li><a href="MML_Func_Fortran.html">Using Fortran Code within MML</a></li>
+<?php jscoqli() ?>
+
+</ul>
+
+<h2>  <a name="fp">Multiprocessing F&P</a></h2>
+
+<p> JSim requires F&P used under <a 
+href="User_MP.html">multiprocessing</a> (MP) to be reentrant, meaning 
+that they can be called simultaneously in different contexts without 
+crosstalk between the computational threads.  Writing reentrant code is 
+technical and should be done only be expert programmers.  A complete 
+description of reentrancy implementation techniques is beyond the scope 
+of this document.  </p> <p> The JSim compiler (like virtually all other 
+compilers) can't tell whether a function or procedure is reentrant by 
+automated analysis.  The model author must tell it.  JSim assumes F&P 
+are not reentant unless told otherwise.  However, telling JSim that a 
+function or procedure is reentrant <strong>will not make it so</strong>.  
+In fact, tagging a function or procedure reentant, when the code is not, 
+in fact, reentrant, will typically crash not only the model but java and 
+JSim itself in a truly spectacular way.  So <strong>never</strong> tag a 
+function or procedure as reentrant unless you are <strong>very 
+sure</strong> the underlying code is reentrant.  Standard warnings apply 
+to you and your children to the seventh generation.</p>
+
+<p>    Assuming you have a reentrant function or procedure you wish to
+use under JSim MP,  you may tag it reentrant by adding the following
+clause to the F&P declaration:
+<pre>
+      reentrant="true";    
+</pre>
+</p>
+<p>    The following is a reentrant example using Java source F&P:</p>
+
+<?php jsTextDownApp("examples/MML_Func_Intro/reentrant.mod"); ?>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

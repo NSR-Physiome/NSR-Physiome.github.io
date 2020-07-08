@@ -1,0 +1,49 @@
+<?php
+    // This block is the phphead.frg file from tpt.
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match('@\<h1[^\062]*\>(.*)\<\/h1\>@sU',"$contents",$matches);
+    $pagtit = preg_replace('@\<.*\>@sU','',"$matches[1]");
+    require_once("phead.html");
+    // phead.html provides $haystack, the name of the current file
+?>
+
+<h1><img src="/images/tick.png" height="32" width="32" />Citing JSim</h1>
+
+<!-- <?php include "topmsg.php"; ?> -->
+
+
+<p>  Please use the following citation when referencing JSim:</p>
+
+<a name="ref"><H3 CLASS="western">Primary citation:</H3></a>
+<FONT FACE="Arial, sans-serif"><FONT SIZE=2 STYLE="font-size: 12pt">
+<P STYLE="margin-left: 0.32in;  margin-bottom: 0in; line-height: 0.18in">
+ Butterworth E, Jardine BE, Raymond GM, Neal ML, Bassingthwaighte JB. <a href="http://f1000research.com/articles/2-288/v3">JSim, an open-source modeling system for data analysis</a> [v3; ref status: indexed, http://f1000r.es/3n0] <em>F1000Research</em> 2014, 2:288 (doi: 10.12688/f1000research.2-288.v3) 
+</P>
+</FONT></FONT>
+
+<br />
+<ul>
+<li><a href="/Links/pub_pdfs/jsim_f1000research.2-288.v3.pdf">Download "JSim, an open-source modeling system for data analysis" (pdf)</a></li>
+<li><a href="/Links/publications.html">Other related JSim references</a></li>
+</ul>
+
+
+<DIV TYPE=FOOTER>
+        <P CLASS="western" STYLE="margin-top: 0.46in; margin-bottom: 0in; widows: 0; orphans: 0">
+        <BR>
+        </P>
+</DIV></p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

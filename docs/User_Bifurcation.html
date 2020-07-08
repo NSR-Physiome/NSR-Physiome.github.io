@@ -1,0 +1,47 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Bifurcation Analysis</h1>
+
+<h2>Overview</h2>
+
+<p>Bifurcation analysis explores mulitple stationary states, both
+stable and unstable, within
+a model.  There are several approaches within JSim:</p>
+
+<ul>
+
+<li>Problems with multiple stable stationary states can be explored 
+by writing the analysis directly within the model.  Curated NSR models
+using this approach are listed <a 
+href="http://www.physiome.org/Models/modelDB/adv_find.php?keyword_1=bifurcation&logic_search=sAND&keyword_2=&fmadv_keyterm=key_terms&fmadv_modelname=model_name&fmadv_descript=description&fmadv_author=author">
+here</a>.</li>
+
+<li>A bifurcation analysis tab for JSim is currently under development.
+In this tab,  the user specify a parameter of interest and a range of exploration.
+The analysis with link to the <a href="http://cmvl.cs.concordia.ca/auto/">AUTO</a> package to generate a 
+bifurcation diagram.  The AUTO package allow exploration of both stable and unstable 
+stationary states.  Release of this feature is expected in mid-2012.</li>
+
+<li>Export of JSim models to <a href="http://www.math.pitt.edu/~bard/xpp/xpp.html">XPP/XPPAUT</a>
+is currently under development.  Once complete,  users may export their models
+to the XPPAUT system for bifurcation analysis there.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

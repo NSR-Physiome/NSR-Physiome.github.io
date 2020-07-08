@@ -1,0 +1,928 @@
+/* try to start consistently in all browsers */
+html, body {
+    margin: 0;
+    padding: 0; /* Opera default not zero */
+    border: 0;
+}
+body {
+	color: #000000; /* black text */
+    /* background-color: #dddddd; */
+    background-color: #ffffff; /* white background */
+    font: 16px/1.2em Arial, Helvetica, sans-serif;
+}
+
+/* body class for iframe stop document (empty; see tpt/stop.html) */
+body.iframestopdoc {
+    background-color: transparent;
+}
+
+/* div id section */
+/* match wrapper id (wrapper contains masthead and content) */
+#wrapper {
+	/* float: right; */
+	color: #000000; /* black text */
+	background-color: #ffffff; /* white */
+    padding-left: 112px;
+}
+
+#masthead { /* match masthead id */
+	padding: 9px 9px 9px 9px;
+	background-color: #ffffff; /* white */
+}
+/* work up flydown menus for masthead */
+#masthead p {
+    display: inline;
+}
+#masthead p.currentpg {
+	text-indent: 0;
+	padding: 0px;
+        color: #0000ff;
+	font-family: helvetica, sans-serif;
+	font-size: 100%;
+}
+#masthead ul {
+    display: inline;
+    list-style: none;
+    text-align: left;
+    text-indent: 0;
+    margin: 0;
+    padding: 0;
+}
+#masthead li {
+    position: relative;
+}
+#masthead ul li {
+    display: inline;
+    padding: 1px 7px;
+    background-color: #f1f8cc;
+    border: 1px solid #000000;
+}
+#masthead ul ul {
+    display: none;
+    position: absolute; 
+    list-style: none;
+    background-color: #f1f8cc;
+    border: 2px solid #000;
+    width: 10em;
+    top: 100%;
+    left: 0;
+    margin: 0;
+    padding: 5px;
+}
+#masthead ul li:hover ul {
+    display: block;
+}
+#masthead ul ul li {
+    display: block;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+/* end of flydown menu workup for masthead */
+/* dynamic pseudo-classes for masthead */
+div[id~="masthead"] a:link {
+/*    color: #2d4587;*/
+color: #0101ff;
+    background: inherit;
+}
+div[id~="masthead"] a:visited {
+    color: #000000;
+    background: inherit;
+}
+div[id~="masthead"] a:hover {
+    color: #2d872d;
+    background: inherit;
+}
+div[id~="masthead"] a:active {
+    color: #0101ff;
+    background: inherit;
+}
+
+#content { /* match content id */
+	padding: 0px 9px 400px 9px;
+    /* overflow: auto; */
+}
+/* dynamic pseudo-classes for content */
+div[id~="content"] a:link {
+ /*   color: #8080ff; */
+      color: #0101ff;
+    background: inherit;
+}
+div[id~="content"] a:visited {
+    color: #800180;
+    background: inherit;
+}
+div[id~="content"] a:hover {
+    color: #2d872d;
+    background: inherit;
+}
+div[id~="content"] a:active {
+    color: #0101ff;
+    background: inherit;
+}
+/* match navside id */
+#navside {
+	/* position: fixed; */
+    /* next for IE6 bug; see media screen rule for others */
+    height: 100%; 
+	width: 112px;
+	position: absolute; 
+	top: 0;
+	left: 0;
+	margin: 0px 0px 0px 0px;
+    padding: 9px 0px 0px 0px;
+	color: #ffffff;
+	background-color: #f1f8cc; 
+    font: 16px/1.2em Arial, Helvetica, sans-serif;
+}
+#navside p {
+	margin: 0;
+}
+/* work up flyout menus, section 1 of 2 */
+#navside ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#navside ul ul {
+    position: absolute;
+    top: -2px;
+    left: 100%;
+    width: 10em;
+    padding-top: 0px;
+}
+#navside li {
+    position: relative;
+}
+@media screen {
+    body>div#navside {
+        height: 250em; 
+	    width: 112px;
+        position: fixed;
+    }
+}
+/* end of flyout menus workup, section 1 of 2 */
+/* dynamic pseudo-classes for navside */
+div[id~="navside"] a:link {
+ /*   color: #2d4587; */
+    color: 0101ff;
+    background: inherit;
+}
+div[id~="navside"] a:visited {
+    color: #000000;
+    background: inherit;
+}
+div[id~="navside"] a:hover {
+    color: #2d872d;
+    background: inherit;
+    text-decoration: none;
+}
+div[id~="navside"] a:active {
+    color: #0101ff;
+    background: inherit;
+}
+/* work up flyout menus, section 2 of 2 */
+div[id~="navside"] ul ul {
+    display: none;
+}
+div#navside ul ul {
+    display: none;
+}
+div[id~="navside"] ul li:hover ul {
+    display: block;
+	color: #ffffff;
+	background-color: #f1f8cc; 
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+div#navside ul li:hover ul {
+    display: block;
+	color: #ffffff;
+	background-color: #f1f8cc; 
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+div[id~="navside"] ul li:hover ul li p[class~="downlink"] {
+    padding-bottom: 5px;
+}
+div#navside ul li:hover ul li p.downlink {
+    padding-bottom: 5px;
+}
+div[id~="navside"] ul li:hover ul li p[class~="currentpg"] {
+    padding-bottom: 5px;
+}
+div#navside ul li:hover ul li p.currentpg {
+    padding-bottom: 5px;
+}
+/* end of flyout menus workup, section 2 of 2 */
+
+/* div class section */
+/* fix overflow problems for dokuwiki */
+div.dokuwiki {
+    overflow: hidden;
+}
+/* element[class=someclass] selectors and element.someclass backups */
+div[class~="navsection"] { /* match navsection class */
+	padding-top: 9px;
+	margin-top: 9px;
+	margin-bottom: 9px;
+	border-top: solid black 2px;
+}
+div.navsection { /* match navsection class */
+	padding-top: 9px;
+	margin-top: 9px;
+	margin-bottom: 9px;
+	border-top: solid black 2px;
+}
+
+div.pullright {
+    display: block;
+    width: 33%;
+	margin: 9px;
+	border: solid black 2px;
+	padding: 9px;
+    float: right;
+}
+div.pullright h3 {
+    display: block;
+    margin: 0;
+}
+div.pullright p.first {
+    display: block;
+    margin-top: 3px;
+    text-indent: 0;
+    font-size: 80%;
+}
+div.pullright p {
+    display: block;
+    text-indent: 1em;
+}
+
+/* a ul class for pullright */
+div.pullright ul.pullright {
+    display: block;
+    list-style: none;
+    padding: 0;
+    font-size: 80%;
+    line-height: 1.2em;
+}
+div.pullright ul.pullright li {
+    margin-top: 5px;
+}
+div.pullright ul ul {
+    display: block;
+    list-style: disc none outside;
+    margin-left: 9px;
+    padding-left: 9px;
+    font-size: 100%;
+}
+div.pullright ul.pullright ul li {
+    margin-top: 0;
+}
+
+/* div for the JSim source code license text */
+div.iframemargin {
+    margin-left: 9px;
+}
+
+/* div for the Course advertisements. JBB only wants this active once we have deliverables: course name & syllabus
+div.coursead {
+    margin: 10px;
+    padding: 7px 15px 10px 15px;
+    border: 2px solid #dddddd; 
+    color: #000000;
+    background-color: #f1f8cc; 
+}
+
+div.coursead a:link {
+    color: #ffffff;
+}
+
+div.coursead a:visited {
+    color: #2d4587;
+}
+
+h2.coursead, h3.coursead, p.coursead {
+    margin: 0;
+}
+
+h2.coursead {
+    padding-bottom: 3px;
+} */
+
+
+/* standard element selectors: h elements first */
+h1 { font-size: 140%; } 
+h2 { font-size: 120%; } 
+h3 { font-size: 100%; }
+h4, h5, h6 { font-size: 100%; }
+h1, h2, h3, h4, h5, h6 {
+		display: block;
+		text-align: left;
+		font-family: Arial, Helvetica, sans-serif;
+}
+
+/* p elements */
+p {
+	display: block;
+	text-align: left;
+	font-size: 100%; 
+	text-indent: 0;
+	margin-top: 1em;
+}
+
+/* local file link for directory listing */
+p[class~="lfilelink"] {
+    margin-top: 0em;
+}
+p.lfilelink {
+    margin-top: 0em;
+    margin-bottom: 0em;
+}
+
+/* topnav p used only in Models/Respiratory/index.html 060612 */
+p[class~="topnav"] {
+    display: block;
+    padding-top: 9px;
+    font-size: 80%;
+    text-align: left;
+    text-indent: 0;
+}
+p.topnav {
+    display: block;
+    padding-top: 9px;
+    font-size: 80%;
+    text-align: left;
+    text-indent: 0;
+}
+p[class~="topnav"] a {  /* a element in p.topnav */
+    display: inline;
+}
+p.topnav a {
+    display: inline;
+}
+p.topnav a:after {  /* :after pseudo-element for a elements in p.topnav */
+    content: url(/images/2x12line.png);
+}
+p[class~="topnav"] a:after {
+    content: url(/images/2x12line.png);
+}
+/* dynamic pseudo-classes for topnav */
+p[class~="topnav"] a:link {
+    color: #8080ff;
+    background: inherit;
+}
+p[class~="topnav"] a:visited {
+    color: #800180;
+    background: inherit;
+}
+p[class~="topnav"] a:hover {
+    color: #2d872d;
+    background: inherit;
+}
+p[class~="topnav"] a:active {
+    color: #0101ff;
+    background: inherit;
+}
+/* end of topnav rules */
+
+/* currentpg class for menu */
+p[class~="currentpg"] {
+	text-indent: 0;
+	padding-bottom: 10px;
+	padding-left: 9px;
+	font-family: helvetica, sans-serif;
+	font-size: 110%;
+    color: #0000ff;
+}
+p.currentpg {
+	text-indent: 0;
+	padding-bottom: 10px;
+	padding-left: 9px;
+	font-family: helvetica, sans-serif;
+	font-size: 110%;
+    color: #0000ff;
+}
+
+/* navlogo used in ptail.html; thus all from template */
+p[class~="navlogo"] {
+    display: block;
+    padding-top: 0px;
+    padding-bottom: 18px;
+    text-align: center;
+    text-indent: 0;
+}
+p.navlogo {
+    display: block;
+    padding-top: 0px;
+    padding-bottom: 18px;
+    text-align: center;
+    text-indent: 0;
+}
+
+/* pxlink and pxlinksrc used only in Links/websites.html */
+p[class~="pxlink"] { /* match pxlink p */
+    display: block;
+	text-indent: 0;
+	margin-bottom: 0;
+	padding: 0;
+}
+p.pxlink { /* match pxlink p */
+    display: block;
+	text-indent: 0;
+	margin-bottom: 0;
+}
+p[class~="pxlinksrc"] { /* match pxlinksrc p */
+    display: block;
+	text-indent: 0;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 5%;
+}
+p.pxlinksrc { /* match pxlinksrc p */
+    display: block;
+	text-indent: 0;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 5%;
+}
+/* end of pxlink and pxlinksrc rules */
+
+/* rules for 'first' paragraphs (first below headers): obsolete? */
+p[class~="first"] { /* match p first class */
+		display: block;
+		font-size: 100%;
+		text-indent: 0;
+		margin-top: 1em;
+}
+p.first { /* html match p first class */
+		display: block;
+		font-size: 100%;
+		text-indent: 0;
+		margin-top: 1em;
+}
+/* end of rules for 'first' paragraphs */
+
+/* Next for paragraphs serving as form labels. */
+p[class~="formlabel"] {
+    font-weight: bold;
+    margin-top: 0em;
+    margin-bottom: 3px;
+    text-align: right;
+}
+p.formlabel {
+    font-weight: bold;
+    margin-top: 0em;
+    margin-bottom: 3px;
+    text-align: right;
+}
+p[class~="srcfrmlbl"] {
+    font-weight: bold;
+    margin-top: 0em;
+    margin-bottom: 3px;
+    text-align: left;
+}
+p.srcfrmlbl {
+    font-weight: bold;
+    margin-top: 0em;
+    margin-bottom: 3px;
+    text-align: left;
+}
+p[class~="tablenote"] {
+    font-size: 80%;
+    margin-top: 0em;
+    margin-bottom: 3px;
+}
+p.tablenote {
+    font-size: 80%;
+    margin-top: 0em;
+    margin-bottom: 3px;
+}
+ul[class~="tablenote"] {
+    font-size: 80%;
+    margin-top: 0em;
+    margin-bottom: 3px;
+}
+ul.tablenote {
+    font-size: 80%;
+    margin-top: 0em;
+    margin-bottom: 3px;
+}
+/* end of form label paragraphs rules */
+
+/* rule for input element in td element creginp class */
+td.creginp input {
+    font-size: 80%;
+}
+
+/* rules for textarea in td element creginp class */
+td[class~="creginp"] textarea {
+    border: 2px solid green;
+    margin-bottom: 6px;
+}
+td.creginp textarea {
+    border: 2px solid green;
+    margin-bottom: 6px;
+}
+td[class~="creginp"] textarea[class~="error"] {
+    border: 4px solid red;
+}
+td.creginp textarea.error {
+    border: 4px solid red;
+}
+
+/* rule for 'last modified' paragraph (in ptail.html template file) */
+p[class~="moddate"] { /* match p moddate class */
+		display: block;
+		font-size: 100%;
+		text-indent: 0;
+		margin-top: 1em;
+}
+p.moddate { /* html match p moddate class */
+		display: block;
+		font-size: 100%;
+		text-indent: 0;
+		margin-top: 1em;
+}
+/* end of 'last modified' paragraph rule */
+
+/* supportcred class for the grants acknowledgment */
+p[class~="supportcred"] { /* match p supportcred class */
+        font-size: 80%;
+}
+p.supportcred { /* html match p supportcred class */
+        font-size: 80%;
+}
+/* end of supportcred class rules */
+
+/* rule for paragraph with hanging indent */
+p[class~="hangindent"] { /* hanging indent */ 
+    display: block;
+    font-size: 100%;
+    margin-left: 10%;
+    text-indent: -10%;
+}
+p.hangindent { /* hanging indent */ 
+    display: block;
+    font-size: 100%;
+    margin-left: 10%;
+    text-indent: -10%;
+}
+/* end of hanging indent paragraph rule */
+
+/* error paragraph (dynamically inserted on form error) */
+p[class~="error"] {
+    border: 0;
+    color: red;
+}
+p.error {
+    border: 0;
+    color: red;
+}
+/* end of error paragraph rule */
+
+/* table elements */
+td {
+		font-size: 100%;
+}
+td[class~="hangindent"] {
+    display: block;
+	font-size: 100%;
+    margin-left: 10%;
+    text-indent: -10%;
+}
+td.hangindent {
+    display: block;
+	font-size: 100%;
+    margin-left: 10%;
+    text-indent: -10%;
+}
+/* end of table elements */
+
+/* form elements */
+form[class~="xpndcllps"] { /* for expand and collapse buttons */
+    display: inline;
+}
+form.xpndcllps { /* for expand and collapse buttons */
+    display: inline;
+}
+
+form[class~="search"] { /* for expand and collapse buttons */
+    display: inline;
+}
+form.search { /* for expand and collapse buttons */
+    display: inline;
+}
+/* next four for expand, collapse, and search buttons */
+button.listopt {
+    background-color: #dddddd;
+}
+button[class~="listopt"] {
+    background-color: #dddddd;
+}
+/* next four for expand, collapse, and search input (submit) elements */
+input[class~="listopt"] {
+    background-color: #dddddd;
+}
+input.listopt {
+    background-color: #dddddd;
+}
+/* Next for input fields in download form. */
+input[class~="inline"] {
+    display: inline;
+    border: 2px solid green;
+    margin-bottom: 6px;
+}
+input.inline {
+    display: inline;
+    border: 2px solid green;
+    margin-bottom: 6px;
+}
+input[class~="accept"] {
+    background-color: green;
+    font-weight: bold;
+    color: white;
+}
+input.accept {
+    background-color: green;
+    font-weight: bold;
+    color: white;
+}
+input[class~="decline"] {
+    background-color: red;
+    font-weight: bold;
+    color: white;
+}
+input.decline {
+    background-color: red;
+    font-weight: bold;
+    color: white;
+}
+/* Next for expand-collapse and other wiki buttons. */
+input[class~="button"] {
+    background-color: #dddddd;
+}
+input.button {
+    background-color: #dddddd;
+}
+input[class~="runmdl"] {
+    font-family: helvetica, sans-serif;
+    font-size: 110%;
+    font-weight: bold;
+    color: #2d4587;
+    background-color: #dddddd;
+}
+input.runmdl {
+    font-family: helvetica, sans-serif;
+    font-size: 110%;
+    font-weight: bold;
+    color: #2d4587;
+    background-color: #dddddd;
+}
+input[class~="addmdl"] {
+    border-top: 2px inset;
+    border-left: 2px inset;
+    border-bottom: 2px outset;
+    border-right: 2px outset;
+}
+input.addmdl {
+    border-top: 2px inset;
+    border-left: 2px inset;
+    border-bottom: 2px outset;
+    border-right: 2px outset;
+}
+input.certify {
+    display: block;
+    font-family: helvetica, sans-serif;
+    font-weight: bold;
+    background-color: #dddddd;
+    color: #ffffff;
+}
+input.register {
+    display: block;
+    font-family: helvetica, sans-serif;
+    font-weight: bold;
+    background-color: #dddddd;
+    color: #ffffff;
+}
+form.addmdl input[type="submit"] {
+    background-color: #dddddd;
+}
+textarea.addmdl {
+    display: inline;
+    vertical-align: text-top;
+    border-top: 2px inset;
+    border-left: 2px inset;
+    border-bottom: 2px outset;
+    border-right: 2px outset;
+}
+span.addmdlfrm {
+    display: block;
+}
+
+/* address element */
+address {
+		display: block;
+		text-align: left;
+		font-size: 100%; 
+		margin-top: 1em;
+		margin-bottom: 1em;
+        margin-left: 0%;
+		text-indent: 0;
+}
+
+/* span elements */
+span.acronym { /* color the text for the acronym*/
+    color: blue;
+}
+span[class~="acronym"] {
+    color: blue;
+}
+span.required { /* color the text for required field marker */
+    color: red;
+}
+span[class~="required"] {
+    color: red;
+}
+
+/* inline elements */
+strong {
+        display: inline;
+		font-size: 100%;
+}
+
+/* list elements */
+ul.conference {
+    display: block;
+    list-style: disc none outside;
+}
+
+dl {
+		font-size: 100%;
+}
+
+dd {
+		font-size: 100%;
+}
+
+dt {
+		font-size: 100%;
+}
+
+ul.idxmod {
+    list-style-type: none;
+}
+
+/* change text-decoration for links to none (Safari) */
+a {
+    text-decoration: none;
+}
+
+/* get rid of ugly borders around img links (a -> img) */
+a img {
+    border-width: 0px;
+}
+
+img.listicon {
+    border-width: 0px;
+    vertical-align: middle;
+}
+
+/* all type (element) universal class selectors */
+*[class~="error"] {
+    border: 4px solid red;
+}
+*.error {
+    border: 4px solid red;
+}
+
+*[class~="downlink"] { /* match downlink class */
+	text-indent: 0;
+	/* padding-bottom: 10px; */
+	padding-left: 9px;
+	font-family: helvetica, sans-serif;
+	font-size: 100%;
+}
+*.downlink { /* match downlink class */
+	text-indent: 0;
+	/* padding-bottom: 10px; */
+	padding-bottom: 10px;
+	padding-left: 9px;
+	font-family: helvetica, sans-serif;
+	font-size: 100%;
+}
+
+*[class~="uplink"] { /* match uplink class */
+	text-indent: 0;
+	padding-bottom: 10px;
+	padding-left: 9px;
+	font-family: helvetica, sans-serif;
+	font-size: 90%;
+}
+*.uplink { /* match uplink class */
+	text-indent: 0;
+	padding-bottom: 10px;
+	padding-left: 9px;
+	font-family: helvetica, sans-serif;
+	font-size: 90%;
+}
+
+*[class~="hideme"] { /* match hideme class */
+	display: none;
+}
+*.hideme { /* match hideme class */
+	display: none;
+}
+/* end of universal class selectors */
+
+/* test of start and stop button-making with span element css */
+/* first the startbutton */
+span.startbutton {
+    margin: 2px;
+    padding: 0px 4px 4px;
+    background-color: green;
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+    border-left: 2px solid silver;
+    border-top: 2px solid silver;
+}
+span.startbutton a {
+    outline: none;
+}
+span.startbutton a:link, 
+span.startbutton a:visited, 
+span.startbutton a:hover, 
+span.startbutton a:active {
+    color: black;
+}
+/* change for effect on click */
+span.startbutton:active {
+    border-bottom: none;
+    border-right: none;
+    border-top: 2px solid black;
+    border-left: 2px solid black;
+    border-bottom: 2px solid silver;
+    border-right: 2px solid silver;
+}
+/* next the stopbutton */
+span.stopbutton {
+    margin: 2px;
+    padding: 0px 4px 4px;
+    background-color: red;
+    color: black;
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+    border-left: 2px solid silver;
+    border-top: 2px solid silver;
+}
+span.stopbutton a {
+    outline: none;
+}
+span.stopbutton a:link, 
+span.stopbutton a:visited, 
+span.stopbutton a:hover, 
+span.stopbutton a:active {
+    color: black;
+}
+/* change for effect on click */
+span.stopbutton:active {
+    border-bottom: none;
+    border-right: none;
+    border-top: 2px solid black;
+    border-left: 2px solid black;
+    border-bottom: 2px solid silver;
+    border-right: 2px solid silver;
+}
+
+/* rules for printing */
+@media print {
+    div.coursead {
+        display: none;
+    }
+    #navside, #masthead {
+        display: none;
+    }
+    #wrapper, #content {
+        padding: 0px;
+        position: static;
+    }
+    body {
+        /* margin: 1in;  USE BROWSER PAGE SETUP TO SET MARGINS */
+    }
+    ul li {
+        widows: 2;
+        orphans: 2;
+    }
+    * {
+        widows: 2;
+        orphans: 2;
+        position: relative;
+        float: none;
+        background-color: transparent;
+        border: 0px;
+    }
+/* @page not in CSS2.1: not implemented in browsers */
+/*    @page {
+        size: 8.5in 11in;
+    } */
+}

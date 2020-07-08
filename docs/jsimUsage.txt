@@ -1,0 +1,25 @@
+Usage: jsim [ switches ]
+
+Switches:
+  <a href="#f">-f</a> file ...             load project, model and other files
+  <a href="#v">-v</a>                      verbose mode
+  <a href="#userurl">-userurl</a> url            load -f files relative to URL
+  <a href="#userdir">-userdir</a> dir            set user directory
+  <a href="#path">-path</a> path              set search path
+  <a href="#server">-server</a> name            connect to remote server
+  <a href="#plugin">-plugin</a> file ...        load optional plugin
+  <a href="#usage">-usage</a>                  print usage message and exit
+  <a href="#stack">-stack</a>                  print stack dump on error
+  <a href="#noscrub">-noscrub</a>                don't scrub build directory at exit
+  <a href="#sandbox">-sandbox</a> [path [path]]  run application is safe sandbox
+  <a href="#nosandbox">-nosandbox</a>              don't use sandbox (default)
+  <a href="#securityMgr">-securityMgr</a> class-name install security manager
+  <a href="#mp">-mp</a> N                   enable up to N processor multiprocessing        
+  <a href="#noprefs">-noprefs</a>                ignore user preferences file
+  <a href="#rgb">-rgb</a> REDxGREENxBLUE     specify base color (0-255)
+  <a href="#fs">-fs</a> size                specify base font size (points)
+  <a href="#ws">-ws</a> WIDTHxHEIGHT        specify project window size (pixels)
+  <a href="#popout">-popout</a>                 create initial project in new frame (applet only)
+  <a href="#demo">-demo</a> [ expr ... ]      compile model, show model and plot tabs
+  <a href="#sbwregister">-sbwregister</a>            register with SBW broken and exit
+  <a href="#sbwmodule">-sbwmodule</a>              run JSim as an SBW module

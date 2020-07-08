@@ -1,13 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim home</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="css/jsim.css"> 
+	<link rel="stylesheet" href="css/small.css"> 
+	
+</head>
 
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
 
 <div class="jsimleft100">
 
-<div class="jsimleft35">
+<div class="jsimleft30">
     <div class="jslogo">
+	<img src="pics/jsimlogo_doc.gif">
     </div>
 
     <div class="jstoc">
-  <h1>JSim Home Page</h1>
+
 
    <dl class="toc">
     <dt><a href="docs/news.html"><img src="pics/news.gif"></a>
@@ -30,16 +61,16 @@
     </dt>
     <dd><a href="docs/cite.html">Citing JSim</a>
     </dd> 
- <dt><a href="/Models/modeling_info.html"><img src="pics/lightbulb.png" height="32" width="32"></a>
-    <dd><a href="/Models/modeling_info.html">JSim Model Standards</a></dd>
+ <dt><a href="https://www.physiome.org/Models/modeling_info.html"><img src="pics/lightbulb.png" height="32" width="32"></a>
+    <dd><a href="https://www.physiome.org/Models/modeling_info.html">JSim Model Standards</a></dd>
     <dt><a href="models/index.html"><img src="pics/model.gif"></a>
     </dt>
     <dd><a href="models/index.html">Model archives</a>
     </dd>
-    <dt><a href="movies/index.html"><img src="pics/movie.gif"></a>
+    <!-- <dt><a href="movies/index.html"><img src="pics/movie.gif"></a>
     </dt>
     <dd><a href="movies/index.html">Instructional videos</a>
-    </dd>
+    </dd> -->
     <dt><a href="docs/glossary.html"><img src="pics/glossary.gif"></a>
     </dt>
     <dd><a href="docs/glossary.html">Glossary</a>
@@ -50,22 +81,22 @@
     </dd>
     <dt><a href="docs/JSim_Refs.html"><img src="pics/biblio.gif"></a>
     </dt>
-    <dd><a href="/Links/publications.html">Bibliography of JSim related work</a>
+    <dd><a href="https://www.physiome.org/Links/publications.html">Biblio of JSim related work</a>
     </dd>
     <dt><a href="docs/JSim_Acknow.html"><img src="pics/acknow.gif"></a>
     </dt>
     <dd><a href="docs/JSim_Acknow.html">Acknowledgements</a>
     </dd>
-    <dt><a href="#team"><img src="pics/problem.gif"></a>
-    </dt>
-    <dd><a href="/Contact">Confused? Contact us.</a>
-    </dd>
+  <!--  <dt><a href="#team"><img src="pics/problem.gif"></a>
+    </dt> -->
+<!--    <dd><a href="/Contact">Confused? Contact us.</a>
+    </dd>  -->
   </dl>
     </div> <!-- end jstoc -->
 </div> <!-- end jsimleft35 -->
 
-<div class="jsimright35">
-
+<div class="jsimright30">
+  <h1>JSim Home Page</h1>
 <p>JSim is a Java-based simulation system for building quantitative 
 numeric models and analyzing them with respect to experimental reference 
 data.  JSim's primary focus is in physiology and biomedicine, however 
@@ -78,9 +109,9 @@ unbalanced equations.  JSim also imports and exports model archive formats SBML
 and CellML.</p>
 
 <p>JSim downloads are available as <a
-href="download/index.html">precompiled binaries</a> (Linux, MacIntosh,
-Windows) or <a href="download/source.html">source code</a>.  JSim
-can also <a href="docs/User_WWW.html">run as a Java applet</a> within your web
+href="download/index.html">precompiled binaries</a> (Linux, Apple MacIntosh,
+Windows) or <a href="https://github.com/NSR-Physiome/JSim">source code</a>.  JSim
+can also <a href="docs/User_WWW.html">run as a Java Web Start App</a> downloaded through your web
 browser. JSim is provided free for non-commercial use as a public service
 by the <a href="http://nsr.bioeng.washington.edu">National Simulation
 Resource</a> at the University of Washington.</p>
@@ -105,10 +136,10 @@ writing models with JSim's Mathematical Modeling Language.</li>
 
 <p>Related software:</p>
 <ul>
-<li><a href="/software/j4/">J4</a>: Java-based quantitative medical 
+<li><a href="https://www.physiome.org/software/j4/">J4</a>: Java-based quantitative medical 
 imaging system.</li>
-<li><a href="/software/i4/">I4</a>: J4's predecessor imaging system.</li>
-<li><a href="/software/xsim/">XSIM</a>: JSim's predecessor simulation </li>
+<li><a href="https://www.physiome.org/software/i4/">I4</a>: J4's predecessor imaging system.</li>
+<li><a href="https://www.physiome.org/software/xsim/">XSIM</a>: JSim's predecessor simulation </li>
 
 
 <li><a
@@ -116,13 +147,15 @@ href="https://sites.google.com/site/semanticsofbiologicalprocesses/projects/semg
 SemGen</a>: Software for automating the modular composition and decomposition of
 biosimulation models.</li>
 
-<li><a href="/software/">More ...</a></li>
 </ul>
 
-</div> <!-- end jsimright35 -->
+</div> <!-- end jsimright30 -->
 
 </div> <!-- end jsimleft100 -->
 
+ 
 
+</body>
+</html>
 
 

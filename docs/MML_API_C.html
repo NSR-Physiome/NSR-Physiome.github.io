@@ -1,0 +1,58 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>The JSim C/C++ Language API</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+<p>    This document describes the JSim C/C++ Application Programmer
+Interface (API), the specification for how to write C or C++ code so that
+is will successfully interface with MML functions and procedures (F&P).  
+This document assumes the reader is familiar with MML F&P and with the C
+or C++ programming languages.</p>
+<h2>  Details:</h2>
+
+<ul>
+<li>Structures & macros used in the C/C++ API are defined in
+JSIMHOME/JSIMOS/include/jsimapi.h, where JSIMOS is your operating system
+(linux, win32, ...).  </li>
+<li>Each argument passed to an MML function or procedure will be
+represented by a JSimArg structure.  Each JSimArg will have an associated
+JSimGrid structure for each MML domain associated with the argument.  A
+JSimArg's realVal array is a double array representing the arguments's
+values.  realVal's length in the product of the associated JSimGrid sizes
+(or 1, if no grids). Multi-dimensional array ordering (row-major vs.  
+row-minor) is not yet finalized for multi-dimensional arguments (pending
+Fortran implementation).  At call time, input arguments will have realVal
+set to model calculated values, output arguments will have realVal set to
+NaNs.</li>
+<li>Function values are returned with the JSIM_RETURN macro.  Procedure
+output arguments are returned by setting the "realVal" array elements in a
+JSimArg.  realVal should never be reallocated. JSIM_RETURN is required for
+both functions and procedures to free up local resources.  Omitting
+JSIM_RETURN will cause memory leaks.</li>
+<li>The JSIM_ERROR macro may be used when error conditions are
+encountered to generate run-time Exceptions that will cause the model run
+to terminate.</li>
+<li>See comments in jsimapi.h for further details. </li>
+<li>See <a href="MML_Func_C.html">Calling C from MML</a> for some simple examples.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

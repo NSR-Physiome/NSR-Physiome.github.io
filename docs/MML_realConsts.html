@@ -1,0 +1,62 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>MML variable constants</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> Prerequisites: </p>
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim GUI 
+</a>(recommended)</li>
+<li><a href="MML_Intro.html">Introduction to the JSim MML</a>(recommended)</li>
+</ul>
+
+<p>Contents:</p>
+<ul>
+  <li><a href="#example">A MML variable constant</a></li>
+  <li><a href="#simple">A Simple MML Model</a></li>
+
+  <?php jscoqli() ?>
+</ul>
+
+<h2> <a name="example">A MML variable constant </a></h2>
+<p> JSim MML variable constants are calculated at compile time but can be changed by the user at run time. </p> 
+<p>For example: <pre> real Rgas = 8.31441 J/(mol*K); </pre>
+After compilation the value '8.31441' is visible in the 'Model Inputs' section of the JSim GUI Run Time page. The variable has no dependency on any other variable, but since 'Rgas' is an input, the user can change the value of it before running a simulation. This is why it can be referred to as a variable constant. This behavior can be confusing if your constant is defined with operators in it: <pre>real x = (8.31441*310.6)/96484.56;  </pre> At run time, 'x' has a value of '.0267275655' and is a model input. As a model input, the user can still change the value of 'x' to whatever value they want and the source code calculation for 'x' is ignored. Importantly, if you want the original value back, as specified in the source MML, you must use the <em>'ParSet ->Revert to Model defaults'</em> option available in the JSim GUI Run Time page. Changing the value in the source code and compiling it again will not update the value in the Run Time page as user specified model input values have precedence over the source code values. If you do not want the user to see or adjust a variable declare it as <a href="/jsim/docs/MML_Topics.html#public"> private</a>.  </p>
+
+<h2> <a name="simple">A Simple MML Model </a></h2>
+
+<p> Below is a simple model using MML variable constants. Change the numeric values in the source code and at run time and observe the behavior of JSim: </p>
+<?php jsTextDownApp("examples/MML_realConsts/realConsts.proj"); ?>
+
+<p> Items of note:</p>
+<ul>
+
+<li>Variable 'x' can be directly changed at run time, while 'xx' and 'xxx' cannot be as they are considered model outputs. They can be changed indirectly by changing their dependencies ('Rgas', 'Temp', 'Farad', 'Temp2') in the Model Inputs section.</li>
+
+<li>After compiling the model, go back and change the value for 'x' in the source code, then compile again. Note that the run time value for 'x' has not changed. To see the updated value for 'x' in the Run Time window, chose the <em>'ParSet -> Revert to model defaults'</em> from the drop down menu.You will now see the updated value for 'x'. 
+</li>
+
+</ul>
+
+
+
+
+<h2> <a name=""> </a> </h2>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet;
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

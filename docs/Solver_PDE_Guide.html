@@ -1,0 +1,52 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim PDE Solver Tuning Guide</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>
+The PDE solvers do not have parameters which can be changed by the
+user with the exception of the <a href="#MacCormack">MacCormack</a> solver which has a switch
+for flux-corrected transport which stabilizes adjacent cell oscillations
+and setting it on (check the box) may improve a solution.</p>
+
+<p>The PDE solvers are:</p>
+<ul>
+<li> <a href="#LSFEA">LSFEA</a></li>
+<li> <a href="#MacCormack">MacCormack</a></li>
+<li> <a href="#TOMS731">TOMS731</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="LSFEA"> LSFEA: Lagrangian Sliding Fluid Element Algorithm</a></h2>
+<p> No user adjustable parameters available in JSim implementation.
+Decreasing spatial and temporal step size may be useful.   </p>
+<h2><a name="MacCormack"> MacCormack: Explicit 2nd order accurate in space
+and time </a></h2>
+<p> The MacCormack solver which has a switch
+for flux-corrected transport (FCT) which stabilizes adjacent cell oscillations
+and setting it on (check the box) may improve a solution. Decreasing
+spatial and temporal step size may be useful. </p>
+<h2><a name="TOMS731"> TOMS731: Transactions of Mathematical Software Algorithm
+731 (a moving-grid interface for systems of one-dimensional time-dependent
+partial differential equations)</a></h2>
+<p> No user adjustable parameters available in JSim implementation.
+Decreasing spatial and temporal step size may be useful.  </p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>
+

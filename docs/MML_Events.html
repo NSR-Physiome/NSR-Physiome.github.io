@@ -1,0 +1,165 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Events in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p> MML events model discrete changes of physical and physiological state such as 
+voltage transitions, heart beats, etc.  Events also provide a mechanism for 
+calculation of recursive functions, such as Fibonacci numbers.  Event-driven 
+variables can freely intermix with continuous (e.g. ODE-calculated) variables, 
+allowing you to model hybrid discrete/continuous systems.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#state">State variables and a simple example</a></li>
+<li><a href="#gate1">Gated example 1</a></li>
+<li><a href="#gate2">Gated example 2</a></li>
+<li><a href="#gate3">Gated example 3</a></li>
+<li><a href="#ode">Events using ODE variables</a></li>
+<li><a href="#recursive">Recursive functions</a></li>
+<li><a href="#cautions">Some cautions</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="overview">Overview</a></h2>
+
+<p>An MML event consists of a realDomain t (which usually represents time), a 
+boolean trigger expression which is a function of t and a series of action 
+assignments.  The trigger is tested for each value of t, and the event is fired 
+if the value of the trigger evaluates to true.  When the event fires, the action 
+assignments are executed in the order specified.</p>
+
+<p>Action assignments are of the form "v = expression;" where v is a realState, 
+intState or ODE variable.  A realState and intState variable v(t) must be 
+assigned an initial value when t=t.min and subsequent values of v(t) are 
+calculate by carrying the value from the previous time step forward, and then 
+altering it based upon any triggered events.  An ODE variable is assigned an 
+initial value when t=t.min and subsequent values are calculated via an ODE
+starting with the previous t value.  Once the ODE calculation is complete,
+v(t) is altered based upon any triggered events.</p>
+
+<h2>  <a name="state">State variables and a simple example</a></h2>
+
+<p>Here is a simple example that counts the number of times an 
+externally provided voltage V exceeds a threshold voltage V0:</p>
+
+<?php jsTextDownApp("examples/MML_Events/count.proj"); ?>
+
+<p> The state variable ct(t) is initialized to 0 at time zero, and is incremented 
+each time the event (V>V0) is triggered.  The event contains a single event 
+action "ct=ct+1". The statement "ct=ct+1" would be nonsense as 
+an MML equation,  but is acceptable as an event action.</p>
+
+<h2>  <a name="gate1">Gate Example 1</a></h2>
+
+<p>The following model describes a gate that opens when an external 
+voltage exceeds threshold V1,  and closes when it drops below 
+threshold V0:</p>
+
+<?php jsTextDownApp("examples/MML_Events/gate1.proj"); ?>
+
+<p>By using two events, we have introduced memory into the system.  The
+value of "open" for V between V0 and V1 is dependent not upon the current
+value of V, but upon previous values.</p>
+
+<h2>  <a name="gate2">Gate example 2</a></h2>
+
+<p>The event triggers in gate example 1 are slightly redundant.  The gate opening 
+trigger "V>V1" would have the same effect as the one given "open=0 and V>V1".  
+However, by using the longer form, we can ensure that the events "gate opening" 
+and "gate closing" happen alternately, which is useful in the following model. A 
+running count is kept of the number of gate openings is kept in variable ct.  The 
+time of the latest gate closure is kept in variable tlast. Multiple actions may 
+be associated with a single event by enclosing them in curly braces.  </p>
+
+<?php jsTextDownApp("examples/MML_Events/gate2.proj"); ?>
+
+
+<h2>  <a name="gate3">Gate example 3</a></h2>
+
+<p>    Event-driven variables become more useful for modeling when their 
+values drive the calculation of other system variables which, in turn,
+trigger events.  In the following example, V either grows or shrinks 
+exponentially based up whether the gate is open.  Whether the gate is
+open depends upon current and previous values of V:</p>
+
+<?php jsTextDownApp("examples/MML_Events/gate3.proj"); ?>
+
+<h2><a name="ode">Events using ODE variables</a></h2>
+
+<p>Events may act upon ODE variables (this is a new feature for JSim version 2).
+In the example below,  the u decays exponentially starting a u(t.min)=1.  When
+u fall below .2,  an event resets it back to 1,  resulting in a periodic wave 
+form:</p>
+
+<?php jsTextDownApp("examples/MML_Events/event_ode.proj"); ?>
+
+<h2>  <a name="recursive">Recursive functions</a></h2>
+
+<p>    JSim events support calculation of recursive functions which are
+not supported elsewhere in MML.  The following example calculates 
+the Fibonacci numbers:</p>
+
+<?php jsTextDownApp("examples/MML_Events/fibonacci.proj"); ?>
+
+<h2>  <a name="caution">Some cautions</a></h2>
+
+<p>Event triggers are
+tested once per time step.  At any given time-step, zero, one or more than
+one events may be triggered.  If multiple events are triggered at a
+time-step, the order in which they are triggered is undefined.  However,
+the actions within an event always take place in the declared order when
+that event is triggered.  It is up to the MML author to write their events
+and triggers in such a way so that the result is well defined.</p>
+
+<p>    Here's a simplified version of a problem that can easily occur.  If
+the triggers in gated example 2:</p>
+
+<pre>
+event (open=0 and V&gt;V1) {
+  open = 1;
+  ct = ct+1;
+}
+</pre>
+
+<p>had been written as:</p>
+
+<pre>
+event (open=0 and V&gt;V1) open = 1;
+event (open=0 and V&gt;V1) ct = ct+1;
+</pre>
+
+<p>then the value of ct would be unpredictable.  If the first event
+trigger were tested first, the second event would never be triggered so ct
+would remain perpetually at 0.  If the second event trigger were tested
+first, ct would be calculated as in the original example.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

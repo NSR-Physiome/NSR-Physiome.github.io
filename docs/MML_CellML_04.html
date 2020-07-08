@@ -1,0 +1,196 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Running CellML Models under JSim - For JSim Versions 2.00 
+to 2.04</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> CellML is an XML based open standard for exchange of computer based
+mathematical models.  JSim currently support importing most CellML models.  
+Extended import and export support is currently under development.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+<li>Familiarity with <a href="http://www.cellml.org/">CellML</a> 
+(recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#imp">Importing CellML Files into JSim</a></li>
+<li><a href="#stat">Project Status</a></li>
+<li><a href="#bugs">Bugs and Limitations</a></li>
+<li><a href="#auck">University of Auckland Collaboration</a></li>
+<li><a href="../models/cellml">The JSim CellML Models page</a></li>
+</ul>
+
+<h2>  <a name="imp">Importing CellML Files into JSim</a></h2>
+<p>    Assuming no tranlation problems, importing CellML into JSim is quite
+easy.  Select "Import model file" from the "Add" menu under the JSim
+GUI's "Project" tab, which allows you to select a model file to import.  
+CellML files have extension .xml or .cellml.  (Note that .xml is used by 
+many
+XML-based files besides CellML, so be sure to pick a real CellML file).  
+Alternatively, you can load a CellML file via the -f switch on the command
+line of either jsim or jsbatch.</p>
+<p>    If translation is successful, a new model tab will appear in the
+project containing the translated MML source code.  If the translator
+has a problem, an appropriate error message will be generated.  No partial
+translation will appear in the event of a translation error.  Errors at
+this stage are most likely because the translator implementation is still
+incomplete (see <a href="#bugs">Bugs and Limitations</a> below).</p>
+<p>    Now push the "Compile" button to compile the model.  There is no
+guarantee that the code will compile successfully since CellML models are
+subject to the same sorts of formulation errors MML models are.  Errors at
+this stage are most often caused by specification errors in the original
+CellML file. Two problems often seen at compile time are:</p>
+
+<ol>
+<li> Model variables may be over-constrained or under-constrained by the
+model equations.  Both result in compilation errors but, in the
+under-constrained case, the compiler may take a long time before exiting.
+The compile "Cancel" button is useful here since most well-constrained
+models will compile in 15 seconds or less.</li>
+<li> Model equations may not be unit balanced.  CellML models assume
+units are balanced, however it is our experience that many of the models
+available in the CellML repository are not.  It is possible the failure to
+compile these models relates to problems in JSim's CellML translator.  
+Investigation continues on this issue.  JSim's <a 
+href="/jsim/models/cellml">CellML Models Page</a> provides MML versions of
+CellML models with unit correction turned off when turning unit correction
+on results in a compilation error.</li>
+
+</ol>
+<p>    CellML to MML translation on the command line may be accomplished
+using jsbatch:
+<pre>
+      jsbatch -f somemodel.xml -omml &gt; somemodel.mod
+</pre>
+</p>
+
+<p>At run-time users should be advised that:</p>
+<ol>
+<li>Time stepping parameters are not defined in CellML files, and must
+be entered by the user.</li>
+<li>Many CellML archive models do not have valid initial conditions.  The
+user may need to specify some initial conditions manually to get 
+reasonable output data.</li>
+</ol>
+
+<h2>  <a name="stat">Project Status</a></h2>
+<p>    JSim's CellML translator is far from complete and should be viewed as
+a first stage toward a complete and robust translator.  It was developed
+based the CellML 1.1 specification with the intent of providing adequate
+translation for most of the models in the CellML repository.  As of 11 Jun
+2005, of the 329 models used as a test bed, approximately 85% translated
+to MML without error.  Very few of those translated models compile
+sucessfully under JSim however, mostly due to equations with unbalanced
+units.  Only about 5% of the translated models had compilation problems
+beyond unit balancing.</p>
+<h2>  <a name="bugs">Bugs and Limitations</a></h2>
+<p>    The following bugs are based on experience with the 329 model test bed
+(see above).  No systematic description of bugs beyond that test bed is
+yet available.</p>
+<p>    The following CellML tags are not yet supported:
+<pre>
+      &lt;partialdiff&gt;
+      &lt;degree&gt;
+      &lt;import&gt;
+      &lt;sum&gt;
+      &lt;domainofapplication&gt;
+      &lt;lowlimit&gt;
+      &lt;uplimit&gt;
+      &lt;piecewise&gt; without &lt;otherwise&gt;
+</pre>
+</p>
+<p>    Celsius units are not supported.  This will require currently
+unavailable contextual information allowing differentiation between
+absolute and relative units.</p>
+<p>    Mapping of CellML variable names to JSim variable names is
+sub-optimal.  CellML names are currently translated as the
+component-name.variable-name unless variable-name is unique within all
+components, in which case the component-name is dropped. CellML component
+and variable names are often long (over 50 characters) which, due to
+limited screen real estate, makes their display in the JSim GUI awkward
+for the user.  Computationally however, JSim has no particular problems
+with long names.  Preliminary users of the CellML translator may wish to
+suggest ideas for better translation algorithms to the JSim development
+team for implementation in later releases.</p>
+<p>    The translator does not treat the left and right hand sides of
+equations the same.  A non-ODE variable missing the "initial_value"
+attribute and not appearing on the left-hand side of any equation is
+assumed to be unconstrained, and is therefore translated as an "extern" in
+MML.  This assumption is not supported by the CellML specification (as far
+as I know), but is necessary for the bulk of the test bed models to
+compile successfully (excepting unit balancing issues).</p>
+<p>    CellML does not specify variable domains directly, but implies them
+from model equations.  The translator assigns variables the minimum number
+of domains consistent with the equations.  In some cases, users may need
+to manually add domains to some translated MML variables to produce
+satisfactory results.  Currently, variables are translated as domains if
+they appear in the denominator of a derivative operator.  A variable V is
+assigned a domain X if V appears in the numerator of a derivative operator
+of X or if V appears isolated in the left-hand side of an equation whose
+right-hand side includes a variable with domain X.  As in the previous
+paragraph, this approach is not supported by the CellML specification, but
+is needed for satisfactory translation.</p>
+<p>    No attempt is currently made to import CellML model diagrams or
+metadata.</p>
+<p>    JSim does not provide any MML to CellML translator at this time.    </p>
+<h2>  <a name="auck">University of Auckland Collaboration</a></h2>
+<h3>    Overview </h3>
+<p>      This section is devoted to the collaborative effort between NSR and
+the University of Auckland (UA) to clean up unit conversion problems in
+the CellML repository models and refine JSim's CellML translator.</p>
+<p>      This will be an iterative process.  NSR will provide UA with a
+recommended release of JSim for testing along with a list of models within
+the repository which JSim can translate successfully, excluding unit
+balancing errors.  This version may be the latest experimental (beta)
+release, or it may be a more preliminary alpha release.  UA will use this
+version of JSim to generate MML unit balancing error messages and correct
+the repository models.  If UA finds problems in the translator itself (as
+opposed to the CellML code), they will relay them back to NSR.  NSR will
+attempt to fix the problem and provide a new recommended JSim version for
+further testing.  We'll repeat this process until all unit problems are
+resolved.</p>
+
+<h3>    Suggested approach</h3>
+
+<ol>
+<li> Run "jsbatch -v -oplan -f somemodel.xml". If this command
+completes successfully, it will print a description of the run-time
+calculations. If it fails, a list of unit balancing errors (maximum one
+per equation) will be sent to stderr.</li>
+<li> If the model fails, use "jsbatch -omml -f somemodel.xml >
+somemodel.mod" to print out translated model text.  Use the embedded
+comments to trace back offending equations to the original CellML.</li>
+
+</ol>
+<p>      You may wish to refer to the <a href="Devel_Batch.html">jsbatch manual</a> .</p>
+<h3>    Change Log</h3>
+<p>      See <a href="news.html">What's New with JSim</a> for a complete list of
+all changes made to JSim, by version number.</p>
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

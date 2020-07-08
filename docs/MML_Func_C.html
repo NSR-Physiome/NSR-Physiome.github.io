@@ -1,0 +1,208 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Calling C Code From MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+<p>    This document describes the process of defining and using C
+procedural code within MML models.  The MML mechanisms used are called
+functions and procedures (F&P).  The functionality described here is somewhat problematic
+under Windows.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Func_Intro.html">Using Functions and Procedures in 
+MML</a>
+<li>Familiarity with the C programming language</li>
+</ul>
+
+<h2>  Overview</h2>
+<p>    C code can be called from MML via either source or native F&P.  In
+both cases, the C code must comform to <a href="MML_API_C.html">The JSim C API</a> .</p>
+<p>    Source F&P embed C source code within MML which is compiled at model
+build time.  This method is the simplest to write and understand, is
+fairly portable between architectures and is appropriate for modest sized
+F&P.  Using Source F&P requires a C compiler be configured in your JSim
+installation.  See <a href="Admin_Custom.html">Customizing a JSim Installation</a> for
+instructions on doing this, or pass the information along to your system
+administrator.  Note that this customization is problematic under Windows.</p>
+<p>    Native F&P link to pre-compiled C native libraries. This method 
+is somewhat more complicated than source F&P,  but may be useful if:
+<ol>
+<li> you wish to distribute a model to a collaborator who does not
+have access to a C compiler;</li>
+<li> your C code base is large enough that you don't wish to recompile
+/relink each time your model builds.</li>
+
+</ol>
+</p>
+<p>    Native libraries required by a model are not saved in model or project
+files, and so must to separately distributed to collaborators.  Note that
+native libraries are not portable between different computer architectures
+and operating systems,  so what runs for you,  may not run for him.</p>
+<p>    This document shows several examples of C source F&P.  Afterward,
+the same examples are done using native F&P.</p>
+
+<ul>
+<li><a href="#example1">Example 1</a> - a scalar C source function;</li>
+<li><a href="#example2">Example 2</a> - a non-scalar C source function;</li>
+<li><a href="#example3">Example 3</a> - a C source procedure.</li>
+<li><a href="#example4">Example 4</a> - a native reworking of example1;</li>
+<li><a href="#example5">Example 5</a> - a native reworking of examples 2 & 3;</li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="example1">Example 1</a></h2>
+<p>    In the following example, a C source function "gmean" is defined
+that accepts two scalar arguments and returns their geometric mean.  The
+main program defines a variable v(t) as the geometric mean of t and t^3,
+which should thus be equal to t^2:</p>
+
+<?php jsTextDown("examples/MML_Func_C/cmean.mod"); ?>
+
+<p>    The first paragraph comprises the gmean function declaration.  The
+keyword "source" indicates that the function will be defined in terms on
+source code within MML.  The keyword "real" indicates that the function
+returns a real number. (Currently, real is the only supported function
+data type.  Other data types may be supported in the future.)  The name
+"gmean" follows the keyword "function", giving a unique name to this
+function.  Function names must follow standard MML naming conventions.  
+The argument list following the function name indicates this function
+takes exactly two scalar arguments.  (Non-scalar arguments use the @
+directive, described later in this document).</p>
+<p>    The "language" clause inside the function declaration indicates the
+procedural code will follow the <a href="MML_C_API">JSim C Model API</a> . The
+"maincode" clause contains the C procedural code.  Conventions for this
+code are fully described in <a href="MML_API_C.html">The JSim C API</a> .  In brief,
+the modeler specified maincode block is copied into a double returning C
+function, whose calling arguments are JSimArg structure pointers named a
+and b.  JSimArg has a double array realVal, whose 0th element is the value
+for a scalar argument.  The JSIM_RETURN statement is required when
+returning from a function in order to clean up temporary memory
+allocation.  It's omission will cause memory leaks.</p>
+<p>    The second paragraph comprises the main line of the MML model.  In
+this case, gmean will be called once for each t. Although only a single
+equation using gmean is present in this example, multiple uses of gmean,
+including nested uses, are supported. It should be noted that incautious
+use of static variables within maincode can break this nesting ability.</p>
+<h2>  <a name="example2">Example 2</a></h2>
+<p>    The first example is trivial because the desired functionality could
+more easily be obtained simply using MML.  This is the case for most
+situations involving scalar arguments.  Function and procedures become
+more useful when passing multi-dimensional arguments because the looping
+constructs within Java are more general than those available in MML.</p>
+<p>    In the following example, one-dimensional integration is implemented
+as a java source function:</p>
+
+<?php jsTextDown("examples/MML_Func_C/cintegral.mod"); ?>
+
+<p>    The MML @ construct is used here twice.  In the function declaration,
+u@t indicates that the single function argument must be one-dimensional.  
+When the function is called u@t, which should be read "u for all t",
+indicates that u values for all t should be passed to integral.  If a
+function's declared argument dimensions do not match the arguments passed
+at call time, MML will alert the modeler at compile time.</p>
+<p>    JSimArg have a JSimGrid array grids, which provides access to the
+associated data grid(s) of a multidimensional variable.  Since the
+function argument is not scalar, realVal array access is done at various
+grid points. Again, see the <a href="MML_API_C.html">JSim C API</a> for further
+information.</p>
+<p>    Multiple @ constructs can be used for higher dimensional function
+arguments.</p>
+<h2>  <a name="example3">Example 3</a></h2>
+<p>    In the following example a procedure, rather than a function is 
+demonstrated.  The procedure "reverse" takes a one-dimensional input 
+argument,  reverses the order of the data,  and places the result in
+a one-dimensional output argument:</p>
+
+<?php jsTextDown("examples/MML_Func_C/creverse.mod"); ?>
+
+<p>    The keywords "C" and "procedure" indicate that the embedded code
+block(s) will follow the JSim C Model API for procedures.  Most
+comments above regarding functions apply equally to procedures,  with 
+a few differences noted below.</p>
+<p>    The procedure argument list separates input arguments from output
+arguments with a semi-colon, with inputs listed first.  This example has
+one input and one output argument.</p>
+<p>    The maincode block returns no value as is appropriate for
+a procedure,  but the JSIM_RETURN() statement is still required
+for freeing allocated memory.  </p>
+<h2>  <a name="example4">Example 4</a></h2>
+<p>    The following is a reworking of source example 1 as a native 
+C function.  The model file looks like this:</p>
+
+<?php jsTextDown("examples/MML_Func_C/nmean.mod"); ?>
+
+<p>    The function declaration specifies that the external library mylib
+will contain a double-returning function mygmean conforming to the 
+JSim C Model API.  The "language" clause indicates that JSim should 
+link to the function using your operating system's conventions for the
+C language.  The code for mylib.c is as follows:</p>
+
+<?php jsTextDown("examples/MML_Func_C/mylib.c"); ?>
+
+<p>    jsimapi.h, distributed with JSim, defines the structures and macros
+you'll need.  JSIM_REAL_FUNCTION() expands to a function header for
+mygmean.  Due to Java's JNI mechanism for calling C, the name of the
+library in which the function will reside must be specified.  JSIM_INIT
+performs certain initialization operations, and JSIM_ARG() returns
+pointers to the allocated arguments.  The remaining three lines are 
+the same code that was used in source example 1.</p>
+
+<p>    Before the model can be run, mylib.c must be compiled into a shared
+library appropriate for your system.  The simplest way to do this is use
+the script installed when customizing JSim for C compilation (see Overview
+above).  For example, on a Linux system with the C compile script
+installed in $JSIMHOME/local (one of several options), the command would
+be:</p>
+
+<pre>
+$JSIMHOME/local/jscompile_c $JSIMHOME $PWD mylib
+</pre>
+
+<p>    This creates the library file libmylib.so under Linux.  Other
+operating systems have other native library naming conventions. The
+library should be placed at an convenient location within JSIMPATH so that
+it can be found at model run time.  See <a href="User_Ref.html">JSim User Reference
+Manual</a> for information on JSIMPATH.</p>
+<p>    Building large multi-module native libraries requires great expertise
+in both C compiling and linking issues. Such details are beyond the scope
+of this document.  The JSim C compile script cannot be used directly for
+such large projects,  but experts may easily analyze the script to extract
+appropriate details.</p>
+
+<h2>  <a name="example5">Example 5</a></h2>
+<p>    Native libraries may contain one or more entry points for JSim F&P.
+Below,  we combine the code for examples 2 and 3 above into a single
+model and library (newlib).  The model is as follows:</p>
+
+<?php jsTextDown("examples/MML_Func_C/ncombo.mod"); ?>
+
+<p>    The code for newlib.c is as follows:
+
+<?php jsTextDown("examples/MML_Func_C/newlib.c"); ?>
+
+<p>    Note that JSIM_PROCEDURE is used instead of JSIM_REAL_FUNCTION for
+crev.  Also note the use of JSIM_ERROR to alert the user to mis-matched
+array lengths.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

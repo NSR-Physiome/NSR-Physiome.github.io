@@ -1,0 +1,133 @@
+== XMML version 2 spec (11:35 AM, 31 Jan 2011)
+
+Note: 
+ 1) all tags ending in 'List' are possibly empty lists of base tag
+ 2) ? follows optional elements
+
+// entire XMML file
+xmml ::= model toolList sequence;
+
+// pre-compiled model
+model ::= unitList variableList equationList relationList 
+	eventList procedureCallList;
+
+// unit definition (in unitList)
+unit ::= fundamentalUnit | derivedUnit;
+
+// fundamental unit
+fundamentalUnit ::= id=String;
+
+// derived unit
+derivedUnit ::= id=String realFactor unitFactorList;
+
+// realFactor
+realFactor ::= multiplier=Double;
+
+// unitFactor
+unitFactor ::= exponent=Double unitID=String;
+
+// model variable (in variableList)
+variable ::= dataType=(real|int) id=String isDomain=Boolean 
+	isExtern=Boolean isPrivate=Boolean isState=Boolean 
+	domainList? propertyValueList?;
+
+// domain in domainList
+domain ::= domainID=String;
+
+// property value (value in Element text)
+propertyValue ::= dataType=string name=String value;
+
+// model equation (in equationList)
+equation ::= id=String expression;
+
+// model relation (in relationList)
+relation ::= id=String expression;
+
+// model event (in eventList)
+event ::= id=String timeDomainID=String trigger actionList;
+
+// event trigger
+trigger ::= type=(absolute|relative) expression;
+
+// event action (in actionList)
+action ::= variableID=String expression;
+
+// procedure call (in procedureCallList)
+procedureCall ::= procedureID=String procedureCallArgumentList
+
+// 1 argument to procedure call (in procedureCallArgumentList)
+procedureCallArgument ::= loopDomains expression;
+
+// loop domains (not yet implemented)
+loopDomains ::= <null>;
+
+// model tool = calculation derived from equations (in toolList)
+tool ::= domainTool | exprTool | externTool | implicitTool | 
+	ODETool | PDETool | procedureTool | queryTool | stateTool;
+
+// domain tool
+domainTool ::= toolCommon;
+
+// v=expr tool
+exprTool ::= toolCommon expression;
+
+// extern variable
+externTool ::= toolCommon;
+
+// implcit eqn(s)
+implicitTool ::= toolCommon zeroExpressionList boundsList linearMatrix?;
+
+// zeroExpression (in zeroExpressionList)
+zeroExpression ::= expression;
+
+// implicit bound (in boundsList, not yet implemented)
+bound ::= <null>;
+
+// linear matrix (not yet implemented)
+linearMatrix ::= <null>;
+
+// ODE tool
+ODETool ::= toolCommon timeDomainID=String timeOrder=int 
+	initialConditionList stateEquation
+
+// ODE tool
+ODETool ::= toolCommon timeDomainID=String timeOrder=int 
+	initialConditionList boundaryConditionList stateEquation
+
+// initial condition (in ODETool, PDETool initialConditionList)
+initialCondition ::= toolID=String;  
+
+// boundary condition (in PDETool boundaryConditionList)
+boundaryCondition ::= domainID=String side=(left|right) 
+	(toolID=String | equationID=String);  
+
+// procedureCall tool (not yet implemented)
+procedureTool ::= toolCommon;
+
+// query tool (internal use only e.g. v(t.max))
+queryTool ::= toolCommon;
+
+// state variable tool
+stateTool ::= toolCommon;
+
+// common items for all Tools
+toolCommon ::= id=String solvedVariables requiredVariables sequenceLoops;
+
+// solved or required variable (in solvedVariables or requiredVariables)
+variableUsage ::= id=String status variableID=String;
+
+// variable usage status (CURR=entire, MIN=LHBC, others are queries)
+status ::= status=(CURR|MIN|MAX|DELAY|QUERY|EXPR|XEXPR);
+
+// sequenced calculations (not yet implemented)
+sequence ::=  <null>;
+
+// mathematical expression
+expression ::= debug math;
+
+// user-readable expression (value is Element text)
+debug ::= value
+
+// mathML expression
+math ::=  see MathML spec
+

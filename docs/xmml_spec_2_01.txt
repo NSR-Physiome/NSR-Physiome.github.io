@@ -1,0 +1,168 @@
+== XMML version 2.01 spec (24 Feb 2011)
+
+Note: 
+ 1) all tags ending in 'List' are possibly empty lists of base tag
+ 2) ? follows optional elements
+
+// entire XMML file
+xmml ::= jsimVersion=String xmmlVersion=String model toolList sequence;
+
+// pre-compiled model
+model ::= unitList variableList equationList relationList 
+	eventList procedureCallList;
+
+// unit definition (in unitList)
+unit ::= fundamentalUnit | derivedUnit;
+
+// fundamental unit
+fundamentalUnit ::= id=String unitType=String;
+
+// derived unit
+derivedUnit ::= id=String unitType=String realFactor unitFactorList;
+
+// realFactor
+realFactor ::= multiplier=Double;
+
+// unitFactor
+unitFactor ::= exponent=Double unitID=String;
+
+// model variable (in variableList)
+variable ::= dataType=(real|int) id=String isDomain=Boolean 
+	isExtern=Boolean isPrivate=Boolean isState=Boolean 
+	domainList? propertyValueList?;
+
+// domain in domainList
+domain ::= domainID=String;
+
+// property value (value in Element text)
+propertyValue ::= dataType=string name=String value;
+
+// model equation (in equationList)
+equation ::= id=String expression;
+
+// model relation (in relationList)
+relation ::= id=String expression;
+
+// model event (in eventList)
+event ::= id=String timeDomainID=String trigger actionList;
+
+// event trigger
+trigger ::= type=(absolute|relative) expression;
+
+// event action (in actionList)
+action ::= variableID=String expression;
+
+// procedure call (in procedureCallList)
+procedureCall ::= procedureID=String procedureCallArgumentList
+
+// 1 argument to procedure call (in procedureCallArgumentList)
+procedureCallArgument ::= loopDomainList expression;
+
+// proc argument loops in (loopDomainList)
+loopDomain ::= domainID=String
+
+// model tool = calculation derived from equations (in toolList)
+tool ::= domainTool | exprTool | externTool | implicitTool | 
+	ODETool | PDETool | procedureTool | queryTool | stateTool;
+
+// domain tool
+domainTool ::= toolCommon;
+
+// v=expr tool
+exprTool ::= toolCommon expression;
+
+// extern variable
+externTool ::= toolCommon;
+
+// implcit eqn(s)
+implicitTool ::= toolCommon zeroExpressionList boundList linearFactorList?;
+
+// zeroExpression (in zeroExpressionList)
+zeroExpression ::= expression;
+
+// implicit bound (in boundList)
+bound ::= type=MIN|MAX|APPROX variableUsage expr;
+
+// linear implicit factor (in linearFactorList)
+linearFactor ::= row=Integer column=Integer expr;
+
+// ODE tool
+ODETool ::= toolCommon timeDomainID=String timeOrder=int 
+	initialConditionList stateEquation
+
+// PDE tool
+PDETool ::= toolCommon timeDomainID=String
+	initialConditionList boundaryConditionList stateEquation
+
+// initial condition (in ODETool, PDETool initialConditionList)
+initialCondition ::= toolID=String;  
+
+// boundary condition (in PDETool boundaryConditionList)
+boundaryCondition ::= domainID=String side=(left|right) 
+	(toolID=String | equationID=String);  
+
+// procedureCall tool (not yet implemented)
+procedureTool ::= toolCommon;
+
+// query tool (internal use only e.g. v(t.max))
+queryTool ::= toolCommon;
+
+// state variable tool
+stateTool ::= toolCommon;
+
+// common items for all Tools
+toolCommon ::= id=String solvedVariableList requiredVariableList sequenceLoops;
+
+// variable in solvedVariableList or requiredVariableList
+variableUsage ::= id=String status=CURR|MIN|MAX|QUERY variableID=String 
+           domainUsage*;
+
+// domain usage in variableUsage
+domainUsage ::= domainID=String domainStatus*
+
+// domain query status
+domainStatus ::= domainStatus=(CURR|MIN|MAX|DELAY|EXPR|XEXPR);
+
+// sequenced calculations (not yet implemented)
+sequence ::=  main;
+
+// sequence mainline
+main ::= itemList;
+
+// itemList
+itemList ::= ordered list of item, loopBlock, ODEBlock, PDEBlock elements;
+
+// calculation item (tool, relation, event)
+item ::= itemID=String;
+
+// loop block
+loopBlock ::= loopDomainID=String itemList;
+
+// ODE block
+ODEBlock ::= timeDomainID=String stateToolList microSequence;
+
+// PDE block
+PDEBlock ::= timeDomainID=String spatialDomainList stateToolList 
+         microSequence PDEBlockBoundaryList;
+
+// ODE/PDE state tool (in stateToolList)
+stateTool ::= toolID=String;
+
+// PDE spatialDomain (in spatialDomainList)
+spatialDomain ::= domainID=String;
+
+// PDE boundary block (in PDEBlockBoundaryList)
+PDEBlockBoundary ::= domainID=String side=left|right microSequence;
+
+// micro sequence (ordered calculation within ODE, PDE or BC block
+microSequence ::= itemList;
+
+// mathematical expression
+expression ::= debug math;
+
+// user-readable expression (text is Element text)
+debug ::= text
+
+// mathML expression
+math ::=  see MathML spec
+

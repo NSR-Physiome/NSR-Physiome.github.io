@@ -1,0 +1,100 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim ODE Solver Tuning Guide</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>The default set of parameters associated with the ODE solvers are
+usually sufficient for most ODE problems, but occassionally
+need to be "tweaked".
+
+When a solver fails or gives a poor result, it is usually caused
+by (1) too large a step size, (2) too large relative and absolute
+tolerances in the solutions, (3) too few steps for calculation, or
+(4) problem being too stiff. Many of these problems can be
+fixed by changing the ODE solver parameters, or by using a more
+complex solver, or by doing both.
+
+
+The ODE solvers are listed in order of increasing complexity.</p>
+<ul>
+<li> <a href="#Euler">Euler</a></li>
+<li> <a href="#RK2">RK2</a></li>
+<li> <a href="#RK4">RK4</a></li>
+<li> <a href="#KM">KM</a></li>
+<li> <a href="#Fehlberg">Fehlberg</a></li>
+<li> <a href="#CVode">CVode</a></li>
+<li> <a href="#Dopri5">Dopri5</a></li>
+<li> <a href="#Radau">Radau</a></li>
+<li> <a href="#Auto">Auto</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="Euler"> Euler: forward one-step</a></h2>
+
+<p> Decrease model step (t.delta) where t stands for the independent
+variable (e.g. t.delta, x.delta, etc.) and/or increase nstep. The
+actual step size is (t.delta/nstep) for the solver. Error is
+first order (proportional to actual step size).</p>
+
+<h2><a name="RK2"> RK2: 2nd order Runge-Kutta, also known as modified
+trapezoidal method</a></h2>
+
+<p> Decrease model step (t.delta) where t stands for the independent
+variable (e.g. t.delta, x.delta, etc.) and/or increase nstep. The
+actual step size is (t.delta/nstep) for the solver. Error is second
+order (proportional to actual step size squared). </p>
+
+<h2><a name="RK4"> RK4: 4th order Runge-Kutta</a></h2>
+
+<p> Decrease model step (t.delta) where t stands for the independent
+variable (e.g. t.delta, x.delta, etc.) and/or increase nstep. The
+actual step size is (t.delta/nstep) for the solver. </p>
+
+<h2><a name="KM"> KM: Runge-Kutta Merson with adaptive stepsize</a></h2>
+
+<p> Decrease minstep (must be smaller than t.delta)
+and/or decrease tol.</p>
+
+<h2><a name="Fehlberg"> Fehlberg: Runge-Kutta-Fehlberg (RKF45)</a></h2>
+
+<p> Decrease minstep (must be smaller than t.delta)
+and/or decrease tol.</p>
+
+<h2><a name="CVode: BDF and Adams-Moulton methods"> CVode</a></h2>
+
+<p>Decrease reltol and/or abstol; increase maxsteps; checking
+the box marked "stiff" invokes a BDF (backward differentiation
+formula, otherwise Adams-Moulton methods are used.)</p>
+
+<h2><a name="Dopri5"> Dopri5: Dorman Prince 5th order with variable stepsize
+(explicit Runge-Kutta Method)</a></h2>
+
+<p> Decrease reltol and abstol. Most of the other parameters are
+already set to reasonable values and changing them will probably
+not improve the solution.</p>
+
+<h2><a name="Radau"> Radau: Implicit Runge-Kutta method with variable order
+(5,9,13) with step size control</a></h2>
+
+<p> Decrease reltol and abstol. Most of the other parameters are
+already set to reasonable values and changing them will probably
+not improve the solution.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>
+

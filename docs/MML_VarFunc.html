@@ -1,0 +1,155 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Variable Functions in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>This document explains variable functions (VFs), which are MML's 
+syntax for treating a model variable v as a function v().  For example, 
+values of a dynamic scalar variable v(t) may queried via v(expression), 
+such as v(t-delay) or v(w(t)). This document discusses VFs in their full 
+generality.  Those whose interest is limited to creating delay lines, 
+should instead see the document <a href="MML_Delay.html">Using Delay 
+Lines in MML</a>.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#basics">VF Basics</a></li>
+<li><a href="#summary">Quick Summary of VF Basics</a></li>
+<li><a href="#delay">Creating Delay Lines using VFs</a></li>
+<li><a href="#interp">Data Driven Functional Relationships and VFs</a></li>
+<li><a href="#bc">VFs and PDE Boundaries</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="basics">VF Basics</a></h2>
+
+<p>In MML, declaring a variable 1-dimensional v implies a function 
+v(expr), where "expr" is an algebraic expression of other model 
+variables, that can be used in model equations.  Similarly, an 
+N-dimensional variable v implies a function v(expr1, expr2, ... exprN). 
+In the following example, w is calculated using the VF call v(t^2):</p>
+
+<?php jsTextDownApp("examples/MML_VarFunc/vfb1.proj") ?>
+
+<p>When the model runs, each value for v(t) will be calculated by 
+linearly interpolating u values at the t grid points closest to t^2. 
+Since sin(t) is not linear, the interpolation introduces some error. 
+v(t) is a better approximation of sin(t^2) when t.delta is small than 
+when t.delta is large.  In general, VFs of non-linear expressions always 
+introduce some interpolation error, which may be minimized
+by choosing an appropriate t.delta.</p>
+
+<p>Using the default time grid, the required interpolation values are 
+always well-defined because 0 &lt t &lt 1 implies t^2 is also.  However, if we 
+set t.max=2, running the model will generate an error because the 
+required interpolation value u(4) is out of bounds.  We 
+can prevent this run-time error by using an "if" clause:</p>
+
+<?php jsTextDownApp("examples/MML_VarFunc/vfb2.proj") ?>
+
+<p>Another type of problem occurs if you set t.min=-1, all the values of 
+v(t) for t &lt 0 are NaNs.  This is because the calculations of u and v 
+proceed in tandem from t.min to t.max.  At t=t.min=-1, calculating v(-1) 
+requires u(1), which hasn't been calculated yet, thus resulting in a 
+NaN.  In an ideal world, the JSim compiler would recognize this 
+calculation order dependency and reorder the run-time calculations to 
+accomodate it.  In reality, unfortunately, this sort of order 
+recognition is a very hard problem in complex models, and is presently 
+without satisfactory solution.  For now, modeler must be aware of 
+calculation order dependency when writing VFs.  One simple way to do
+this is by following the examples in this document.</p>
+
+<h2><a name="summary">Quick Summary of VF Basics</a></h2>
+
+<ol>
+<li>Compensate for VF non-linearity by choosing an appropriately fine 
+grid spacing.</li>
+<li>Protect VF calls from domain value overflow (or underflow) by using
+"if" clauses;</li>
+<li>Be aware of calculation order dependencies, following examples in
+this document whenever possible.</li>
+</ol>
+
+<h2><a name="delay">Creating Delay Lines using VFs</a></h2>
+
+<p>VFs are one of several mechanism for creating delay lines.
+All are discussed in the document <a href="MML_Delay.html">Using Delay
+Lines in MML</a>.</p>
+
+<h2><a name="interp">Data Driven Functional Relationships and 
+VFs</a></h2>
+
+<p>VFs also provide a mechanism for incorporating external (often
+experimental) data into a model.  Consider an initially charged capacitor(C), 
+draining its charge(Q) over a coupled resistor(R).  A simple model
+for this system, assuming constant R, is as follows:</p>
+
+<?php jsText("examples/MML_VarFunc/vfrc1.mod"); ?>
+
+<p>Now suppose R is a non-linear function of the applied voltage
+that has been measured experimentally and stored in a 
+JSim-compatible data set (see <a href="User_DataSets.html">Data Files 
+and Project Data Sets</a>).  MML for this system is below:</p>
+
+<?php jsTextDownApp("examples/MML_VarFunc/vfrc3.proj"); ?>
+
+<p>This model introduces a new realDomain vr representing the 
+voltage over R and that R itself is now declared "extern" with domain 
+vr.  This construct allows R's values to be drawn from the external
+data set via a JSim function generator.  Furthermore,  the ODE for
+Q uses the VF R(V) to calculate the resistance appropriate to the 
+current voltage. Also note that the current voltage V(t) is a "real", 
+not a "realDomain", and so R cannot declare V as its domain.</p>
+
+
+<h2><a name="bc">VFs and PDE Boundaries</a></h2>
+
+<p>Models containing PDEs in series can exhibit a VF-related problem 
+with NaNs if boundary conditions are not properly handled.  
+Consider flow through a stirred tank C2(t) and an spatial distributed 
+pipe C1(t,x).  The pipe's input (C1in) is drawn from the tank, and the 
+pipe's output (C1out) empties back into the tank.  A first attempt at 
+coding might look as follows:</p>
+
+<?php jsText("examples/MML_VarFunc/vfbc1.mod"); ?>
+
+<p>Here we calculate C1out at the pipe's right-hand boundary using a VF 
+C1out=C1(t,x.max).  Unfortunately, this code will fail at run-time with 
+a "NaNs detected" message because the VF doesn't provide enough 
+information to the compiler to sort out the circular dependencies of C1 
+and C2.  If, however, we use a "when" clause to calculate C1out, the 
+compiler can recognize the C1/C2 dependencies, and order the 
+calculations properly:</p>
+
+<?php jsText("examples/MML_VarFunc/vfbc2.mod"); ?>
+
+<p>This model will run without the NaN error.  Here, the proper solution 
+is to <em>not</em> use a VF, but to use a "when" clause instead.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

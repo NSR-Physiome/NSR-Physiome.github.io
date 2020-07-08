@@ -1,0 +1,156 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>The XSim template library for JSim</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+<p>    This document describes the XSim template library for JSim, which is
+used to create the MML wrapper for an XSim-style model under JSim.  It
+assumes you understand the <a href="MML_XSim_Intro.html">Introduction to XSim-style models under
+JSim</a> and are familiar with writing simple MML models
+under JSim.</p>
+<p>    <a href="#basics">Basics</a></p>
+<p>    <a href="#morevars">More variable types</a></p>
+<p>    <a href="#space">Spatial variables</a></p>
+<p>    <a href="#units">Using units</a></p>
+<h2>  <a name="basics">Basics</a></h2>
+<p>    The XSim template library allows XSim-style declarations of parameter
+P array locations so that JSim can properly communicate with the
+free-standing model computation code.  We'll start with a simple example
+(that should already look familiar):
+<pre>
+        import XSim;
+        XSim main {
+          library lib("demo");
+          ivar time;    
+          time.min=0; time.max=30; time.delta=0.1; time.loc = 130;
+          realInput period = 6; period.loc = 1;
+          realInput amplitude = 1; amplitude.loc = 2;
+          realOutput Sine(time); Sine.loc = 201;
+          realOutput Cosine(time); Cosine.loc = 202;
+       }
+</pre>
+</p>
+<p>    The import statement loads the template library, and the line "XSim
+main {" declares the model mainline will be done using the "XSim".  </p>
+<p>    The library statement tells JSim that the free-standing model code
+will be found in the file libjsxdemo.so under Linux, jsxdemo.dll under
+Windows or libjsxdemo.jnilib under MacOS. There must be exactly one
+library declaration in an XSim model.</p>
+<p>    The ivar statement declares the XSim independent variable,  of which
+there must be exactly one.  An ivar is like a standard MML realDomain, 
+except that it has an associated P array location (time.loc).</p>
+<p>    The realInput statements here declare parameters that are set by the
+user.  The realOutput statements declare parameters to be calculated by
+the XSim model.  Both are like standard the MML real, except they have
+associated P array locations (e.g. period.loc).  amplitude and period are
+scalars since they were declared without any domains.  Therefore they will
+be passed to the P array only during model initialization.  Sine and
+Cosine are time-dependent, since they were declared with domain "time".  
+Therefore they will be returned from the P array for each model time-step.</p>
+<p>    P array location declarations are required for all ivar, realInput and
+realOutput variables.  Omitting an location will result in a compilation
+error.  Note that locations follow the Fortran convention of counting from
+1 (not 0 as in C, Java, etc.).</p>
+<h2>  <a name="morevars">More variable types</a></h2>
+<p>    Here's a simple stirred-tank model:
+<pre>
+        import XSim;
+        XSim main {
+          library lib("tank");
+          ivar t;       
+          t.min=0; t.max=30; t.delta=0.1; t.loc = 130;
+          realInput V=1; V.loc = 1;
+          realInput Fp=1; Fp.loc = 2;
+          extern realInput Cin(t); Cin.loc = 200;
+          realOutput Cout(t); Cout.loc = 201;
+          realOutput transitTime; transitTime.loc = 205;
+       }
+</pre>
+</p>
+<p>    Here Cin is declared with domain t,  so it will be sent to the model
+at each time-step.  It is declared extern so the user may assign a 
+function generator to it.  This declaration corresponds to the XSim 
+feed and dynamic input constructs.</p>
+<p>    Note that output transitTime is declared without any domains, 
+so it will be retrieved from the P array in the model completion phase.
+This declaration corresponds to the XSim static output construct.</p>
+<h2>  <a name="space">Spatial domains</a></h2>
+<p>    Here's a model using a spatial domain:
+<pre>
+        import XSim;
+        XSim main {
+          library lib("btex");
+          ivar t;       
+          t.min=0; t.max=30; t.delta=0.1; t.loc = 130;
+          intInput Nseg = 7; Nseg.loc = 3;
+          realDomain x;
+          x.min=0; x.max=1; x.ct=Nseg;
+          realInput V=1; V.loc = 1;
+          realInput Fp=1; Fp.loc = 2;
+          choiceInput recirc(0, "No", "Yes")=0; recirc.loc=5;
+          extern realInput Cin(t); Cin.loc = 200;
+          realOutput Cout(t); Cout.loc = 201;
+          realOutput C(t,x); C.loc=300; C.dim=65; 
+       }
+</pre>
+</p>
+<p>    Here the Nseg variable is declared as an integer,  with P array
+location 3.  The recirc variable is a choice integer (as in standard MML)
+with values "No"=0 and "Yes"=1.  There is no corresponding intOutput 
+or choiceOutputs declarations.</p>
+<p>    The spatial domain x is declared as a simple realDomain,  without
+any location since XSim style models only recognize a single independent
+variable.  However the size of the x grid is determined by Nseg,  which
+is passed to the model (P array location 3).  </p>
+<p>    The output C is a function of both x and t, and so takes up multiple P
+array locations.  The number actually retrieved from the model is
+determined by x.ct.  However, since most model programs have fixed size
+requirements, you must declare the maximum number of locations C will 
+use, via C.dim.  Not specifying C.dim will result in a compilation error.</p>
+<p>    If the locations used by C were not contiguous, e.g. 300, 303, 306, 
+... you could specify this with "C.locincr = 3".  However, locincr 
+defaults to 1 if not specified.</p>
+<p>    All variables,  input and output,  static and dynamic, may have a 
+spatial dimension.  Space prohibits a separate example here for each.
+However, XSim variables (ivar, realInput, intInput, realOutput) may have
+at most one spatial dimension.  </p>
+<h2>  <a name="units">Using units</a></h2>
+<p>    Units may be included in XSim-style models in the standard JSim way:
+<pre>
+        import nsrunit;
+        unit conversion off;
+        import XSim;
+        XSim main {
+          library lib("tank");
+          ivar t sec;   
+          t.min=0; t.max=30; t.delta=0.1; t.loc = 130;
+          realInput V=1 liter; V.loc = 1;
+          realInput Fp=1 liter/sec; Fp.loc = 2;
+          extern realInput Cin(t) molar; Cin.loc = 200;
+          realOutput Cout(t) molar; Cout.loc = 201;
+          realOutput transitTime sec; transitTime.loc = 205;
+       }
+</pre>
+</p>
+<p>    Note that unit conversion is off,  since native code models have
+no mechanism to handle automated unit conversion.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

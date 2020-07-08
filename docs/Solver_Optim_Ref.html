@@ -1,0 +1,392 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Optimization Algorithms</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p> There is no perfect optimization algorithm that is best for all
+problems.  Optimization algorithms vary in their approach, efficiency,
+robustness and applicability to particular problem domains.  This document
+describes the optimization algorithms currently supported by JSim in some
+detail so users can make intelligent use of them.  JSim's currently
+available optimizers are listed below.  Other algorithms are in development.</p>
+
+<p> Prerequisites:</p>
+<ul>
+<li><a href="User_Optim.html">Introduction to the JSim Optimizer</a></li>
+</ul>
+
+<p>  Contents:</p>
+
+<ul>
+<li><a href="#over">Overview</a></li>
+<li><a href="#simplex">Simplex</a></li>
+<li><a href="#ggopt">GGopt</a></li>
+<li><a href="#gridsearch">GridSearch</a></li>
+<li><a href="#neldermead">Nelder-Mead</a></li>
+<li><a href="#nl2sol">Nl2sol</a></li>
+<li><a href="#sensop">Sensop</a></li>
+<li><a href="#simanneal">Simulated Annealing</a></li>
+<li><a href="#genetic">Genetic Algorithm</a> (version 2.01 and above)</li>
+<li><a href="#pswarm">Particle Swarm Algorithm</a> (version 2.19 and above)</li>
+<li><a href="#praxis">Principle Axis Algorithm</a> (version 2.20 and above)</li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="over">Overview</a></h2>
+
+<p>    Some terminology is useful when discussing the merits of optimization
+algorithms:</p>
+
+<ul>
+<li>Bounded algorithms are those that require upper and lower bounds
+for each parameter varied.  Unbounded algorithms require no such bounds.</li>
+<li>Parallel algorithms are those that can take advantage of multiple
+system processors for faster processing.  See <a href="User_MP.html">Using JSim 
+Multiprocessing</a> for further information on 
+JSim multiprocessing.</li>
+
+</ul>
+<p>    All of JSim's currently available optimization algorithms share
+the following control parameters:</p>
+
+<ul>
+
+<li><strong>max # runs:</strong> The optimizer will stop if it has run the
+model this many times.</li>
+<li><strong>min RMS error:</strong>  The optimizer will stop if the mean 
+RMS error between reference data and model output is less than this 
+value.</li>
+
+</ul>
+<p>    Algorithm-specific control parameters are
+listed with each algorithm description.</p>
+<h2>  <a name="simplex">Simplex</a></h2>
+<p>    JSim's simplex is a bounded, non-linear steepest-descent algorithm.
+This algorithm does not currently support parallel processing. 
+(description needs work)</p> 
+<p>    Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>parameter initial step:</strong>  default=0.01</li>
+<li><strong>minimum par step:</strong> The optimizer will stop if it is
+considering a parameter step value that vary less than this value.  </li>
+</ul>
+<p>Reference: Dantzig GB, Orden A, Wolfe P: 
+The generalized simplex method for minimizing a linear form under linear inequality restraints. <a href="https://msp.org/pjm/1955/5-2/p04.xhtml"> Pacific J Math. 1955;5(2): 183–195.</a> </p>
+
+
+<h2>  <a name="ggopt">GGopt</a></h2>
+<p>    GGopt is an unbounded non-linear algorithm originally written by Glad
+and Goldstein. This algorithm does not currently support parallel
+processing. (description needs work)</p>
+<p>    Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>minimum par step:</strong>  The optimizer will stop if it is 
+considering a parameter step value that vary less than this value.  </li>
+<li><strong>maximum # iterations:</strong> default=10</li>
+<li><strong>minimum gradient:</strong> default=1e-6</li>
+<li><strong>relative error:</strong> default=1e-6</li>
+</ul>
+<p>
+Reference: Bassingthwaighte JB, Chan IS, Goldstein AA, et al.: GGOPT: an unconstrained 
+non-linear optimizer. Comput Methods Programs Biomed. 1988;26(3): 275–81.<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3369810/"> PubMed link</a>
+</p>
+
+<h2>  <a name="neldermead">Nelder-Mead</a></h2>
+
+<p>    Nelder-Mead is an unbounded, steepest descent algorithm by Nelder and
+Mead.  It is also called non-linear Simplex.  This algorithm supports
+multiprocessing (MP).</p>
+
+<p>    During each iteration in a P-parameter optimization, this algorithm
+performs a P or P+1 parmeter queries (model runs).  Several additional
+single queries are also performed.  Ideal MP speedup on an N-processor
+system on be roughly of order P (if P is a factor of N), or order N (if N
+is a factor of P).</p>
+
+<p>    This algorithm differs from the previously available JSim "Simplex" 
+(above) in that:</p>
+
+<ul>
+<li>it is unbounded,  while "Simplex" is bounded;</li>
+<li>it supports MP,  while "Simplex" does not;</li>
+<li>it is a newer implementation of the algorithm (Java vs. Fortran).</li>
+</ul>
+
+<p>    Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>parameter initial step:</strong>  default=0.01</li>
+<li><strong>minimum par step:</strong>  The optimizer will stop if it is 
+considering a parameter step value that vary less than this value.  </li>
+</ul>
+<p>
+Reference: Nelder JA, Mead R: A simplex method for function minimization.
+<a href="https://academic.oup.com/comjnl/article-abstract/7/4/308/354237?redirectedFrom=fulltext">The Computer Journal. 1965;7(4): 308–313.</a>
+</p>
+
+<h2>  <a name="gridsearch">GridSearch</a></h2>
+
+<p> GridSearch is a bounded, parallel algorithm.  The algorithm operates 
+via progressively restricted search of parameter space on a regularly 
+spaced grid of npoints per dimension. Each iteration, npoints^nparm 
+points are searched for the minimum residual.  Each parameter dimension 
+is then restricted to one grid delta around that minimum and the search 
+repeats until stopping criteria are met.</p>
+
+<p> Search bounds in each dimension narrow by a factor of at least 
+2/(npoints-1) each iteration.  Thus, npoints must be at least 4. Each 
+iteration requires up to npoints^nparm residual calculations.  Residual 
+calculations are reused when possible, and this reuse is most efficient 
+when npoints is 1 + 2^N for some N.  Therefore, npoints defaults to 5, 
+which is the smallest "efficient" value.</p>
+
+<p> This algorithm is very not efficient for very smooth residual 
+functions in high-dimensional space.  It works well on noisy functions 
+when low accuraccy situations (e.g. 3 significant digits required).  
+With npoints large, it copes well with multiple local minima.  An 
+effective strategy may be to use several interations of GridSearch to 
+estimate a global minimum, and then use a steepest-descent algorithm to 
+fine tune the answer.</p>
+
+<p> The number of points searched during each iteration is typically 
+large compared to the number of available processors. Typical MP speedup 
+on an N-processor system is therefore on the order of N. </p>
+
+<p> Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>minimum par step:</strong>  The optimizer will stop if it is 
+considering a parameter step value that vary less than this value.  </li>
+<li><strong>max # iterations:</strong> stop after this many iterations, 
+default=10.</li>
+<li><strong># grid points:</strong> npoints above,  default=5.</li>
+</ul>
+<p>
+Reference: Kolda TG, Lewis RM, Torczon V: Optimization by direct search: New perspectives 
+on some classical and modern methods. <a href="https://epubs.siam.org/doi/10.1137/S003614450242889">Siam Review. 2003;45(3): 385–482.</a>
+</p>
+
+<h2>  <a name="nl2sol">NL2SOL</a></h2>
+
+<p>    This version of Nl2sol is derived from NL2SOL, a library of FORTRAN
+routines which implement an adaptive nonlinear least-squares algorithm.
+It has been modified to perform all calculations in double precision. It
+is an unbounded optimizer. This optimizer does not support 
+multi-processing.</p>
+
+<p>    Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>maximum # runs:</strong> default=50</li>
+<li><strong>relative error:</strong> default=1e-6</li>
+</ul>
+<p>
+References:
+<ul><li>Dennis JE, Gay DM, Welsch RE: NL2SOL: An adaptive nonlinear least-squares 
+algorithm. <a href="https://dl.acm.org/citation.cfm?doid=355958.355966">ACM Trans Math Softw. 1981;7(3): 348–368.</a></li>
+<li>
+Dennis JE, Schnabel RB: Numerical methods for unconstrained optimization 
+and nonlinear equation. N. Y.: Prentice-Hall, 1983; 378</li>
+</ul>
+</p>
+
+
+<h2> <a name="sensop">Sensop</a></h2>
+
+<p>  Sensop is a variant of Levenberg-Marquardt algorithm that utilized
+the maximum parameter sensitivity to determine step size.  It is a bounded 
+optimizer, supporting multiprocessing.</p>
+
+<p>    Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>minimum gradient:</strong> default=1e-6</li>
+<li><strong>minimum par step:</strong>  The optimizer will stop if it is 
+considering a parameter step value that vary less than this value.  </li>
+<li><em>(JSim v2.16 or greater)</em> <strong>Max stat iter:</strong> (default =0) When this parameter is non-zero, Sensop will terminate if it makes more than the maximum number of iterations specified by 'Max stat iter' without improving the best parameter estimates. This control parameter is useful for users using JSim w/out user intervention or if the optimizer has found a good fit but none of the other stopping criteria have been met.<br /> For example, if you set 'maximum # runs' to 5000 and Sensop found a best fit at run #160 but continued to try 4840 times to improve the fit. But if 'Max stat iter' is set to 100 then it will stop when all of the parameter estimates have not changed for 100 consecutive optimizer iterations. The correlation between optimizer iterations and model evaluations (runs) is dependent on the number of parameters to be optimized.</li>
+</ul>
+<p>The JSim java implimented Sensop algorithm can be found <a href="https://github.com/NSR-Physiome/JSim/blob/master/SRC2.0/JSim/nml/opt/Sensop.java">here (Github). </a> 
+</p>
+
+<p>
+Reference: Chan IS, Goldstein AA, Bassingthwaighte JB: SENSOP: a derivative-free solver 
+for non-linear least squares with sensitivity scaling. Ann Biomed Eng. 1993;21(6): 621–31. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3756097/">PubMed link.</a>
+</p>
+
+<h2> <a name="simanneal">Simulated Annealing</a></h2> 
+
+<p>Simulated annealing is an algorithm inspired by the annealing process
+in metullurgy. As the problem "cools" from its initial "temperature",
+random fluctuations of model parameters are reduced. JSim implements a
+bounded version of this algorithm that supports multiprocessing.</p>
+
+<p> Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>initial temperature:</strong>default=100.  This parameter has
+no physical meaning (e.g. Kelvin),  but must be positive.
+</li>
+</ul>
+<p>The JSim java implimented Simulated Annealing algorithm can be found <a href="https://github.com/NSR-Physiome/JSim/blob/master/SRC2.0/JSim/nml/opt/SimAnneal.java">here (Github). </a> 
+</p>
+<p>
+Reference: Kirkpatrick S, Gelatt CD Jr, Vecchi MP: Optimization by simulated annealing.
+<a href="http://science.sciencemag.org/content/220/4598/671">Science. 1983; 220(4598): 671–680</a>
+</p>
+
+<h2><a name="genetic">Genetic Algorithms</a></h2>
+
+<p><em>This algorithm is available only in JSim version 2.01 and above.</em></p>
+
+<p>Genetic algorithms are a family of algorithms that generate a population of
+candidate solutions and then select the best solutions in each iteration. A
+new population of solutions is created during each iteration. There are
+different ways of specifying how a new population is generated from the
+existing population.  The error calculation is used to score and rank the
+candidate solution. The "fit" individuals in the existing population are
+selected using one of three methods: (1) roulette-wheel, (2) tournament
+selection, or (3) elitism. In the roulette-wheel method, the probability of a
+solution being selected is inversely proportional to the error. In the
+tournament selection, two random solutions are selected and the one with the
+lower error is placed in the new population. In elitism, all the solutions
+with the lowest errors (with a cutoff fraction) are selected. New solutions
+are selected by "mutating" and "crossing over" existing solutions.</p>
+
+<p> Algorithm-specific control parameters:</p>
+
+<ul>
+<li><strong>Population:</strong>default= 25. Number of trials in each
+generation. If <strong>max # runs &lt; Population</strong> then
+  <strong>Population</strong> is defaulted to the value of <strong>max #
+runs</strong> and only the parent generation is calculated. Suggested values
+are <strong>max # runs = 400, Population=100</strong> for four generations.</li>
+<li><strong>Mutation rate:</strong>default = 0.1.  The probability of any single
+parameter getting changed.</li>
+<li><strong>Crossover rate:</strong>default = 0.5. The probability of
+creating a new solution by combining existing solutions.</li>
+<li><strong>Select Method:</strong> default= 1. Acceptable values are
+(1) roulette-wheel, (2) tournament selection, and (3) elitism. See
+above description identifying these terms.</li>
+<li><strong>Mutation step:</strong>default=0.05. The amount by which a
+mutation changes a parameter, specified as a fraction of the range.
+<li><strong>Elite cutoff:</strong>default=0.5. Fraction of the population considered
+fit for the elitism selection method (<strong>Select Method=3.</strong>)</li>
+</ul>
+
+</p>
+<p>The JSim java implimented Genetic algorithm can be found <a href="https://github.com/NSR-Physiome/JSim/blob/master/SRC2.0/JSim/nml/opt/Genetic.java">here (Github). </a> The JSim genetic algorithm supports multiprocessors (parallel processing).
+</p>
+<p>
+Reference: Holland JH: Adaptation in natural and artificial Systems: an introductory 
+analysis with applications to biology, control, and artificial intelligence. <a href="https://dl.acm.org/citation.cfm?id=531075">MIT Press. 1992; 183.</a>
+</p>
+
+<h2><a name="pswarm">Particle Swarm Algorithm (PSO)</a></h2>
+
+<p><em>This algorithm is available only in JSim version 2.19 and above.</em></p>
+
+<p>
+The PSO algorithm works by having swarm candidate solutions (called particles) that move around in the search-space according to a few simple rules. The movements of the particles are guided by their own best known position in the search-space as well as the entire swarm's best known position. When improved positions are being discovered these will then come to guide the movements of the swarm. The process is repeated and by doing so it is hoped, but not guaranteed, to converge to a minimum value. This optimization can be useful when fitting a large number of parameters (>10) when estimates of their values are unknown or have a large range of values. The PSO algorithm supports multiprocessors (parallel processing) in JSim release v 2.20 and later. 
+</p>
+<p>
+Algorithm-specific control parameters:
+<ul>
+<li><strong># of particles:</strong> default=25. Number of particles in the swarm. May need larger values (50 or greater) when optimizing 20, 30 or more parameters, or the range of possible values for a parameter is large.</li>
+<li><strong>velocity coeff:</strong> default = 0.25 (range: 0 - 1.0). Velocity coefficient used to calculate initial particle velocity. Calculation for initial indiviual particle velocity (parameter,n, and particle,i,) is: <br />
+<pre>
+v_particle[n][i] = vel_coeff*(xmax[n]-xmin[n])*(random number[0 < # <1.0]) </pre>
+Where xmax[n], xmin[n] are a parameter's maximum and minimum values as specified by the user.
+</li>
+<li><strong>Min inertia:</strong> default=0.3 (range: 0 - 1.0). Coefficient that reflects a particle's minimum resistance to changing velocity.
+</li>
+<li><strong>Max inertia:</strong> default=1.0 (range: min inertia - 1.0). Coefficient that reflects a particle's maximum resistance to changing velocity. The Inertia calculation for each particle is:
+<pre> w = w_min +it*dw, </pre>
+where w is particle inertia, w_min is minimum inertia, 'it' is iteration number (max_iter is the maximum amount of iterations specified), and dw is change in inertia with each iteration and is given by:
+<pre> dw = (w_max-w_min)/max_iter  </pre>
+</li>
+<li><strong>Cog learn:</strong> default=1.05 (range:0 - 3.0). Determines how much of the particle's personal best fit influences its trajectory.
+</li>
+<li><strong> Soc learn:</strong> default=1.05 (range:0 - 3.0). Determines how much of the swarm's best fit influences the individual particle's trajectory.<br />
+The updated position of each particle (parameter, n, and particle, i,) is given by:
+<pre>particle_x[n][i] = particle_x[n][i] + v_particle[n][i] </pre>
+The updated velocity of each particle (parameter,n, and particle,i,) is given by:
+<pre>v_particle[n][i] = w*v_particle[n][i] + 
+c1*(random number[0 < # <1.0]) *(x_pbest[n][i] - particle_x[n][i]) +
+c2*(random number[0 < # <1.0]) * (x_gbest[n] - particle_x[n][i]) </pre>
+	where c1 is cog learn factor, c2 is soc learn factor, x_pbest is particle's personal best position, x_gbest is the swarm's best position so far. 
+
+ </li>
+</ul>
+</p>
+<p><strong>Further work/issues:</strong> 
+<ul>
+<li>Add control of randomization: Allow user to specify the seed for random number generator so that user can repeat optimization. Currently, each optimization run is a little different due to seed being different with each run.</li></ul></p>
+<p>The JSim java implimented Particle Swarm algorithm can be found <a href="https://github.com/NSR-Physiome/JSim/blob/master/SRC2.0/JSim/nml/opt/PSwarm.java">here (Github). </a> 
+</p>
+<p>
+Reference: James Kennedy and Russell C. Eberhart. Particle swarm optimization. In Proceedings of the 1995 IEEE
+International Conference on Neural Networks, pages 1942–1948, Piscataway, New Jersey, 1995. IEEE Service
+Center. <a href=" https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=488968&tag=1">IEEE paper. </a> 
+</p>
+
+<h2><a name="praxis">Principle Axis Algorithm (PRAXIS)</a></h2>
+
+<p><em>This algorithm is available only in JSim version 2.20 and above.</em></p>
+<p>
+PRAXIS seeks an M-dimensional point X (parameters to fit) which minimizes a given fitness, or cost, function. PRAXIS minimizes along directions that are conjugates of each other to locate a minima and is a derivative free optimizer. The code is a refinement of Powell's method of conjugate search directions and the fitness function  need not be smoothly differentiable. 
+</p>
+<p>
+Algorithm-specific control parameters:
+<ul>
+<li><strong>Bounded?: </strong> default = true (checked). This algorithm is originally unbounded but is modified to accept bounds. The decision to bound the parameter space depends on the type of equations in the model. Often ODEs and PDEs can be very stiff causing the solvers to stop. Using boundaries allows the user to keep the parameter values inside realistic limits. To use the unbounded optimizer just uncheck box. Note: the the JSim optimizer configuration page will still check that the initial parameter value is within the listed min/max values so you will have to adjust them to some large value.  
+</li>
+<li><strong>Max dist to min: </strong> default = 1 (range 0.01 - 1.0). Relative distance from initial parameter value to actual value at minimum. This value is applied to the average range of starting values for all parameters. This value does not affect convergence but can increase or decrease the amount of iterations needed to reach the minimum. This setting is less useful when parameters' starting values are very different (ie a=0.01, b=2500). </li>
+<li><strong>Iter no improve: </strong> default = 1 (range: 1-4). Number of iterations with no improvement in minimum before it stops. '1' is adequate, '4' is conservative. </li>
+<li><strong>Fit tolerence: </strong> default = 1E-10 (range: number greater than zero). Max Tolerence (T0) between actual minimum and current minimum. Based on the precision of the computer's arithmetic. From comments in code:<br />
+<pre>
+PRAXIS attempts to return praxis = f(x) such that 
+if X0 is the true local minimum near X, 
+then norm ( x - x0 ) < T0 + sqrt ( EPSILON ( X ) ) * norm ( X ),
+    where EPSILON ( X ) is the machine precision for X.
+</pre>
+</li>
+</ul>
+</p>
+<p>
+</p>
+
+<p>
+The JSim java implimented PRAXIS algorithm can be found <a href="https://github.com/NSR-Physiome/JSim/blob/master/SRC2.0/JSim/nml/opt/Praxis.java">here (Github). </a> 
+</p>
+<p>
+Reference:
+<ul>
+<li> Brent, Richard P., <u>Algorithms for minimization without derivatives</u>, chapter 7, 1973, Prentice-Hall, NJ, USA </li>
+<li>
+Code reference: <a href="https://people.sc.fsu.edu/~jburkardt/cpp_src/praxis/praxis.html">C++ PRAXIS code </a>
+</li>
+</ul>
+
+</p>
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

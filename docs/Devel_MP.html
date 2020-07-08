@@ -1,0 +1,151 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Multiprocessing Development</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p>  This page is a working document for JSim internals developers working
+on JSim multi-processing (MP) support:</p>
+
+<ul>
+<li><a href="#over">Overview</a></li>
+<li><a href="#upgrade">Native Library Upgrades</a></li>
+<li><a href="#bench">Benchmarks</a> (updated 6 Dec 2006)</li>
+<?php jscoqli() ?>
+</ul>
+
+<p>  <a name="over">Overview</a></p>
+
+<p>  The first stage of JSim MP support will use Java threads. The user will
+request some number of separate run threads (probably as a command-line
+switch).  On a machine with multiple processors, the JVM will balance the
+threads between available processors, increasing performance. On single
+processor machines, multiple threads will compete for time slots, so
+performance will actually be somewhat reduced, but will allow for testing
+during development.</p>
+
+<h2>  <a name="upgrade">Native Library Upgrades</a></h2>
+
+<p>    The native code for ODE, PDE and optimizer methods will need to be
+upgraded to support MP.  The native code may be found in
+$JSIMSRC/JSim/nonJava.  Each method has original code in C or Fortran
+(e.g. radau.f) and a JNI wrapper (e.g. jradau.c).  I've already modified
+all the JNI wrappers to support MP.  There are separate data structures
+allocated for each thread (e.g. jsodethread.h and .c) indexed by integer
+threadInx.  This threadInx must be passed to and returned by the native 
+solver code.</p>
+
+<p>    Upgrades to each method should be as follows:</p>
+
+<ol>
+<li> threadInx becomes the 1st argument for each top-level solver
+function call that results in an external callback (e.g. fcn() in ODE
+solvers).  threadInx also becomes the 1st argument in the callback. This
+will allow the JNI wrapper to redirect simultaneous callbacks to the
+correct Java code.  threadInx need not be (and therefore, should not be)
+passed to functions that do not perform external callbacks.</li>
+<li> All solver code should be made reentrant, if at all possible.  
+This should be straight-forward for most solvers that do everything from a
+single entry point (i.e. a single solver call from within the JNI
+wrapper).  CVode may be a special case (see below).</li>
+<li> Test programs should be written in C or Fortran (as appropriate)
+that tests reentrancy by calling the solver recursively to 2 levels.
+For example,  an optimizer that calls a second optimizer within its
+fcn() call.  While not exhaustive,  such tests are easy to debug,  and
+catch many common errors.  </li>
+<li> Once the above is completed, send me a copy for review.  Once I
+have acceptable versions of code and test programs for all the solvers,
+I'll roll them into the JSim code base, along with appropriate changes to
+the JNI wrappers.</li>
+</ol>
+
+<h2>  Reentrancy Guidelines for C modules</h2>
+
+<p>    Wikipedia.org is a good source for recent computer info.  See entries
+there reentrant, thread-safe, etc.  Checking with the original code
+authors is probably a good idea.</p>
+
+<p>    Use no static variables or variables declared outside of functions
+unless they are constant for all threads. All called functions must be
+reentrant.</p>
+
+<p>    Send me other guidelines you think should be here.</p>
+
+<h2>  Reentrancy guidelines for Fortran modules</h2>
+
+<p>    Ditto comments above regarding Wikipedia.</p>
+
+<ul>
+<li>everything appearing in a SAVE statement;</li>
+<li>variables in COMMON blocks;</li>
+<li>arrays that use more than 32kb storage.</li>
+
+</ul>
+<p>    However, arrays that are dimensioned by a dummy or COMMON variable or
+assumed-size arrays are put in the stack. g77 does not complain about
+recursive calling.</p>
+<p>    Send me other guidelines you think should be here.</p>
+<h2>  <a name="bench">Benchmarks</a></h2>
+<p>    MP Performance on 4 Tested Platforms:
+<pre>
+        Multi-run Benchmark Results  (larger number indicates better performance)
+        #processors     altix1  bigbox  baggins gollum
+        1               100     100     100     100
+        2               199     158     194     188
+        4               345     235
+        8               479
+        16              556
+
+        Single Run Benchmark Results (larger number indicates better performance)       
+        #processors     altix1  bigbox  baggins gollum
+        1               100     100     100     100
+        2               197     182     184     186
+        4               376     257
+        8               537
+        16              651
+</pre>
+</p>
+<p>    Notes for above:</p>
+
+<ul>
+
+<li>Multi-run benchmark was a 16-run "loops" analysis using VS001 
+model using release 1.6.66.</li>
+
+<li>Single run benchmark was a 32 parallel path ODE model using a
+prototype version of JSim 1.6.68.  The model's java code was manually
+edited in a manner consistent with proposed changes to the JSim MML
+compiler.</li>
+
+<li>Revised altix performance figures available 6 Dec 2006.</li>
+
+<li>Performance figures are percentages based on 100% for a single
+processor usage on the system in question.  Single processor performance
+on the tested systems varied by up to a factor of 3 due to hardware and OS
+differences.</li>
+
+<li>"altix1" is a 128 processor SGI Altix system running JSim for Linux
+IA64, however our altix1 account is restricted to a maximum 16 processors
+for a single job. "bigbox" is a 4 processor Intel system running JSim for
+Linux AMD64.  "baggins" is an Intel-based Mac Mini.  "gollum" is a
+G5-based Power Mac.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

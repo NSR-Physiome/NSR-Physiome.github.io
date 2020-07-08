@@ -1,0 +1,497 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Data Files and Project Data Sets</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p> JSim Data Sets are portions of a JSim project that represent numeric 
+data captured from experimental measurements or previous model runs.  
+This document describes how to load data sets into a JSim project, some 
+typical uses for them once they are loaded, and how to export data to 
+external files.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim 
+GUI </a>(required)</li>
+<li><a href="User_Projects.html">JSim Projects</a> (recommended)</li>
+</ul>
+
+<p> Contents:</p>
+
+<ul>
+<li><a href="#struct">Data set Structure</a></li>
+<li><a href="#loadfile">Loading data sets from external files</a></li>
+<li><a href="#loadmodel">Loading data sets from model runs</a></li>
+<li><a href="#createnew">Create 1D CSV data curves</a></li>
+<li><a href="#modify">Modify an existing, imported 1D data curve</a></li>
+<li><a href="#copy">Copying data sets between projects</a></li>
+<li><a href="#uses">Typical uses for Data sets</a></li>
+<li><a href="#export">Exporting data sets to external files</a></li>
+<li><a href="#tac">TAC Data Format</a></li>
+<li><a href="#column">Columnar Text Data (CDATA) Format</a></li>
+<li><a href="#csv">Comma Separated Value (CSV) Data Format</a></li>
+<li><a href="#jsml">JSML Data Format</a></li>
+<li><a href="#pretty">Pretty Data (PDATA) Format</a></li>
+<li><a href="#line">Line Data (LDATA) Format</a></li>
+<li><a href="#matlab">Matlab Data Format</a></li>
+<li><a href="#i4bull">I4 Bullseye Data Format</a></li>
+<li><a href="#plugin">Plug-in Data Formats</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="struct">JSim Data Set Structure</a></h2>
+
+<p>    JSim data sets are collections of data curves.  Each curve has a
+name that is unique within the data set by which the curve is known to
+the rest of JSim.  A curve name must also start with a letter and
+contains only letters, numbers and the underscore character.  A curve
+may optionally possess a free-form text description and physical unit
+information.  Curves may be of any dimension, however 1-dimensional
+data is most common and is best supported in JSim at present.  Each
+data set in a JSim project will appear as a leaf in the JSim project
+tree and as a tab on the left-hand side of the JSim project window.</p>
+
+<h2>  <a name="loadfile">Loading data sets from external files</a></h2>
+
+<p>    Most data sets are loaded from external data files.  Currently, 
+the following import formats are supported:</p>
+
+<ul>
+<li><a href="#tac">TAC format</a> is a standard for time-activity curve
+representation defined by NSR that offers easy interchange with 
+other NSR simulation products such as Simcon, XSIM and earlier 
+versions on JSim (1.4 and 1.5).</li>
+<li><a href="#column">Columnar text (CDATA) format</a> is an informal format,  described
+below,  offering easy interchange with spreadsheet programs.</li>
+<li><a href="#csv">Comma separated value (CSV) format</a> is similar
+to columnar text format,  but uses commas a separator characters
+is becoming more popular for scientific data exchange.</li>
+<li><a href="#jsml">JSML format</a> (for JSim Markup Language) is an XML dialect
+used for internal data storage within JSim project files.  It supports 
+multi-dimensional data and offers easy interchange with XML based 
+data-bases and applications.</li>
+<li><a href="#i4bull">I4 Bullseye format</a> is a functional image format for 2D and
+3D cardiac functional image data used the the I4 imaging system.  This
+format is useful only if you use the I4 system.</li>
+</ul>
+
+<p>    JSim also offers a <a href="Devel_Plugin.html">data format plug-in feature</a>
+that allows users to define support for other file formats within JSim.
+Serious users of JSim should become familiar with the relative
+advantages of each supported format. The list of supported import
+formats will grow as JSim matures.</p>
+
+<h3>    To load an external data file of a supported format:</h3>
+
+<p>      1) obtain a copy of the file on your computer system and make
+sure if conforms to the applicable specification (see above);</p>
+
+<p>      2) select "Import data file ..." from the Add menu in a project's
+"Project" tab;</p>
+
+<p>      3) navigate the file system and select the desired file.</p>
+
+<p>    If the file conforms to specification, a new data set leaf will
+appear in the project tree.  If not, a diagnostic error message will
+appear in the project's Message tab.</p>
+
+<h2>  <a name="loadmodel">Loading data sets from model runs</a></h2>
+
+<p>    It is sometimes useful to save output data from model runs
+into data sets.  Some possible uses include:</p>
+
+<ul>
+<li>using one model's output to feed another's input;</li>
+<li>generating reference data for comparison of different models
+(e.g. optimizing one model to fit another's output).</li>
+</ul>
+
+<h3>    To do this:</h3>
+
+<p>      1) run a model and plot the desired data in a plot page;</p>
+
+<p>      2) select "Store project dataset ..." from the plot page's File
+menu;</p>
+
+<p>      3) name the new data set at the prompt.</p>
+
+<p>    Once completed a new data set leaf will appear in the project tree.</p>
+
+<p>    Note that a data set may be created from the model optimization
+graph in an analogous manner.</p>
+
+<h2> <a name="createnew">Creating new 1D CSV curves from within JSim</a></h2>
+<p>(Available in JSim version 2.19 or greater) JSim allows you to enter 1D data curves directly into the project file through the JSim gui:
+<ul>
+<li>From within the JSim GUI, select the 'Project' tab.</li>
+<li>Select 'Add' --> 'New data set' from the drop-down menu. Either type in a name for the new data set or use the default. </li>
+<li>Select the 'DataSets' tab and select the name of the data set created above. </li>
+<li>Now select 'Edit' --> 'create' to create a new data curve. A pop-up window should appear with an example data curve. Currently only 1D CSV format is supported. </li>
+<li>Type in your curve following the template shown. You may copy/paste a curve into the window, if desired. </li>
+<li>Finally, select 'Curve' --> 'Save' to save the curve. </li>
+</ul>
+The new data set and curve should now be available for plotting and analysis within JSim (Do not forget to save the updated project file). You can also create and add a new data curve to an existing data set.
+
+</p>
+
+<h2> <a name="modify">Modify existing, 1D curves from within JSim</a></h2>
+<p>(Available in JSim version 2.19 or greater) You can modify an existing 1D data curve from within JSim:
+<ul>
+<li>Pick the data set containing the curve you wish to modify through selecting it in the 'DataSets' tab in the top right panel of the JSim gui. </li>
+<li>Next, select the curve you wish to modify and then select 'Edit' --> 'modify'. A pop-up window should appear containg the data curve in CSV format.  </li>
+<li>Now edit curve as needed. You can delete, add data points, and change values. All additions must follow the CSV formatting. </li>
+<li>Finally, select 'Curve' --> 'Save' to save the curve. </li>
+</ul>
+The modified curve will have a '_mod' appended to the original curve name. Note, the original curve is not deleted. To delete an unneeded curve just select the curve and select 'Edit' --> 'cut'
+</p>
+
+<h2>  <a name="copy">Copying data sets between projects</a></h2>
+
+<p>    Data sets may be copied directly between project using the
+cut/copy/paste mechanism that applied to all items in a project tree.
+This is preferred to the old-style mechanism of writing data sets to
+external file and then reimporting the external files because:</p>
+
+<ul>
+<li>It is simpler, faster and less error prone;</li>
+<li>The only current supported file format supports all information 
+in a data set is JSML.  Some information may be lost if other formats
+are used.</li>
+<li>Local file access is when JSim is
+run as a untrusted WWW applet.</li>
+</ul>
+
+<h3>    To do this:</h3>
+
+<p>      1) make sure both project windows were created in the same JSim
+program execution (copying between different executions is not yet
+supported);</p>
+
+<p>      2) select the Project tab in the project you wish to copy from;</p>
+
+<p>      3) highlight the data set (or other project tree leaf) you wish
+to copy by clicking on it.  Additional leaves may be highlighted by
+clicking with the Control key depressed;</p>
+
+<p>      4) select "copy" from the Edit menu;</p>
+
+<p>      5) select the Project tab in the project you wish to copy to;</p>
+
+<p>      6) select "paste" from the Edit menu.</p>
+
+<h2>  <a name="uses">Typical uses for Data Sets</a></h2>
+
+<p>    <strong>Plotting.</strong> Data may be selected for plotting in plot pages.
+Once a data set is loaded, it becomes an option in the data source
+selection box in the plot page configurator.  This data source may be
+either a model or a data set.  When it is a data set, the data select
+box will list the curves in a data set by name.</p>
+
+<p>    <strong>Function Generators.</strong> Model function generators are used to
+generate useful functions that can be assigned to model input
+variables.  The "DataCurve" option allows the function generator to
+assume values taken from a particular curve in a data set.  For further
+information see <a href="/jsim/docs/User_Fgen.html">Using Function Generators in JSim</a></p>
+
+<p>    <strong>Optimization.</strong> JSim's model optimizers allow for automated
+analysis of what parameter values generate output that best match given
+experimental data.  For further information see <a href="/jsim/docs/User_Optim.html">Using JSim's Parameter
+Optimizer</a></p>
+
+<h2>  <a name="export">Exporting data sets to external files</a></h2>
+
+<p>    Data files may currently be exported from two places within JSim:</p>
+
+<ul>
+<li>Project data sets may be exported using the "Export data file..."
+menu item in a data set's File menu;</li>
+<li>Plot data may be exported using the "Export data file..." menu
+item in a plot page's File menu;</li>
+</ul>
+
+<p> Exported data files may be written in any of the <a 
+href="#loadfile">supported input formats</a> or in three "output only" 
+formats below:</p>
+
+<ul>
+<li><a href="#pretty">Pretty format</a> presents 0-D, 1-D and 2-D in somewhat
+attractive text tables.  Higher dimensional data is rather less 
+attractive.  This format is used for text display of data within 
+JSim (e.g. plot page text). File is saved with a <strong>.pdata</strong> extension.</li>
+<li><a href="#line">Line format</a> presents data for each variable on a single
+line.  This presents some advantages in model verification and debugging
+for researchers familiar with Unix text file tools.</li>
+<li><a href="#matlab">Matlab format</a> writes data in Matlab's <strong>.m</strong> format.  This
+format supports data of arbitrarily large dimension.</li>
+</ul>
+
+<p>    When exporting data,  the user must supply a file suffix,  and 
+that file suffix must match the recommended suffix for the desired 
+data format.  Formats and corresponding suffixes are displayed in 
+the export dialog.  They are also detailed in this document under
+the appropriate format.</p>
+
+<h2>  <a name="tac">TAC Data Format</a></h2>
+
+<p>    TAC (for Time Activity Curve) format is an ASCII text specification
+designed by NSR. It is strongly recommended that TAC files have the
+<strong>.tac</strong> extension. An example of a TAC file is <a href="data_ex/data.tac">here.</a> 
+<!-- Complete TAC format specification may be found in the
+XSIM download section of the <a href="http://nsr.bioeng.washington.edu">NSR
+website</a> .-->
+</p>
+
+<h3>    TAC format strengths are:</h3>
+
+<ul>
+<li>supports data interchange between various NSR simulation
+interfaces (Simcon, XSIM, and JSim);</li>
+<li>promotes good documentation;</li>
+<li>format well suited to multiple indicator dilution experiment
+data.</li>
+</ul>
+
+<h4>   TAC format weaknesses are:</h4>
+
+<ul>
+<li>files are complex to create from scratch.  Some utilities are
+available from NSR;</li>
+<li>only 1-dimensional data is supported.</li>
+</ul>
+
+<p>   JSim assigns names to curves within TAC files using the same
+convention as XSIM.  For those unfamiliar with XSIM, here is a brief
+synopsis.  The highest level of TAC file structure is the "run".  Each
+run may contain any number of physiological, input function and/or
+sample curves.  JSim's assigned curve names are of the form <strong>R#x#</strong>
+where:</p>
+
+<ul>
+<li><strong>R</strong> is the letter "R";</li>
+<li>the first <strong>#</strong> is the run number,  starting count at 1;</li>
+<li><strong>x</strong> is the letter "p" for physiological, "i" for input
+function or "s" for sample data curves;</li>
+<li>the second <strong>#</strong> is curve number of the specified type
+within the run, starting count at 1.</li>
+</ul>
+
+<h2>  <a name="column">Columnar Text Data (CDATA) Format</a></h2>
+
+<p>    Columnar text data files are ASCII files containing a single
+2-dimensional table representing one or more 1-dimensional data
+curves.  It is strongly recommended such file have the <strong>.cdata</strong> extension.
+An example, generated from a JSim plot page, is <a href="data_ex/plotData.cdata">here.</a>The format is described below.</p>
+
+<h3>    Columnar text format strengths:</h3>
+
+<ul>
+<li>quick and easy to generate from spreadsheets or custom
+utility programs;</li>
+<li>exporting tabular text from multi-column numeric table in a
+spreadsheet program will normally generate a file compatible with this
+format.</li>
+</ul>
+
+<h3>    Columnar text format weaknesses:</h3>
+
+<ul>
+<li>not a formal standard, so conventions not necessarily supported
+by other products and may change in the future;</li>
+<li>no provision for in-file documentation;</li>
+<li>only 1-dimensional data is supported.</li>
+</ul>
+
+<h2>  <a name="csv">Comma Separated Value (CSV) Data Format</a></h2>
+
+<p> CSV data files are ASCII files containing a single 2-dimensional 
+table representing one or more 1-dimensional data curves.  They are very 
+similar to Columnar text format except that they use the comma as a 
+separator character. It is strongly recommended such file have the <strong>.csv</strong> 
+extension. An example of a CSV file is <a href="../models/examples/JSBATCH/data.csv">here.</a> </p>
+
+<h3>    CSV format strengths:</h3>
+
+<ul>
+<li>this format is becoming more popular for scientific data 
+exchange;</li>
+<li>quick and easy to generate from spreadsheets or custom
+utility programs;</li>
+<li>exporting tabular text from multi-column numeric table in a
+spreadsheet program will normally generate a file compatible with this
+format.</li>
+</ul>
+
+<h3>    CSV format weaknesses:</h3>
+
+<ul>
+<li>CSV data file are sometimes used to represent data which does
+not conform to JSim's interpretation of a set of 1D curves;</li>
+<li>units are not supported;</li>
+<li>only 1-dimensional data is supported.</li>
+</ul>
+
+<h3>    Formal format specification:</h3>
+
+<p>      File must be ASCII text.  Blank lines are ignored.  Each non-blank
+line must have the same number of columns.  The first non-blank line
+may be either a header line or a data line.  The second non-blank line
+may be either a units line or a data line.  All subsequent non-blank
+lines must be data lines.  Data lines must contain only space or tab
+delimited numbers.  Numbers follow standard ASCII floating point
+representation.  The keyword NaN, in any capitalization, translates to
+an IEEE 754 NaN.  The first non-blank line is considered a header line
+if the content of first column is not a number.  If present, a header
+line must contain a unique name for each column that starts with a
+letter.  If present, a units line must contain a unit name for
+each column.  Each name or unit may or may not be enclosed in matching 
+single or double quotes.  The first column represents the independent variable.
+Subsequent columns represent dependent variable values corresponding to 
+the 1st column. Values of the independent variable must be strictly 
+increasing and may be either regularly or irregularly spaced.  </p>
+<p>      The imported data set will contain one curve for each dependent
+variable, that is, one less than the number of columns. If a header
+line is present, curve names are taken from the header with any
+enclosing quotes removed and any unacceptable characters replaced by
+underscore.  If a header line is not present, curves are automatically
+named y1, y2, etc.</p>
+
+<h3>    Examples:</h3>
+
+<p>      Two examples should make the formal specification easier to grasp.  
+The first file includes a header line.  JSim will name the two resulting
+curves u and v. The columns line up in this example for clarity, but
+alignment is not required by the specification:</p>
+
+<pre>
+        time      u         v
+        0         1         2
+        1         .5        4
+        2         .25       8
+        5         .125      16
+        10        6.25e-2   32
+</pre>
+
+<p>      In this second,  there is no header line.  JSim will
+name the two resulting curves y1 and y2:</p>
+
+<pre>
+        0         1         2
+        1         .5        4
+        2         .25       8
+        5         .125      16
+        10        6.25e-2   32
+</pre>
+
+<p>      In this third example,  there is both a header an a units line:
+
+<pre>
+        time      u         v
+        sec       watt/M^2  m/sec
+        0         1         2
+        1         .5        4
+        2         .25       8
+        5         .125      16
+        10        6.25e-2   32
+</pre>
+
+<h2>  <a name="jsml">JSML Data Format</a></h2>
+
+<p>    This format (JSim Markup Language) is an XML dialect used for internal
+data storage within JSim project files.  It supports multi-dimensional
+data and offers easy interchange with XML based data-bases and
+applications.  XML tags for this format are not yet finalized.  The
+recommended file suffix for this format is <strong>.jsml</strong> . An example, generated from a JSim plot page, is <a href="data_ex/plotData.jsml">here.</a></p>
+
+<p>    There are two encoding options for JSML: legacy and ascii.  Ascii
+encoding is now recommended in all cases because:</p>
+
+<ul>
+<li>disk storage is roughly 1/3 that required by legacy encoding,  with
+corresponding decrease in loading time;</li>
+<li>run-time memory allocation for loaded data is roughly one half that
+required by legacy encoding;</li>
+<li>better support for multi-dimensional data curves and physical 
+unit import.</li>
+</ul>
+
+<p>    Ascii is the default encoding for JSML data files.  The jsbatch 
+-oencoding switch allows you to specify legacy
+encoding if desired.  </p>
+
+<h2>  <a name="pretty">Pretty Data (PDATA) Format</a></h2>
+
+<p>    This format presents 0-D, 1-D and 2-D in somewhat attractive text
+tables.  Higher dimensional data is rather less attractive.  This format
+is used for text display of data within JSim (e.g. plot page text).  It is
+an output format only, and may not be imported into JSim.  The recommended
+file suffix for this format is <strong>.pdata</strong>. An example, generated from a JSim plot page, is <a href="data_ex/plotData.pdata">here.</a></p>
+
+<h2>  <a name="line">Line Data (LDATA) Format</a></h2>
+
+<p>    This format presents data for each variable on a single line.  This
+presents some advantages in model verification and debugging for
+researchers familiar with Unix text file tools.  It is an output format
+only, and may not be imported into JSim.  The recommended file suffix
+for this format is <strong>.ldata</strong> . An example, generated from a JSim plot page, is <a href="data_ex/plotData.ldata">here.</a></p>
+
+<h2>  <a name="matlab">Matlab Data Format</a></h2>
+
+<p>    This format allows export of JSim numeric results to Matlab via .m
+files.  This is an output only format, and may not be imported into JSim. An example, generated from a JSim plot page, is <a href="data_ex/plotData.m">here.</a>
+This format supports data of any dimensionality. A 1D MML variable will be
+exported as a Matlab vector, a 2D MML variable will be exported as a 2D
+Matlab matrix, a 3D MML variable will be exported as a 3D Matlab matrix,
+and so on.  The domain (e.g. time) values corresponding the matrix
+dimensions are also written to Matlab vectors in a systematic way.  For
+example, a 2D MML variable u(t,x) would generate 3 Matlab variables:</p>
+
+<ul>
+<li><strong>u</strong>: a 2D matrix containing the values of u for each t and x;</li>
+<li><strong>u__1</strong>: a 1D vector containing the values of t corresponding
+to u's 1st dimension;</li>
+<li><strong>u__2</strong>: a 1D vector containing the values of x corresponding
+to u's 2nd dimension.</li>
+</ul>
+
+<p>    <strong>Limitations</strong>: Note that JSim import support for .m files would
+require a complete reimplementation of Matlab, so don't even think about
+it. Also note that only numeric data is transferred.  Translating JSim MML
+source code into corresponding Matlab executable code would require a very
+significant additional programming effort, and is not anticipated at this
+time.  It is possible, however, that Matlab binary .mat files may be
+supported for both import and export as some future time.  If this is of
+pressing interest to you, please contact the JSim development team.</p>
+
+<h2>  <a name="i4bull">I4 Bullseye Data Format</a></h2>
+
+<p>    This format is used by the <a href="http://nsr.bioeng.washington.edu/Software/I4">I4 Imaging
+System</a> for storage of
+static (2D) and dynamic (3D) cardiac bullseye data.  JSim supports this
+format (both input and output) as part of its functional imaging facility
+which is currently under development.  The recommended file suffix for
+this format is .bul .</p>
+
+<h2>  <a name="plugin">Plug-in Data Formats</a></h2>
+
+<p>    JSim also offers a <a href="Devel_Plugin.html">data format plug-in feature</a>
+that allows users to define support for other file formats within JSim.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

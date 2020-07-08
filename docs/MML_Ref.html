@@ -1,0 +1,556 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>MML Reference Manual</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> This document is the authoritative reference
+for the syntax and semantics of JSim's Mathematical Modeling Language
+(MML).</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p> Contents: </p>
+
+<ul>
+<li><a href="#over">Overview</a></li>
+<li><a href="#import">Import statements</a></li>
+<li><a href="#units">Unit statements</a></li>
+<li><a href="#templates">Template definitions</a></li>
+<li><a href="#functions">Function and procedure definitions</a></li>
+<li><a href="#comp">Component declarations</a></li>
+<li><a href="#compsub">Component sub-statments</a></li>
+<li><a href="#precomp">Pre-defined component types</a></li>
+<li><a href="#algebra">Algebraic expression syntax</a></li>
+<li><a href="#reserved">Reserved word list</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2> <a name="over">Overview</a></h2>
+
+<p>    MML is a ASCII text-based language that declares a set of mathematical
+variables and the relationships that constrain them.  MML is case
+sensitive and extraneous whitespace (space, tab, C/R and N/L) characters
+are ignored.  Characters between /&#042; and &#042;/ and those between //
+and the end of the line are treated as comments.  Characters on a single
+line between double-quote marks (&quot;) are interpreted as strings.  
+Multi-line strings, useful for function and procedure code blocks, are
+delimited by {{ and }}.  MML text may be stored in the model source
+section of a JSim project file, or may be stored as a free-standing text
+file.  In the latter case, it is strongly recommended the file have the
+.mod extension.</p>
+
+<p> An MML file is a series of top-level statements, which may be 
+import statements,
+unit statements, template definitions, function or procedure definitions
+or component declarations.  A properly formed MML model must contain
+exactly one top-level component declaration.  All other top level
+statements are optional.  Older MML files may start with the 
+keywords "JSim v1.1", identifying the MML (not JSim) version 
+number.  This syntax is still supported, but is not longer 
+recommended.</p>
+
+<p>    In all syntactic descriptions that follow, square brackets [] denote
+optional elements.</p>
+
+<h2>  <a name="import">Import Statements</a></h2>
+<p>    Import statements allow importing unit, template, function and procedure
+  definitions from standard libraries.  Import statement syntax is:
+<pre>
+      import name;
+</pre>
+</p>
+<p>    If name does not have an extension,  .mod is assumed.  Name may 
+  be placed in quotes to handle spaces and oddball file name characters,
+  such as directory delimiters.</p>
+<p>    Import statements search directories listed in the property JSIMPATH.
+See the <a href="User_Ref.html#env">JSim Environment Variables</a> for details.</p>
+<h2>  <a name="units">Unit Statements</a></h2>
+<p>    Unit statements may be either unit conversion statements or unit 
+  definitions.  Unit conversion statements may be one of two forms:
+<pre>
+      unit conversion on;
+      unit conversion off;
+</pre>
+</p>
+<p>    One of the above is required if units are to be assigned to any 
+model components.  Unit conversion on implies that the equations should be 
+checked for unit consistency,  and any appropriate conversion factors
+included in the run-time calculations.  Unit conversion off implies
+that the unit declarations are merely for documentation purposes,  but
+that they have no effect on the run-time calculations.</p>
+<p>    Unit definitions may be fundamental:
+<pre>
+      unit name = fundamental [prefixable];
+</pre>
+</p>
+<p>    or derived:
+<pre>
+      unit name = [factor] expr [prefixable];
+</pre>
+</p>
+<p>    where expr is a unit expression of previously defined units and factor 
+is a numeric factor.  If factor is missing,  one is assumed.  The 
+keyword <strong>prefixable</strong> allows any defined unit prefixes (see below)
+to be interpreted correctly.</p>
+<p>    JSim defines two units internally,  which are equivalent:
+<pre>
+      dimensionless
+      radian
+</pre>
+</p>
+<p>    Fundamental units form an orthogonal basis for the unit system.  
+  Typically this will include units of time, length,  mass, etc.  
+  All other units must be defined explicitly by the model writer.  
+  NSR distributes a standard units file (nsrunit.mod) that, when imported 
+  (see Import Statements), provides for most common needs.  </p>
+<p>    Derived units are defined in terms of previously defined units using
+  the MML unit expression syntax.  A unit expression may be of any of the
+  following forms:</p>
+
+<ul>
+<li>unit</li>
+<li>expr1*expr2</li>
+<li>expr1/expr2</li>
+<li>expr^number</li>
+<li>1/expr</li>
+
+</ul>
+<p>    where unit is a previously defined unit, and exprX are unit expressions.  
+  Standard algebraic order of operations apply. Parentheses may be used to
+  override order of operations, however (due to parsing difficulties)  a
+  unit expression may not begin with a parenthesis.</p>
+<p>    Unit prefixes may be defines as follows:
+<pre>
+      unit prefix name = number;
+</pre>
+</p>
+<p>    All defined unit prefixes (typically kilo, milli, micro, etc.) apply
+to all units defined with the <strong>prefixable</strong> keyword.</p>
+<h2>  <a name="templates">Template Definitions</a></h2>
+<p>    Template statements allow the creation of new component types,  beyond
+  the <a href="#precomp">four types</a> that are defined automatically.  There are currently
+  two supported template statements,  math templates and class templates.</p>
+<p>    Math templates allow the modeler to define reusable chunks of MML code:
+<pre>
+     math template name [ ( arguments ) ] { sub-statements }
+</pre>
+</p>
+<p>    Arguments to a math template represent variables that are shared between the 
+  component and its calling context.  See <a href="MML_Templates.html">Using Templates within MML</a>
+  for more information.</p>
+<p>    Class templates access component definitions in previously compiled Java 
+  class files:
+<pre>
+     class template name { class="classfile"; }
+</pre>
+</p>
+<p>    For example, the NSR-distributed BTex BCL defines all its components as 
+class templates.  See <a href="MML_BCL.html">Using BCL Components within MML</a> for more information.</p>
+<h2>  <a name="functions">Function and Procedure Definitions</a></h2>
+<p>    Functions and procedure (F&P) definitions allow MML models to access
+code written in procedural languages such as Java, Matlab, Fortran, etc.  
+Functions return a real data value when given some number of input
+arguments.  Procedures return no data value, but may have both input and
+output arguments.  Class F&P access pre-compiled java classes:
+<pre>
+     class real function name { class="classfile"; }
+
+     class procedure na/jsim/docs/MML_if_else.htmlme { class="classfile"; }
+</pre>
+</p>
+<p>    Native F&P definitions reference pre-compiled native code libraries:
+<pre>
+      real native function name ( arguments ) {
+        library="somelibrary";
+        name="functionname";
+      }
+
+      real native procedure name ( arguments ) {
+        library="somelibrary";
+        name="functionname";
+      }
+</pre>
+</p>
+<p>  Source F&P definitions incorporate source code that can be compiled 
+at model build or model run time::  <p>      real source-type function name ( arguments ) {
+        topcode={{ user-code }};
+        maincode={{ user-code }};
+        bottomcode={{ user-code }};
+      }</p>
+<p>      source-type procedure name ( arguments ) {
+        topcode={{ user-code }};
+        maincode={{ user-code }};
+        bottomcode={{ user-code }};
+      }</p>
+<p>    where source-type is a supported source type (currently "java" or
+"matlab"). Arguments to native and source F&P are placeholder names passed
+to the compiled code.  Scalar placeholders are simple names (following
+JSim naming conventions). Multi-dimensional placeholders are a series of
+simple names separated by at (@) symbols.  All arguments to functions are
+inputs, and are separated by commas.  Input arguments to procedures are
+listed first, separated by commas and followed by a semicolon.  Output
+arguments to procedures follow the the semicolon.  See <a href="MML_Func_Intro.html">Using Functions
+and Procedures in MML</a> for further information.</p>
+</p>
+<h2>  <a name="comp">Component declarations</a></h2>
+<p>    A component declaration may be one of in two forms:
+<pre>
+      [ access ] type name [ ( arguments ) ] [ unit ];
+
+      [ access ] type name [ ( arguments ) ] [ unit ] { sub-statements }
+</pre>
+</p>
+<p>    where</p>
+
+<ul>
+<li>"access" may be "public", "private" or "extern",  the default being 
+  public.  This clause determines the visibility of the component to
+  the model user.</li>
+<li>"type" is the component type.  The internally defined MML types are
+  "math", "real", "int" and "realDomain".  All but the first are
+  considered variable types.  Additional types may be create via the
+  top-level template definition statements.  Details for built-in component
+  declarations are provided within this document.  </li>
+<li>"name" the (case sensitive) component name.  It must be unique within
+  its parent component's context.        The name must begin with a letter and 
+  may contain any number of letters, numbers, underscores (_) or periods (.)
+  so long as it does not contain two consecutive underscores or periods.
+  Names must not start with the letter sequence "JS" in any capitalization
+  and must not be found within JSim's list of <a href="#reserved">reserved words</a> .</li>
+<li>"arguments" is a comma separated list of one or more components,
+  algebraic expressions or strings that help to define a component.  For
+  example, the arguments to a "real" component declaration are the relevant
+  realDomains over which it varies.</li>
+<li>"unit" is the physical unit associated with the component.  See the 
+  Unit Statements section for more information on units.</li>
+<li>"sub-statements" serve to qualify relationships within the component.
+  The sub-statements may be additional component declarations, equations,
+  combined declaration/equations, void function calls or access 
+  redefinition statements.  
+  Declared (child) sub-components may be accessed in the parent's context
+  via a dot-separated name (parent-name.child-name).</li>
+
+</ul>
+<h2>  <a name="compsub">Component sub-statements</a></h2>
+<p>    Component sub-statements are of the same form as top-level component
+  declarations described above.  This allows arbitrary nesting of
+  components.</p>
+<p>    Equations are exact numerical relationships between variables 
+  in one of the following forms:
+<pre>
+      expr2 = expr3;
+
+      when (expr1) expr2 = expr3;
+
+      when (expr1) {
+        expr2 = expr3;
+        expr4 = expr5;
+        ...
+      }      
+
+      event (expr1) stateVar = expr;
+
+      event (expr1) {
+        stateVar2 = expr2;
+        stateVar3 = expr3;
+        ...
+      }
+</pre>
+</p>
+<p>    where exprX are algebraic expression of variables, with expr1 being of
+the boolean type.  See <a href="#algebra">Algebraic Expression Syntax</a> for further
+information.</p>
+<p>    Combined declaration/equations are of the form:
+<pre>
+      [access] type name [(arguments)] = expr;
+</pre>
+</p>
+<p>    which is equivalent to the two statements:
+<pre>
+      [access] type name [(arguments)];
+      name = expr;
+</pre>
+</p>
+<p>    With unit conversion on,  name is given the same units as expr.</p>
+<p>    Relations describe inexact numerical relationships between variables
+  using the <, <=, >, >= and ~= relations in place of the equals sign.
+  This feature is not completely supported at this time.</p>
+<p>    Procedure calls are of the form:
+<pre>
+      proc1(arg1, arg2, ... , argN);
+</pre>
+</p>
+<p>    where proc1 has been previously defined using a top-level procedure
+definition statement and argX are function arguments.</p>
+<p>    Access redefinition statements redefine a previously defined
+  component's access.  This is most useful when a component predefines
+  sub-variables that may not be of the proper access (e.g. realDomain). The
+  syntax is:
+<pre>
+      [access] type name;
+</pre>
+</p>
+<h2>  <a name="precomp">Predefined Components</a></h2>
+<p>    The following components are internally defined within MML, and do 
+  not need to be defined by the modeler.</p>
+<h3>    Math Components</h3>
+<p>      The built-in "math" component serves mearly as a wrapper for a
+mathematical system.  It requires no arguments and accepts no unit clause.  
+To be useful, it is always declared with sub-statements.  No
+sub-components are automatically created.  Only real, int, realState,
+intState and realDomain sub-components are supported.</p>
+<h3>    Real and Integer Components</h3>
+<p>      The built-in real, realState, int and intState components represent
+dependant real and integer variables that may be scalars, or of one or
+more dimensions.  The arguments denote those dimensions, and must be
+realDomains.  If no arguments are specified, the variable is a scalar. The
+variables may be declared within any higher lever component, making them
+useful not only in MML models, but in many BCL models as well.  Units are
+supported, but not required for these components.  No sub-components are
+automatically declared.  MML is neutral on the precision for these
+variables.  The JSim compiler currently implements both reals and integers
+as 64-bit floating-point numbers.</p>
+<h3>    Choice Components</h3>
+<p>      The built-in choice component is a scalar integer variable whose
+value is associated with a set of String labels.  The arguments, which may
+be integers or Strings define the associations.  The number of labels 
+corresponds to the number of String arguments.  The values start at 1, and
+increment with each successive label.  The next label value may be reset 
+with a preceeding integer argument.  The labels only have force when the
+variable is an input.  If the variable is an output,  it is treated the 
+same as any other integer variable.  Characteristics not mentioned here 
+are inherited from integers (above).</p>
+<h3>    RealDomain Components</h3>
+<p>      The built-in realDomain component represents a one-dimensional 
+  independent variable,  as specified by a fixed,  evenly spaced grid.
+  No arguments are required.  Units are supported but not required.
+  Four sub-components are automatically declared:
+<pre>
+        real min;       // minimum value
+        real max;       // maximum value
+        real delta;     // grid spacing
+        int ct; // # of grid points (at least 2, min and max)
+</pre>
+</p>
+<h2>  <a name="algebra">Algebraic expression syntax</a></h2>
+<p>    Algebraic expressions in JSim may involve numeric constants with or 
+  without units,  variables,  standard binary operations,  built-in or model 
+  defined functions, or interpolated variable values. Expressions may be of the 
+  numeric or boolean type.  </p>
+<p>    Numberic constants may be expressed as positive or negative integers
+  (e.g. 0, 123, -123), decimals (e.g. 12.3, -0.123) or floating point
+  numbers using either e or E (e.g. 1e-12, -5.3E4).  Unary plus is not
+  allowed and numbers must have a digit to both the left and right of any
+  decimal point.</p>
+<p>    Constants with physical units are enclosed in parentheses:</p>
+<pre>
+      (number unitexpr)
+</pre>
+
+<p>    where unitexpr is a unit expression as described previously.</p>
+
+<p>Variables are normally listed in equations without their domains.  
+When a variable name in an expression is followed by a parenthesis, the 
+number of arguments within the parenthesis must match the variables' 
+dimension and the returned value is the interpolated value at the domain 
+values in the arguments. See <a 
+href="MML_Topics.html#query">Miscellaneous Short Topics in MML</a> for 
+more information.</p>
+
+<p>    Numeric Binary Operations:</p>
+
+<ul>
+<li>+         addition</li>
+<li>-         subtraction (also unary minus)</li>
+<li>*         multiplication</li>
+<li>/         division</li>
+<li>^         exponentiation (right-associative, e.g. a^b^c=a^(b^c))</li>
+<li>:         derivative or partial derivative (more on this later)</li>
+</ul>
+
+<p>    Built-in Numeric Constants/Functions:</p>
+
+<ul>
+<li>PI        3.14159...</li>
+<li>abs(x)    absolute value</li>
+<li>ceil(x)   round upward to next integer</li>
+<li>floor(x)  round downward to next integer</li>
+<li>round(x)  round to nearest integer</li>
+<li>rem(x,y)  remainder of x when divided by y</li>
+<li>sqrt(x)   square root</li>
+<li>ln(x)     natural log, 
+x must be dimensionless if unit correction is on</li>
+<li>log(x)    log base 10, 
+x must be dimensionless if unit correction is on</li>
+<li>exp(x)    inverse natural log (e^x), 
+x must be dimensionless if unit correction is on</li>
+
+<br/>
+
+<li>sin(x)    trigonometric sine (x in radians)</li>
+<li>cos(x)    trigonometric cosine (x in radians)</li>
+<li>tan(x)    trigonometric tangent (x in radians)</li>
+<li>asin(x)   trigonometric inverse sine, 
+x must be dimensionless if unit correction is on</li>
+<li>acos(x)   trigonometric inverse cosine, 
+x must be dimensionless if unit correction is on</li>
+<li>atan(x,y) trigonometric inverse tangent, where (x,y) 
+represent vector coordinates in the standard XY plane.  
+x/y must be dimensionless if unit correction is on</li>
+
+<br/>
+
+<li>sinh(x)   hyperbolic sine,  
+x must be dimensionless if unit correction is on</li>
+<li>cosh(x)   hyperbolic cosine,  
+x must be dimensionless if unit correction is on</li>
+<li>tanh(x)   hyperbolic tangent,  
+x must be dimensionless if unit correction is on</li>
+<li>asinh(x)  inverse hyperbolic sine,  
+x must be dimensionless if unit correction is on</li>
+<li>acosh(x)  inverse hyperbolic cosine (positive branch),  
+x must be dimensionless if unit correction is on</li>
+<li>atanh(x)  inverse hyperbolic tangent,  
+x must be dimensionless if unit correction is on</li>
+
+<br/>
+
+<li>besseli0(x) modified Bessel function of the 1st kind, order zero, x 
+must be dimensionless if unit correction is on</li>
+
+<li>besseli1(x) modified Bessel function of the 1st kind, order one, x 
+must be dimensionless if unit correction is on</li>
+
+<li>besselkn(n,x) modified Bessel function of the 2nd kind, integer 
+order round(n), negative x returns NaN, n and x must be dimensionless if 
+unit correction is on</li>
+
+<li>besseljn(n,x) Bessel function of the 1st kind, integer order 
+round(n), n and x must be dimensionless if unit 
+correction is on</li>
+
+<li>besselyn(n,x) Bessel function of the 2nd kind, integer order 
+round(n), negative x returns NaN, n and x must be dimensionless if unit 
+correction is on</li>
+
+<br/>
+
+<li>erf(x) error function, x must be dimensionless if unit correction is 
+on</li>
+
+<li>erfc(x) complementary error function, x must be dimensionless if 
+unit correction is on</li>
+
+<br/>
+
+<li> <a href="MML_Integrals.html#integrals">integral</a>(x@t) integral 
+of x over domain t </li>
+
+<li> <a href="MML_Integrals.html#integrals">integral</a>(t=a to b, x) 
+integral of x for values of domain t from a to b</li>
+
+<li> <a href="MML_Integrals.html#sums">sum</a>(x@t) sum of x for all 
+values of domain t </li>
+
+<li> <a href="MML_Integrals.html#sums">sum</a>(t=a to b, x) sum of x 
+for values of domain t from a to b</li>
+
+<br/>
+
+<li><a href="http://www.physiome.org/jsim/docs/MML_random.html">random()</a> pseudo-random number from a uniform distribution between 0 
+and 1 
+inclusive</li>
+<li><a href="http://www.physiome.org/jsim/docs/MML_random.html">randomg()</a> pseudo-random number from a Gaussian (normal) distribution 
+of mean 0 and standard deviation 1</li>
+
+</ul>
+
+<p>    Comparison Operators:</p>
+
+<ul>
+<li><     less than</li>
+<li><=    less than or equals</li>
+<li>=      equals</li>
+<li>>     greater than</li>
+<li>>=    greater than or equals</li>
+
+</ul>
+<p>    Boolean Operators:</p>
+
+<ul>
+<li>and     binary logical and</li>
+<li>or      binary logical or</li>
+<li>not     unary logical not</li>
+<li><a href="/jsim/docs/MML_if_else.html">if/else trinary logical if/else</a></li>
+
+</ul>
+<p>    Boolean Constants:</p>
+
+<ul>
+<li>true    boolean true</li>
+<li>false   boolean false  </li>
+
+</ul>
+<h2>  <a name="reserved">Reserved word list</a></h2>
+<p>    The following words have special meanings within MML
+and thus cannot be used as component, template, function
+or unit names:</p>
+
+<ul>
+<li>and</li>
+<li>assign</li>
+<li>class</li>
+<li>conversion</li>
+<li><a href="/jsim/docs/MML_if_else.html">else</a></li>
+<li>event</li>
+<li>extern</li>
+<li>false</li>
+<li>function</li>
+<li>fundamental</li>
+<li><a href="/jsim/docs/MML_if_else.html">if</a></li>
+<li>import</li>
+<li>integral</li>
+<li>JSim</li>
+<li>or</li>
+<li>override</li>
+<li>PI</li>
+<li>private</li>
+<li>procedure</li>
+<li>public</li>
+<li>solver</li>
+<li>source</li>
+<li>sum</li>
+<li>template</li>
+<li>to</li>
+<li>true</li>
+<li>unit</li>
+<li>when</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

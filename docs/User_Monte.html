@@ -1,0 +1,122 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Monte Carlo Analysis</h1>
+
+<h2>Preface</h2>
+
+<p>JSim Monte Carlo analysis provides a mechanism for analyzing parameter confidence
+limits through statistical analysis of multiple optimizations on noisy data sets.
+
+<p>Monte Carlo analysis is available in JSim releases 2.06 and above. This
+functionality is supported in applets and other remote server applications 
+in JSim releases 2.07 and above.</p>
+
+<p>Prerequisites:</p>
+
+<ul>
+<li><a href="User_Optim.html">Introduction to JSim Optimization</a> 
+(required)</li>
+<li><a href="User_MP.html">Using JSim Multiprocessing</a> 
+(recommended)</li>
+</ul>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#over">Overview</a></li>
+<li><a href="#graph">Graphs</a></li>
+<li><a href="#report">Reports</a></li>
+<li><a href="#other">Other Outputs</a></li>
+<li><a href="#mp">Using Multiprocessing to Improve Performance</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="over">Overview</a></h2>
+
+<p>JSim Monte Carlo analysis proceeds as follows.  First, 
+set up an parameter optimization as described <a
+href="User_Optim.html">here</a>.  Then, activate the "Config"
+subtab within the model's "Monte Carlo" tab.  The parameter 
+there control the generation of some number (50 by default) noisy data sets 
+based on the datasets to match in the optimization configuration.
+When the Monte Carlo "Run" button is pressed the noisy datasets
+are generated and JSim runs an optimization on each.  While the
+analysis proceeds and after it is finished,  results from the analysis
+can be viewed in the "Graph" and "Report" subtabs within the "Monte Carlo"
+tab.</p>
+
+<p>Parameters controlling the noisy dataset generation are as follows:</p>
+
+<ul>
+
+<li><strong># optimizations:</strong> The number of optimization to run.</li>
+
+<li><strong>random seed:</strong> A random seed of zero will generate a
+different noise profile each time Monte Carlo is run.  Any other seed will
+generate a noise profile that will be the same each time Monte Carlo is run.</li>
+
+<li><strong>distribution:</strong> Selects the noise distribution.  "uniform"
+selects a uniform distribution between -1 and 1.  "gaussian" selects a
+gaussian normal distribution with mean 0 and variance 1.</li>
+
+<li><strong>magnitude:</strong> Selects the magnitude multiplier for the
+generated noise.</li>
+
+<li><strong>add method:</strong> Select "proportional" to add the noise proportional to the
+magnitude of the sample.  Select "additive" to add the noise to the sample
+without scaling.  NOTE: In JSim 2.06 and below,  substitute "scaled" for "proportional"
+and "fixed" for "additive".</li>
+
+</ul>
+
+<h2><a name="graph">Graphs</a></h2>
+
+<p>The Monte Carlo "Graph" subtab provides two principal analysis graphs,  as
+selected via the "View" menu.  "Parameter Histograms" show the distribution of
+values of a single parameter as a histogram. "2-Parameter Scatter Plots" plots
+any two optimized parameters against each other, allowing the user to discern 
+covariance visually.</p>
+
+<p>For more detailed analysis of a single optimization,  the user may
+select to view any of the 7 optimization plots available.  These plots
+are identical to those available in the "Optimizer" tab.</p>
+
+<h2><a name="report">Reports</a></h2>
+
+<p>The Monte Carlo "Report" subtab provides two views, selected via the "View"
+menu.  The "Summary" report provides a Monte Carlo statistical analysis,
+including the optimized parameter means, standard deviations and 
+covariance matrix.  The "Detail" report provides optimization report from 
+a single optimization,  which is useful when a more detailed analysis
+is required.</p>
+
+<h2><a name="other">Other Outputs</a></h2>
+
+<p>Once a Monte Carlo run is completed,  you may store either the optimized
+parameter sets or the generated noisy data as project data sets using options
+in the "Config" subtab's "File" menu.</p>
+
+<h2><a name="mp">Using Multiprocessing to Improve Performance</a></h2>
+
+<p>Depending upon
+the model, optimization configuration and # of optimization,  a Monte Carlo
+analsis may require a large amount of processing time.  If your computer has
+multiple processors available,  this processing time can be significantly
+reduced.  See <a href="User_MP.html">Using JSim Multiprocessing</a> for
+details.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

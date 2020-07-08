@@ -1,0 +1,76 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>The JSim Fortran Package</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p>  This document gives overall information about the JSim Fortran package
+(fpack), a set of classic XSim Fortran models ported to run under JSim.  
+Contents:</p>
+
+<ul>
+<li><a href="#avail">Available models</a></li>
+<li><a href="#use">Using the fpack models</a></li>
+<li><a href="#caveat">Some caveats</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="avail">Available models</a></h2>
+<p>    The following models are currently available:</p>
+
+<ul>
+<li>body: a whole-body recirculation model with multiple organs;</li>
+<li>btex20: a two-region, distributed blood-tissue exchange model;</li>
+<li>btex40: a four-region, distributed blood-tissue exchange model;</li>
+<li>demo: a demonstration model showing decaying sine, cosine, and
+tangent functions;</li>
+<li>gentex: a multi-path, multi-species, five region organ model with
+nonlinear transmembrane transport, nonlinear reactions and time-varying
+blood flow and volume;</li>
+<li>gentex2: a version of the gentex model with restricted capability
+for users who do not require the full capability of gentex.</li>
+<li>mhed: a carbon11--meta-hydroxyephedrine transport model (based on
+gentex);</li>
+<li>mmid4: a multi-path, multi-indicator, four-region organ model;</li>
+<li>msid4:  a multi-path, multi-indicator, multi-species, four-region
+organ model.</li>
+
+</ul>
+<h2>  <a name="use">Using the fpack models</a></h2>
+<p>    Example project files for the fpack models may be found in the
+doc/examples/fpack directory of your JSim distribution.  The models are
+stored in project files (rather than simple .mod files) because they
+contain run-time layout customizations (RTML) as well as MML model code.  
+Copy an example project file to your working directory and work there.  
+Alternatively, you may incorporate an example model into an existing
+project by opening it in a separate project window and using the "Project"
+tab copy/paste mechanisms. Do not do your work inside the distributed
+example files or your work will be lost next time you upgrade JSim.</p>
+<p>    <strong>Important: be sure to read the caveats below before trying them
+out</strong>.</p>
+<h2>  <a name="caveat">Some caveats</a></h2>
+<p>    Fpack is currently available only under Linux and MacOS.  Fpack
+for Windows is still in development.  All of
+the models except btex20, btex40 and demo currently require GLIBC_2.3.  
+</p>
+
+<p> Customized graphic front-ends for the fpack models are are still a 
+bit rough. They were created via an automated conversion program from 
+the original XSim .cf files, and will require some hand-tuning to look 
+just right.  This hand-tuning will be done as time allows.  </p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,215 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Templates in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> This document discusses the current state of templates in MML.  MML
+templates allow an MML author to create reusable modules which become
+valuable in large-scale modeling.  JSim template implementation is still
+in an experimental stage, and the information provided here may well
+change for future releases of JSim.</p>
+
+<p> Prerequisites: </p>
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>  Contents:</p>
+
+<ul>
+<li><a href="#flat">Understanding components and flattening</a></li>
+<li><a href="#mfax">Understanding the MFAX and XSIM template packages</a></li>
+<li><a href="#templ">Template Declarations</a></li>
+<li><a href="#class">Class Templates</a></li>
+<li><a href="#mml">MML Templates</a></li>
+<li><a href="#limits">Limitations on MML Templates</a></li>
+<?php jscoqli() ?>
+</ul> 
+
+<h2> <a name="flat">Understanding components and
+flattening</a></h2> 
+
+<p> MML models are constructed via nested components.  Each component
+may contains one or more sub-components and/or constraints. The most
+common form for constraints are equations, but constraints also
+include <a href="MML_Events.html">events</a> and <a
+href="MML_Func_Intro.html">procedures</a> .  Consider the following
+model:</p>
+
+<?php jsTextDownApp("examples/MML_Templates/expdecay.mod"); ?>
+
+<p>    The top level component (of type math) is called main.  main contains
+2 sub-components:  t (of type realDomain), and u (of type real) and 5
+equation constraints. The t component contains 4 sub-components: min,
+max and delta (of type real) and ct (of type int).</p>
+<p>    Most JSim modelers use only the predefined JSim types (math, real,
+realDomain, realState, int, intState, choice).  However, JSim allows users
+to define their own types via the "template" declaration.  When the JSim
+compiler encounters a component declaration for a user-defined template,
+the component goes through a "flattening" process wherein the component is
+reduced to predefined JSim types.  Once the entire model is "flat", the
+compiler proceeds to generate run-time code, dealing only within
+pre-defined types.  This approach spares the component writer the arduous
+task of understanding the internals of the JSim compiler,  thus making
+template writing a fairly straight-forward process.</p>
+<h2>  <a name="mfax">Understanding the MFAX and XSIM template packages</a></h2>
+<p>    NSR currently distributes two optional template packages with JSim:</p>
+
+<ul>
+<li><a href="MML_MFAX_Intro.html">MFAX</a> : a set of templates appropriate for 
+chemical network models in multiple compartments with convective flow and 
+membrane transport between those compartments.  MFAX is an example
+of a "Biological Component Library" (BCL) because each template is 
+intended to represent an abstract biochemical entity (e.g. compartment, 
+chemical species, chemical reaction, ...).</li>
+<li><a href="MML_XSim_Intro.html">XSIM</a> : a set of templates appopriate for
+running XSIM-style models under JSim.  These templates do not constitute
+a BCL is the classic sense,  since none of them represent biological 
+components,  but the underlying implementation methodology is identical
+to that of the MFAX BCL.</li>
+
+</ul>
+<p>    In each case, the model writer imports the set of template definitions
+via the MML "import" directive, and creates of model by declaring
+components using some combination of the these templates and JSim's
+default templates.  Consider the following MFAX model, which describes a
+the dimerization of a chemical species A in a single compartment:</p>
+
+<?php jsTextDownApp("examples/MML_Templates/mfax01.mod"); ?>
+
+<p> The top level component here is named "main", and is of type MFAX.
+example1 has 5 sub-components: t (of type Time); A and B (of type
+Chem); C (of type Compartment); and R (of type MassBalReaction).  
+example1 also contains 6 equation constraints (e.g. "R.kb = 0.5"). The
+new types were defined via template commands in the imported MFAX.mod
+file, a portion of which is show below: </p>
+
+<pre>
+class template MFAX { class="JSim.bcl.mfax.MFSys"; }
+class template Time { class="JSim.bcl.mfax.Time"; }
+class template Chem { class="JSim.bcl.mfax.Chem"; }
+class template Membrane { class="JSim.bcl.mfax.Membrane"; }
+</pre>
+
+<p>    The details of these template declarations is explored in the
+following sections.</p>
+
+<h2>  <a name="templ">Template Declarations</a></h2>
+<p>    There are currently two types of template declarations supported by
+MML - class templates and MML templates.  Class templates are described by
+pre-compiled java classes that are loaded as needed.  MML templates are
+templates described in MML.  Each has its own strengths and weaknesses, as
+described in the following sections.  Overall, class templates are more
+general and powerful while MML templates are more transparent and easier
+to create and maintain.  Both the MFAX and XSIM template packages are
+implemented using class templates.  It is expected that MML templates will
+eventually play an important role in creating large modular physiological
+models.</p>
+<p>    A template declaration doesn't "do anything" by itself, that only
+happens when one or more components are declared using the template.  
+Each component inherits properties of its template and the model writer
+may extend them in various template-specific ways.  The component
+declaration syntax is independent of the template declaration methodology,
+facilitating easy reuse and/or substitution of templates.</p>
+<h2>  <a name="class">Class Templates</a></h2>
+<p>    Class templates have form:</p>
+<pre>
+class template NAME { class="CLASSNAME"; }
+</pre>
+
+<p>    where words in lower case are reserved by MML, and capitals are
+defined by the model writer. See the <a href="#mfax">MFAX/XSIM section</a> above for a
+specific example.  CLASSNAME refers to a Java class accessible to JSim via
+<a href="User_Ref.html#env">JSIMPATH</a> that follows appropriate conventions for
+interacting with the planner.  Unfortunately, those conventions are not
+yet finalized and documented, which means that, at present, class
+templates are only an option for model writers to get the 
+<a href="../download/source.html">JSim
+source code</a> .</p>
+<h2>  <a name="mml">MML Templates</a></h2>
+<p>    MML templates allow you to extend existing templates via MML.  The
+simplest usage would be to extend the built-in math template, which
+represents a collection of variables and/or constraints.  For 
+example:</p>
+
+<?php jsTextDownApp("examples/MML_Templates/template2.mod"); ?>
+
+<p>    Here the template ABC defines 3 real variables (a, b and c) and one
+constraint (a+b=c).  The top-level model component "main" defines two
+sub-components X and Y, each of type ABC, meaning that each contains the
+sub-variables a, b, and c and the a+b=c constraint on those variables.
+Since the internal ABC constraints leave 2 of it's 3 variables
+unconstrained, additional constraints must be placed in the top-level
+component for the model to compile sucessfully.  In this case, by
+constraining X.a and X.b, X.c can be calculated.  Y.b is set to 5, and
+"Y.c=X.c" ends up calculating Y.c, since X.c had already been constrained.  
+The Y version of the a+b=c constraint end up calculating Y.a, since Y.b
+and Y.c have already been constrained. Note that template constraints do
+not necessarily determine order of calculation within the component, but
+that the order may be determined by contextual usage.  This is an
+important feature for writing widely reusable components.</p>
+<p>    An existing template can be extended following this example, in which
+the ABC template is extended to include another variable and another 
+constraint:</p>
+
+<?php jsTextDownApp("examples/MML_Templates/template3.mod"); ?>
+
+<p>    Note that substitution of the ABCD template for ABC in the main 
+component resulted in only minor changes within main itself.  In this
+way,  it is hoped templates can introduce a degree of modular construction
+necessary for large-scale modeling.  </p>
+<h2>  <a name="limits">Limitations of MML Templates</a></h2>
+<p>    While MML templates do have some existing functionality within JSim,
+they are not yet fully supported and/or documented because the following
+unresolved problem which are judged to be serious enough to hamper
+real-world professional usage.  It is quite possible that resolution of
+these problems will require changes to template syntax, which would be
+problematic for on-going support if this feature was prematurely released:</p>
+
+<ul>
+<li>Mechanisms for sharing common variables between components are not
+yet well defined, yet they are critical to real-world usage.  In
+particular, template-defined variables must be aware of realDomains (e.g.
+time) which, to be meaningful, must be shared.  The preliminary sharing
+mechanisms currently in place are currently judged to be insufficient for
+real-world usage and so are not documented here, lest we become too
+attached to them.</li>
+<li>Effective large-scale use of MML templates requires importing
+declarations from multiple source files.  The JSim GUI does not yet
+support editing or project-based control of multiple sources for a single
+model.  Thus, imported files must be stored separately either a user's
+directory or the JSim installation, which is currently awkward, especially
+for new users.  Better mechanisms for sharing importable templates
+(perhaps network based) must be developed.</li>
+<li>MML extension of variable templates (e.g. real, realDomain, ...)
+is sub-optimal because there is no syntax supporting constaint of
+its own value (i.e. "this").</li>
+<li>MML extension of class templates is not yet supported, and 
+vice-versa.</li>
+<li>Template declaration syntax currently implies single-inheritance,
+which may or may not be a critical problem.  There is yet no general 
+consensus as to whether multiple-inheritance is an essential feature
+for object-oriented programming (C++ has it,  Java does not).</li>
+
+</ul>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

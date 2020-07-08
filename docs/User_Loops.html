@@ -1,0 +1,190 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Loops in JSim</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> The JSim "Loops" feature allows users to observe the effects of
+changing model parameter values.</p>
+
+<p> Prerequisites:</p>
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim GUI</a></li>
+</ul>
+
+<p> Contents:</p>
+<ul>
+<li><a href="#basic">Basic Loops</a></li>
+<li><a href="#fgen">Looping on Function Generator Parameters</a></li>
+<li><a href="#solver">Looping on Solver Control Parameters</a></li>
+<li><a href="#next">The Next Loop Function</a></li>
+<li><a href="#bugs">Bugs and Limitations</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<p>    <img src="../pics/movie.gif">A video designed to accompany this 
+document may be found <a href="../movies/index.html#User_Loops">here</a> 
+.</p>
+
+<h2><a name="basic">Basic Loops</a></h2>
+
+<p>    JSim Loops are configured within a model's "Loops" sub-tab.  An inner
+loop and an outer loop are provided, allowing 2 levels of nesting.  
+Within either loop, any number of model parameters (model input variables,
+function generator parameters or solver settings) may be varied.  The
+upper third of the Loops sub-tab configures the inner loop, the middle
+third configures the outer loop, and the lower third gives status
+information.  A model must be compiled before loops can be configured.  
+Once the loops are configured, the menubar "Run" button runs the model
+once for each iteration.  Once run, each model variable or expression
+selected within a plot page will generate multiple data sets, one for each
+iteration.</p>
+
+<p> Inner and outer loops are configured by entering the parameter name to
+vary in the "Parameter" column, either by typing the name, or selecting
+from the pull-down list.  When a valid parameter name is entered the box
+blackens and the "Start" column shows the current value for that variable,
+which may be adjusted if required. In the first iteration, the parameter
+takes the value in the "Start" column.  In subsequent iteration values are
+specified in the "Other Values" column.  The simplest form for "Other
+Values" is a comma-separated list of values to be assumed by the
+parameter, for example "10,20,30" (do not type the quote marks).  
+Alternatively, the "@" syntax, described below, may be used.</p> <p> The
+Loops "@" syntax allows the user to enter one of the following special
+values in the "Other Values" column:</p>
+
+<ul>
+<li>@+number  (linear increase)</li>
+<li>@-number  (linear decrease)</li>
+<li>@*number  (geometric increase)</li>
+<li>@/number  (geometric decrease)</li>
+</ul>
+
+<p>    When the "@" syntax is used, the first character must be the @ sign,
+the second character must an arithmetical operator, and what follows must
+be a real number (e.g. 10, 1.53e8, .0123).  Arbitrary algebraic
+expressions using @ are not supported. The "Start" column for this
+parameter must contain a real number (i.e. arbitrary algebraic expressions
+are not allowed).  For example, if a parameter has "100" in the start
+column, and "@+10" in the "Other Values" column, the values assumed would
+be 100, 110, 120, 130, etc.  With "@/2" in the "Other Values" column, the
+values assumed would be 100, 50, 25, 12.5, etc.</p>
+
+<p>    When a proper entry is made in the "Other Values" column, the box blackens.  
+Both the "Parameter" and "Other Values" boxes are blackened for a loop parameter
+to be properly configured.  When this happens a checkbox will appear in the OK
+column.  Unchecking this box will temporarily suppress this parameter line
+during a loops run.  If the parameter line is incompletely configured, a
+question mark button will appear in the OK column.  Clicking this button will
+show a message stating what is incomplete about the line's configuration.  Any
+number of parameters may be varied in each loop.  The number of parameters
+corresponds to the number of check marks in the OK column.</p>
+
+<p>    The number of loop iterations is determined in different ways,
+depending upon the mode (auto or manual).  In manual mode, the number of
+iterations is set explicitly by the user via the "# times" control.  In
+auto mode, mode number of iterations is determines from the longes value
+in the "Other Values" column. If no lists are specified (i.e. only the "@"
+syntax is used) the number of values must be specified by the user in the
+"# times" field that will appear under such circumstances.</p>
+
+<p>    The total number of loop iterations will be the product of the number
+in the inner and outer loops.  </p>
+
+<h2><a name="fgen">Looping on Function Generator Parameters</a></h2>
+
+<p> Looping over function generator parameters allow users to compare
+model behaviour over a range of input waveforms (e.g. varying sine wave
+periods).  These parameters are not currently shown in the loops control
+"Parameter" column pull-down menu, and so must be entered via the
+keyboard.  Function generator parameter names are of the form:</p>
+
+<pre>
+FGNAME.FUNC.PARM
+</pre>
+
+<p>where</p>
+
+<ul>
+<li>FGNAME is the name of the function generator assigned by the user 
+(e.g. 
+fgen_1)</li>
+<li>FUNC is the waveform selected via the "Function" menu (e.g. 
+SineTrain) </li>
+<li>PARM is the name of the parameter within the specified function (e.g.
+period).
+</ul>
+
+<p>Combining the above rules,  the name for the SineTrain period parameter
+for a function generator name "fgen_1" would be 
+"fgen_1.SineTrain.period". As with all JSim parameters, function generator
+parameter names are case sensitive.</p>
+
+<p>For complete details on function generator parameters, see
+<a href="User_Fgen.html">Using Function Generators in JSim</a>.</p>
+
+
+<h2><a name="solver">Looping on Solver Control Parameters</a></h2>
+
+<p> Solver control parameters control the behaviour of JSim's numeric
+solvers.  Looping of such parameters can allow users to optimize numeric
+methods for their model.  As with function generator parameters, solver
+control parameters are not yet available in the loops control pulldown
+menus, and so must be typed in by hand.</p>
+
+<p> Solver control parameters names are of the form</p>
+
+<pre>
+solver.CLASS_SOLVERNAME_PARMNAME
+</pre
+
+<p> where:</p>
+
+<ul>
+<li>CLASS is "ode" (ordinary differential equation solver), "pde" 
+(partial differential equation solver) or 
+"fzero" (implicit equation solver, or zero finder);</li>
+<li>SOLVERNAME is the name of the solver used, e.g. Dopri5;</li>
+<li>PARMNAME is the name of the parameter within SOLVERNAME, e.g.
+reltol.</li>
+</ul>
+
+<p>Combining the above examples, the full name for the Dopri5 relative 
+tolerance parameter is "solver.Dopri5.reltol".  As with all JSim 
+parmaeters, solver control parameter names are case sensitive.</p>
+
+<p>Names for solver control parameters are not yet completely documented.  
+A document is currently in preparation stages.</p>
+
+<h2><a name="next">The Next Loop Function</a></h2>
+
+<p>When running loops in the JSim GUI, the run status popup (which includes
+a  progress meter) allows the user the "Next Loop" option.  Pressing this
+button will terminate the current model calculation loop and move on the the
+next. If <a href="User_MP.html">multiprocessing</a> is enabled,  several
+loops may be calculated simultaneously. In this case, the next loop function
+skips the loop that has been running the  longest.</p>
+
+<p>The Next Loop function is available in JSim releases 2.13 and above.</p>
+
+<h2><a name="bugs">Bugs and Limitations</a></h2>
+
+<p>    There is no "Next Loop" button,  skipping ahead before the current
+loop is completed.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

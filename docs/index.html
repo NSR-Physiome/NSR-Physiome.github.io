@@ -1,0 +1,31 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>The JSim Documentation Set</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>This page is now obsolete.  See one of the following:<p> 
+
+<ul> 
+<li><a href="../index.html">JSim Home Page</a></li> 
+<li><a href="overview.html">JSim Overview</a></li> 
+<li><a href="User.html">Running JSim</a></li> 
+<li><a href="MML.html">Writing JSim Models</a></li> 
+</ul>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

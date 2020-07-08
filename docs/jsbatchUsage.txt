@@ -1,0 +1,73 @@
+Usage: jsbatch [ switches ]
+
+Switches:
+  <a href="#f">-f</a> file ...             load project, model & other files
+  <a href="#v">-v</a>                      verbose mode
+  <a href="#userurl">-userurl</a> url            load -f files relative to URL
+  <a href="#userdir">-userdir</a> dir            set user directory
+  <a href="#path">-path</a> path              set search path
+  <a href="#server">-server</a> name            connect to remote server
+  <a href="#plugin">-plugin</a> file ...        load optional plugin
+  <a href="#usage">-usage</a>                  print usage message and exit
+  <a href="#stack">-stack</a>                  print stack dump on error
+  <a href="#noscrub">-noscrub</a>                don't scrub build directory at exit
+  <a href="#builddirsfx">-builddirsfx</a> suffix     force build directory suffix (experts only!)
+  <a href="#sandbox">-sandbox</a> [path [path]]  run application is safe sandbox
+  <a href="#nosandbox">-nosandbox</a>              don't use sandbox (default)
+  <a href="#securityMgr">-securityMgr</a> class-name install security manager
+  <a href="#mp">-mp</a> N                   enable up to N processor multiprocessing        
+  <a href="#i">-i</a> var=expr ...         assign 1 or more model inputs or controls
+  <a href="#func">-func</a> name ...          create 1 or more function generator
+  <a href="#plot">-plot</a> name ...          create 1 or more plot pages
+  <a href="#rtml">-rtml</a> file ...          load model RTML from file
+  <a href="#img">-img</a> file ...           load 1 or more model image files
+  <a href="#lmod">-lmod</a> name              load source code into model
+  <a href="#lpar">-lpar</a> name              load project par set into model
+  <a href="#lxpar">-lxpar</a> file             load XSim .par file into model
+  <a href="#spar">-spar</a> name              store model par set in project
+  <a href="#filter">-filter</a> dataset ...     filter 1 or more project datasets
+  <a href="#iproj">-iproj</a> proj:name ...    import content from other projects
+  <a href="#c">-c</a> name=value ...       set model compiler options
+
+  <a href="#model">-model</a> name        specify which model (if multiple)
+  <a href="#q">-q</a> [var ...]       query variable constraints
+  <a href="#loops">-loops</a>             loops run instead of normal run
+  <a href="#sens">-sens</a>              sensitivity analysis instead of normal run
+  <a href="#optim">-optim</a>             run optimizer instead of normal run
+  <a href="#monte">-monte</a>             run Monte-Carlo analysis instead of normal run
+  <a href="#nruns">-nruns</a> #           # runs for each model
+  <a href="#fwdIC">-fwdIC</a>             forward ICs after (each) run
+
+  <a href="#o">-o</a> expr ...        output selected model expressions
+  <a href="#oplot">-oplot</a>             output data from plots
+  <a href="#ofgenprev">-ofgenprev</a>         output data from function generator preview
+  <a href="#odataset">-odataset</a> name     output data from specified dataset
+  <a href="#ortml">-ortml</a> name        output selected model's RTML
+  <a href="#out">-out</a> file          write output to file instead of stdout
+  <a href="#odim">-odim</a> #            select data of specified dimension
+  <a href="#ofmt">-ofmt</a> name         write output in named format
+  <a href="#oblocked">-oblocked</a> mn mx    write blocked output (if ofmt supported)
+  <a href="#osingle">-osingle</a>           write single-precision output (default)
+  <a href="#odouble">-odouble</a>           write double-precision output
+  <a href="#oprec">-oprec</a> #           write custom precision output
+  <a href="#ozero">-ozero</a> #           write small output data as 0
+  <a href="#oencoding">-oencoding</a> code    write format-specific output encoding
+  <a href="#ocrash">-ocrash</a>            write output even if run crashes
+  <a href="#oreport">-oreport</a>           write optimization or Monte-Carlo report
+  <a href="#oreports">-oreports</a>          write all optimization reports from Monte-Carlo run
+
+  <a href="#oplan">-oplan</a> [variant]   write model plan to output (if available)
+  <a href="#omathml">-omathml</a>           write model MathML to output
+  <a href="#omml">-omml</a>              write MML model to output (if available)
+  <a href="#oxmml">-oxmml</a> [variant]   write XMML informatics file to output
+  <a href="#osbml">-osbml</a> [variant]   write SBML file to output
+  <a href="#ocellml">-ocellml</a>           write CellML file to output
+  <a href="#oantimony">-oantimony</a>         write Antimony model to output
+  <a href="#omatlab">-omatlab</a>           write Matlab .m model to output
+  <a href="#oflat">-oflat</a>             write flat model to output (if available)
+  <a href="#ojava">-ojava</a>             write java model to output (if available)
+  <a href="#oproj">-oproj</a> [name ...]  write project content to output
+  <a href="#oprofile">-oprofile</a>          write run-time profile to output
+  <a href="#opar">-opar</a> name         write .par file to output
+  <a href="#sdata">-sdata</a> name        store output in project dataset
+

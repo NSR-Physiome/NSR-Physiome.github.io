@@ -1,0 +1,97 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>Writing XSim-style models for JSim in Fortran</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+<p>    This document describes how to create the free-standing computational
+model code for an XSim-style model under JSim.  It assumes you understand
+the <a href="MML_XSim_Intro.html">Introduction to XSim-style models under JSim</a> and
+are familiar with building Fortran programs on your system.</p>
+<h2>  Contents</h2>
+<p>    <a href="#code">Writing & compiling Fortran model code</a> </p>
+<p>    <a href="#wrap">Wrapping your model code with jsxwrap</a> </p>
+<p>    <a href="#example">A simple example</a></p>
+<p>    <a href="#caveats">Some caveats</a></p>
+<h2>  <a name="code">Writing appropriate Fortran code</a></h2>
+<p>    Fortran model code, conforming the XSIM API for Fortran must be created.  
+This main source file will have extension .f or .F.  The compiled version
+will have extension .o. It is assumed you have installed a Fortran compiler
+on your system and know how to operate it. The API is given below:</p>
+
+<ul>
+<li>The file "scparf.h" in directory $JSIMHOME/$OS/include must be copied
+or included in your Fortran. This code defines the REAL P array as a common
+block.</li>
+<li>The code must have SUBROUTINE ENTRY points for simini, simlop and
+simend (these are not optional, as in XSim).  simini is called once at the
+beginning of the program.  simlop is called once for each independent
+variable (usually time) step.  simend is called once at the end of the
+run.</li>
+<li>A block of 4 P array locations are reserved for the independent 
+variable.  Sequentially,  these values represent the minimum, maximum,
+current and step increment.  Traditionally,  the current value is at 
+location 130,  however it may be anywhere so long as the "ivar" 
+of the associated MML wrapper has the appropriate location.</li>
+<li>Warning messages from the model should call scwmsg(S), where S is a
+CHARACTER* variable containing the warning message.  These messages will
+be displayed in the JSim GUI, but will not affect the run.  Similarly,
+fatal errors should call scfmsg(S),  which will cause JSim to terminate
+the model run.</li>
+
+</ul>
+<h2>  <a name="wrap">Wrapping your model code with jsxwrap</a></h2>
+<p>    The program jsxwrap wraps a Fortran object and associated libraries 
+in a native library that can be utilized by JSim.  The usage is:
+<pre>
+      jsxwrap -f modelName objects libraries
+</pre>
+</p>
+<p>    The "-f" switch indicates the objects implement the XSim Fortran API
+for JSim.  </p>
+<p>    jsxwrap required you have installed a version of gcc compatible with the
+JSim distribution.  gcc must be installed for jsxwrap to run, and the objects
+and libraries specified must be compatible with the JSim distribution (see
+caveats below).  Upon successful completion, jsxwrap will print a message 
+giving the name of the native library generated.</p>
+<h2>  <a name="example">A simple example</a></h2>
+<p>    Here is an example of a single source Fortran model (demo.F) that 
+requires the C math library.  The example assumes you're on Linux:
+<pre>
+      g77 -I $JSIMHOME/linux/include -c demo.o demo.F
+      jsxwrap -f demo demo.o -lm
+</pre>
+</p>
+<p>    The generated file will be libjsxdemo.so.</p>
+<h2>  <a name="caveats">Some caveats</a></h2>
+<p>    Here are some current problems we intent to fix shortly:</p>
+
+<ul>
+<li>jsxwrap is currently available only for Linux and MacIntosh
+distributions.  A Windows version is under development.  Users of the JSim
+source distribution may use jsxwrap.db.</li>
+<li>Warning and fatal messages are written to the 
+console rather that into the JSim project window, and fatal messages 
+are not fatal.  </li>
+<li>Must get users more information on gcc compatibility.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,325 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim and SBML</h1>
+
+<p><em>This document applies to JSim version 2.07 and above.  For
+earlier version of this document, see <a
+href="MML_SBML_06.html">here</a></em>.</p>
+
+
+<h2>Introduction</h2>
+
+<p> SBML is an XML based open standard for exchange of computer based 
+mathematical models.  JSim imports SBML models by translating them to 
+MML.  JSim can also export many MML models to SBML, although this 
+functionality is somewhat limited because MML contains many mathematical 
+constructs that have no corresponding construct in SBML.</p>
+<p>JSim currently uses SBML library (libsbml) version: 5.13.0</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+<li>Familiarity with <a href="http://www.sbml.org/">SBML</a>
+(recommended)</li>
+</ul>
+
+<h2>  Contents:</h2>
+
+<ul>
+<li><a href="#import">Importing SBML Files into JSim</a></li>
+<li><a href="#export">Exporting SBML Files from JSim</a></li>
+<li><a href="#stat">Project Status</a></li>
+<li><a href="#import_tech">SBML Import Technical Details</a></li>
+<ul>
+<li><a href="#import_bugs">SBML Import Bugs and Limitations</a></li>
+</ul>
+<li><a href="#export_tech">SBML Export Technical Details</a></li>
+<ul>
+<li><a href="#export_bugs">SBML Export Bugs and Limitations</a></li>
+</ul>
+<li><a href="../models">The JSim Models page (includes SBML 
+models)</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="import">Importing SBML Files into JSim</a></h2>
+
+<p>To import an SBML model into JSim, select "Import model file" from 
+the "Add" menu under the JSim GUI's "Project" tab.  SBML files have 
+extension .xml or .sbml.  (Note that .xml is used by many XML-based 
+files besides SBML, so be sure to pick a real SBML file.)  
+Alternatively, you can load a SBML file via the -f switch on the command 
+line of either jsim or jsbatch.</p>
+
+<p>Note that some SBML features do not yet translate to MML.  In
+this case,  warning comments will appear at the beginning of the 
+generated MML.</p> 
+
+<p>Push the "Compile" button to compile the model.  There is no 
+guarantee that the code will compile successfully since SBML models are 
+subject to the same sorts of formulation errors MML models are.  
+Problems may also occur because JSim's SBML translator is not yet 
+complete. See <a href="#import_bugs">SBML Import Bugs and Limitations</a> for
+details.</p>
+
+<p>Batch translation of SBML files to MML may be accomplished as 
+follows:</p>
+ 
+<pre>
+jsbatch -f somemodel.xml -omml &gt; somemodel.mod
+</pre>
+
+<p>Windows users: If you are receiving errors from JSim concerning libSBML please see <a href="../download/win32.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
+</p>
+
+<h2><a name="export">Exporting SBML Files from JSim</a></h2>
+
+<p>To export SBML from the JSim GUI, compile it, click on the model 
+"Debug" tab and select "View SBML" from the "View" menu.  Translated 
+SBML will appear in the text area.  If any warnings are generated in 
+the translation, a button "Show N translator warnings" will appear. 
+Clicking this button will display the warnings in the JSim message
+area (right half of GUI).</p>
+
+<p>To export SBML from the command line,  use the "-osbml" switch
+in <a href="Devel_Batch.html">jsbatch</a>:</p>
+
+<pre>
+jsbatch -f somemodel.mod -osbml &gt; somemodel.xml
+   or
+jsbatch -f somemodel.proj -osbml &gt; somemodel.xml
+</pre>
+
+<p>Windows users: If you are receiving errors from JSim concerning libSBML please see <a href="../download/win32.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
+</p>
+
+<h2>  <a name="stat">Project Status</a></h2>
+
+<p>The SBML translator is now quite robust, correctly translating and
+simulating the 812 models in the <A
+HREF="http://sbml.org/Facilities/Online_SBML_Test_Suite">SBML test suite</a> 
+with the 'component' tags:</p>
+<ul>
+  <li>Algebraic rules</LI>
+  <li>Assignment rules </li>
+  <li>Compartments</li>
+  <li>CSymbolAvogadro</li>
+  <li>CSymbolDelay</li>
+  <li>CSymbolTime</li>
+  <li>FunctionDefinition</li>
+  <li>InitialAssignment</li>
+  <li>Parameter</li>
+  <li>RateRule</li>
+  <li>Reaction</li>
+  <li>Species</li>
+  <li>StoichiometryMath</li>
+</ul>
+<p>and/or the 'test tags':</p>
+<ul>
+  <li>0D-Compartment</li>
+  <li>Amount</li>
+  <li>AssignedConstantStoichiometry</li>
+  <li>AssignedVariableStoichiometry</li>
+  <li>BoundaryCondition </li>
+  <li>Concentration </li>
+  <li>ConstantSpecies</li>
+  <li>ConversionFactors </li>
+  <li>HasOnlySubstanceUnits </li>
+  <li>InitialValueReassigned </li>
+  <li>LocalParameters </li>
+  <li>MultiCompartment </li>
+  <li>NonConstantCompartment </li>
+  <li>NonConstantParameter </li>
+  <li>NonUnityCompartment </li>
+  <li>NonUnityStoichiometry </li>
+</ul>
+
+<p>But excluding the following tags and concepts:</p>
+<ul>
+    <li>Events (all tags with 'Event' in them)</li>
+    <li>FastReaction</li>
+    <li>The MathML constructs &lt;factorial&gt;, &lt;xor&gt;, &lt;infinity&gt;,
+&lt;notanumber&gt;, &lt;true&gt;, and &lt;false&gt;</li>
+    <li>Delay equations that rely on variables changing before the simulation begins.</li>
+</ul>
+
+<p>Overall, JSim correctly translates and simulates 812 cases from the test
+suite (in all SBML levels and versions), and does not fully simulate or
+translate the 299 cases with the above elements (mostly events).</P>
+
+<h2><a name="import_tech">SBML Import Technical Details</a></h2>
+
+<p>SBML models are converted to MML with unit conversion off.  Any
+required unit conversion factors must be part the original SBML 
+equations.</p>
+
+<p>The MML variable "time" is used to represent modeling time, regardless of
+what name or names it may be known as in the original SBML.</p>
+
+<p>The translator creates one variable per species, reaction, parameter,
+compartment, and named species reference (stoichiometry).  If the units of
+those variables are set (whether explicitly or by default) those units will be
+translated to their most compact form using nsrunit.  If the variable is
+found to change, it will be defined to vary in the 'time' domain in JSim.
+Initial values or formulas for these variables are set using the 'when
+(time=time.min)' construct. </p>
+
+<p>Any Reaction in SBML becomes a variable in JSim that varies over the 'time'
+domain. Its value is set to equal the 'kinetic law' of the reaction. These
+reaction variables are then used to construct the ODEs for the species they
+contain. The rate of change for each species over time (species:time) is set
+to the sum of the reactions in which it is produced, less the sum of the
+reactions in which it is consumed, each multiplied by the stoichiometry of
+that species in that reaction.</p>
+
+<p>When a species is defined to be interpreted as a <i>concentration</i> within
+the model, the reactions in the model nonetheless define how the species 
+<i>amount</i> changes in time.  Therefore, the rates of change for these species 
+are defined as '(species*compartment):time'.  The math of this construct
+works out to properly simulate the model even when the compartment volume
+is not '1', or if it changes over time.</p>
+
+<p>SBML models may also contain 'assignment rules' (formulas assigned to
+variables which must be true at all points during the simulation), 'rate
+rules' (formulas defining directly how an element changes over time) and
+'algebraic rules' (formlas which must be true at all points during the
+simulation, but which may end up being used to determine any of the involved
+variables). All three are translated directly to JSim, with assignment rules
+becoming 'variable=formula', rate rules becoming 'variable:time=formula' and
+algebraic rules becoming 'formula=0'.</p>
+
+<p>Finally, SBML models may define functions, which are translated to JSim on
+a case-by-case basis.  In other words, if SBML defines a function func(x,y) =
+2x+3y, and uses it two different times, (func(p, q) and func(z, w)), the
+translator will expand those two calls individually to 'func.call0' and
+'func.call1', which in turn will be defined as '2p+3q' and '2z+3w',
+respectively.</p>
+
+<p>When translating formulas in any of the above scenarios, delays in SBML
+equations that define a delay 'd' for a variable 'X' are translated into the
+JSim form "X(if (time&lt;d) time.min else time-d)"</p>
+
+<p>The translator defines 3 <a href="MML_Topics.html#help">variable
+properties</a> to provide SBML contextual information. The defined properties
+are:</p>
+
+<ul>
+<li>sbmlName: the "name" clause from SBML species, parameter, and 
+compartment tags;</li>
+<li>sbmlRole: one of "species", "compartment", "parameter", and "rate";</li>
+<li>sbmlCompartment: the compartment ID for species variables.</li>
+</ul>
+
+<p>Due to MML keywords and namespace limitations, some SBML variables
+may be renamed in the MML translation.  If so, an appropriate warning 
+message appears at the beginning of the translated MML.</p>
+
+<h3><a name="import_bugs">SBML Import Bugs and Limitations</a></h2>
+
+<p> SBML "event" tags are not yet supported.  The event will be ignored 
+and the translator will insert a warning message in the resulting MML. </p>
+
+<p> SBML has the concept of a 'fast reaction' (a reaction which goes to
+completion instantly) which is currently untranslatable to JSim. Translations
+of models containing reactions of this type will result in a warning message
+in the MML.</p>
+
+<p> The following MathML elements may appear in SBML models, but are not (yet)
+translatable to JSim: &lt;factorial&gt;, &lt;xor&gt;, &lt;infinity&gt;, and
+&lt;notanumber&gt;. Formulas with these elements are not translated to MML at
+all, with a warning message resulting in the MML.</P>
+
+<p> The MathML constructs &lt;true&gt; and &lt;false&gt; are translated to
+MML, but the MML parser does not yet recognize them as valid boolean 
+constructs.  When the parser is updated, these translated constructs will
+succeed.</p>
+
+<p> SBML has the concept of 'values that change before the simulation begins'
+which is currently untranslatable to JSim.  Delay equations that rely on this
+feature will produce unexpected results.  Only models that utilize the 'delay'
+construct in SBML are potentially affected by this limitation.
+
+<p>The mapping from SBML variable name to MML variable name (required due to
+JSim reserved words and namespace limitations) is theoretically imperfect.
+For example, SBML models with two distinct id's differing only in an initial
+underscore (e.g.  ADG and _ADG) will not be translated correctly.  However, it
+works for all models in databases so far tested.</p>
+
+<p></p>
+
+<h2><a name="export_tech">SBML Export Technical Details</a></h2>
+
+<p>JSim elements are translated into SBML parameters, rules, and initial
+assignments.  Even if the model was originally SBML, having species and
+reactions, the current translator does not attempt to reconstruct those
+species and reactions.</p>
+
+<p>All JSim variables become SBML parameters.  If those variables varied over
+time, the SBML parameter is set 'constant=false', and set 'constant=true'
+otherwise.  If the initial value of the parameter was a double, that double is
+used as the 'value' of the parameter; otherwise, the formula is used in an
+initial assignment to that parameter.</p>
+
+<p>Rates of change for variables become SBML 'rate rules' that assign to the
+variable.</p>
+
+<p>Formulas that define the value for a variable over all time become SBML
+'assignment rules' that assign the given formula to the variable.</p>
+
+<p>'Delay equations' in JSim of the form "X(if (time&lt;delay) time.min else
+time-delay)" or similar are translated to SBML using the csymbol 'delay'.</p>
+
+<h3><a name="export_bugs">SBML Export Bugs and Limitations</a></h2>
+
+<p>This following JSim constructs can not be exported to SBML, and you will
+get a warning message:</p>
+
+<UL>
+ <LI> <b>Multiple domains</b>.  Heuristics are defined to guess which domain
+ should be used for SBML implicit time, but any domains beyond that one, and
+ formulas that include constructs involving multiple domains, will be
+ ignored.</LI>
+ <LI> <b>Events</b>.  JSim events are conceptually incompatible with SBML
+ events, and are not translated.</LI>
+ <LI> <b>Formulas involving rates of change</b>.  It is possible to define a
+ rate of change in SBML, but not to then use that in another equation (y =
+ x:t).  In JSim, rates of change can even be determined implicitly by their
+ use in such equations.  In a future version of the translator, these formulas
+ may be abstracted to separate variables and used intead, but for now, the
+ translator does not attempt to translate these formulas.</LI>
+ <LI> <b>Subvariables</b>.  It is possible in JSim to define variables of the
+ type X.Y, adding a semantic connection between that variable and 'X'.  It is
+ theoretically possible to 'flatten' these types of variables for translation
+ to SBML, but the current translator does not attempt to do so, and any such
+ variables (and formulas that contain those variables) will be ignored.</LI>
+ <LI> <b>Partial differential equations</b>.  Because SBML does not (yet)
+ allow multiple domains, any attempt to define partial differential equations
+ will be ignored by the translator.</LI>
+ <LI> <b>Procedures</b>.  JSim constructs that call external functions (blocks
+ of Java or C code, for example) can not be translated to SBML, and are
+ ignored.</LI>
+ <LI> <b>State variables</b>.  State variables are a part of JSim's event
+ handling, and are not yet translatable to SBML.</LI>
+ <LI> <b>Integration</b>.  JSim constructs involving integration can not be
+ translated to SBML, and are ignored.</LI>
+</UL>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

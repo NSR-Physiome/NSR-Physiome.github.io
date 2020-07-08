@@ -1,0 +1,361 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Partial-Differential Equations in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2> Introduction</h2> 
+
+<p> This document describes how to use partial differential equations 
+(PDEs) within MML models.  JSim currently support only first degree PDEs 
+in one spatial dimension.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a> (required)</li>
+<li><a href="MML_ODE.html">Using ODEs in MML</a> (recommended)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+
+<li><a href="#first">First Examples</a>
+  <ol>
+  <li><a href="#adv">The Advection Equation</a></li>
+  <li><a href="#diff">The Diffusion Equation</a></li>
+  <li><a href="#advdiff">The Combined Advection/Diffusion Equation</a></li>
+  <li><a href="#mult">A Multiple Variable Problem</a></li>
+  <li><a href="#note">A Cautionary Note About Mixing PDEs with ODEs</a></li>
+  </ol>
+</li>
+
+<li><a href="#bc">Types of Boundary Conditions for 
+Advection/Diffusion Problems</a></li>
+<li><a href="#icbc">IC/BC Consistency in PDEs</a></li>
+<li><a href="#avail">Available Solvers</a></li>
+<li><a href="#lsfea">The LSFEA Solver</a></li>
+<li><a href="#mcccormack">The MacCormack Solver</a></li>
+<li><a href="#toms731">The Toms 731 Solver</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<p> See also:</p>
+
+<ul>
+<li><a href="Solver_PDE_Guide.html">PDE Solver Tuning Guide</a></li>
+<li><a href="Solver_PDE_Ref.html">PDE Solver Reference Manual</a></li>
+</ul>
+
+<h2>  <a name="first">First Examples</a></h2>
+
+<p>JSim can solve a large class of 1st degree 1-dimensional partial
+differential equations (PDEs). The five examples illustrated here are 
+the type of advection and diffusion equations  used to model
+concentrations of materials in capillaries.</p>
+
+<h3><a name="adv">Example 1: The Advection Equation</a></h3>
+
+<?php jsTextDownApp("examples/MML_PDE/Advection.proj"); ?>
+
+<p>This is a pure advection (aka wave) equation in a tube. What comes in 
+at the left hand boundary exits at the right hand boundary.</p>
+
+<p>There are two independent variables, t in seconds, where t stands
+for time, and x in centimeters, where x is a spatial variable.
+The tube is parameterized by length L, volume V, and flow F.
+The velocity in the tube, U, is given by U=F*L/V. The
+transit time, Tmean (time for the input concentration to appear at the
+outflow) is given by Tmean = V/F.</p>
+
+<p>The left hand <a href="#bc">Dirichlet boundary condition</a> 
+is 
+given as -U*C = -U*Cin.</p>
+
+<p>The right hand <a href="#bc">Neumann boundary condition</a>, 
+C:x=0, is, strictly speaking, extraneous, insofaras there is only one 
+derivative in the x space. However, JSim requires two boundary 
+conditions for PDE's.</p>
+
+<p>The result is the advection of the wave form (Lagged-normal curve 
+representing a bolus injection) in the downstream direction.
+See Figures 1 and 2 in the JSim applet.</p>
+
+<h3><a name="diff">Example 2: The Diffusion Equation</a></h3>
+
+<p>This models requires either the MacCormack or the Toms731
+solver because it lacks flow. </p>
+
+<?php jsTextDownApp("examples/MML_PDE/Diffusion.proj"); ?>
+
+<p>A simple mass balance check is performed by integrating C with 
+respect at x at model end time, t.max.</p>
+
+<p>The left and right <a href="#bc">Neumann boundary conditions</a> can 
+be written as either <pre>D*C:x = 0;</pre> or <pre>C:x=0;</pre></p>
+
+<p>The result is an uncentered spike in the initial condition gradually
+becomes rounded, flattens out. An integral of C(x,t.max) with respect
+to x, shows that the amount of material is conserved.</p>
+
+<h3><a name="advdiff">Example 3: The Combined Advection/Diffusion 
+Equation</a></h3>
+
+<?php jsTextDownApp("examples/MML_PDE/AdvectionDiffusion.proj"); ?>
+
+<p>The left hand <a href="#bc">total flux boundary condition</a> is 
+written as -U*C + D*C:x = -U*Cin. The right hand boundary <a 
+href="#bc">Neumann boundary condition</a> is written as either D*C:x = 0 
+or C:x = 0. </p>
+
+<p>Figure 1 in the JSim applet shows the outflowing concentration has a 
+reduced peak height and is more spread out relative to the inflowing 
+concentration. Figure 2, a contour plot of the concentration in time 
+(vertical axis) and and space (horizontal axis) shows the concentration 
+peak decaying and spreading out with time.</p>
+
+<h3><a name="mult">Example 4: A Multiple Variable Problem</a></h3>
+
+<?php jsTextDownApp("examples/MML_PDE/CounterCurrent.proj"); ?>
+
+<p>As with ODEs, PDE variables may interact with other PDE and ODE 
+variables. This is an example of counter-current flow and exchange. Two 
+tubes (capillaries) flowing in opposite direction exchange material with 
+each other. The tube with flow from left to right (lr) is similar to the 
+combined advection diffusion equation with exchange with the tube with 
+flow from right to left (rl).</p>
+
+<p>This model illustrates both left (lr) and right (rl) <a 
+href="#bc">total flux boundary conditions</a> and right (lr) and left 
+(rl) <a href="#bc">Neumann boundary conditions</a>.</p>
+
+<h3><a name="note">Example 5: A Cautionary Note About Mixing PDEs with ODEs</a></h3> 
+
+<?php jsTextDownApp("examples/MML_PDE/BTEX20NoDisf.proj"); ?>
+
+<p>Mixing PDEs and ODEs can result in computational errors. This is an
+example of a two region model (BTEX20) which compares having the 
+diffusion coefficient in the non-flowing region, Disf, set to zero with having
+no diffusion coefficient in the equation for the non-flowing region.
+The results are different, and omitting the diffusion coefficient in the
+PDE for the non-flowing region leads to erroneous results. In models
+where the non-flowing regions may represent transporters bound to membranes
+and no diffusion is possible, it is still necessary to include a diffusion
+term with the diffusion coefficient set to zero. It is permissible to have
+PDE and ODE models in series, but not in parallel.</p>
+ 
+<h2><a name="bc">Types of Boundary Conditions for advection diffusion 
+problems</a></h2>
+
+<p>There are primarily three types of boundary conditions that JSim
+can use for advection-diffusion problems:</p>
+
+<ul>
+
+<li><a name="dirichlet">Dirichlet:</a> C (at either x.min or x.max) = 
+g(t).</li>
+
+<li><a name="neumann">Neumann:</a> C:x (at either x.min or x.max) = 0, 
+primarily for the downstream boundary and required for LSFEA solver. C:x 
+(at either x.min or x.max) = h(t), used with MacCormack and Toms731 
+solver.</li>
+
+<li><a name="flux">Total Flux:</a> -U*C + D*C:x = -U*Cin (at either 
+x.min or x.max), primarily for the upstream boundary.</li>
+
+</ul>
+
+
+<h2>Initial and Boundary Consistency in PDEs</h2>
+
+<p>A PDE variable's initial and boundary condition on the inflow
+side of the problem must be consistent. Consider the following
+initial and boundary condition:</p>
+
+<pre>
+when(t=t.min) {C(x,t)=f(x);} //implies C(x.min,t.min)=f(x.min)
+when(x=x.min) {C(x,t)=g(t);} //implies C(x.min,t.min)=g(t.min)
+</pre>
+
+<p>Unless f(x.min)=g(t.min), the specification is inconsistent. This
+problem is fixed by either rewriting the initial condition as</p>
+
+
+<pre>
+when(t=t.min) {C(x,t)=if(x=x.min) g(t) else f(x); } 
+// implies C(x.min,t.min) = g(t.min) not f(x.min),
+</pre>
+
+<p>or rewriting the boundary condition as</p>
+
+<pre>
+when(x=x.min) {C(x,t) = if(t=t.min) f(x) else g(t); }
+// implies C(x.min,t.min) = f(x.min) not g(t.min).
+</pre>
+
+<p>Jsim rejects model runs with inconsistent boundary 
+specifications.</p>
+
+<h2><a name="avail">Available PDE Solvers</a></h2>
+
+<p>JSim currently has three PDE solvers available:</p>
+
+<ol>
+<li> <a href="#lsfea">LSFEA</a> - Lagrangian Sliding Fluid Element Algorithm;</li>
+<li> <a href="#maccormack">MacCormack</a> - 2nd order finite difference 
+method 
+with
+optional flux-corrected transport for hyperbolic and parabolic equations;</li>
+<li> <a href="#toms731">Toms731</a> - adaptive moving grid method for univariate
+partial differential equations;</li>
+</ol>
+
+<p>LSFEA is the fastest solver, but is applicable to the narrowest range 
+of equations.  For example, LSFEA does not handle pure diffusion 
+equations.  Toms731 somewhat slower than LSFEA, but handles some 
+equations (e.g. pure diffusion) LSFEA can't.  Toms731 is slower still, 
+but handles some non-linear problems the other solvers can't.  An exact 
+mathematical description of what equations each solver can handle 
+follows in the remaining sections of this document. However, the user 
+need not be overly concerned with the exact solver requirements, since 
+the JSim compiler determines which solvers are appropriate for a set of 
+PDEs, the fastest of which becomes the default solver. For more advanced 
+users, the JSim user environment allows the user to select amoung 
+available solvers.</p>
+
+<p>In order to describe JSim's PDE solvers further, we must first 
+describe a bit about how JSim processes PDEs.  When the JSim compiler 
+encounters a PDE, it attempts to factor the equation and boundary 
+conditions into the <em>standard equation form</em> for each PDE solver, 
+using simple algebraic manipulations.  The standard form varies betweens 
+solvers. If the factorization for a given solver succeeds, JSim will 
+allow that solver to be used at run-time.  Bear in mind that successful 
+numeric calculation depends both equations stability and the solver 
+used. If the factorization fails for all available solvers, then the 
+compiler will abort with an appropriate error message.</p>
+
+<p>We define a PDE equation block as a set of PDEs whose state equation 
+or boundary conditions share state variables.  PDE solvers operate on 
+blocks of equations, rather than on individual equations, and some 
+properties of the block are relevant to solver performance.  In the 
+following example, u and v share an equation block because their state 
+equations depend upon each other:
+
+<pre>
+      u:t = u:x:x - u:x - u + v;
+      v:t = v - u;
+</pre>
+</li>
+</ul>
+
+
+<h2>  <a name="lsfea">The LSFEA Solver</a></h2>
+
+<p>The LSFEA solver supports PDE state and boundary equations that
+can be factored as follows:</p>
+
+<pre>
+      u:t = D*u:x:x - B*u:x + S;
+      when (x=x.min) f1*u + f2*u:x = f3;
+      when (x=x.max) g1*u + g2*u:x = g3;
+</pre>
+
+<p>where</p>
+
+<ul>
+<li>D*u:x:x is called the diffusion term, D the diffusion 
+coefficient;</li>
+<li>B*u:x is called the advection term;</li>
+<li>S is called the source or sink term;</li>
+
+<li>Algebraic expressions B, D, S, f1, f2, f3, g1, g2 and g3 may  
+not contain any derivative variables (e.g. u:x);</li>
+<li>B and D must be spatially invariant (no x dependency);</li>
+<li>D must be non-negative;</li>
+<li>f1, f2, f3, g1, g2 and g3 may not contain u;</li>
+<li>If B=0 then f1, f3, g1 and g3 must be zero;</li>
+<li>If B>0, then f1 must be non-zero;</li>
+<li>If B<0, then g1 must be non-zero;</li>
+<li>At least one of f1 and g1 must be zero;</li>
+<li>At least one of f2 and g2 must be non-zero;</li>
+<li>at least one PDE in the equation block must have a non-zero B
+value;</li>
+</ul>
+
+<h2>  <a name="maccormack">The MacCormack Solver</a></h2>
+
+<p>The MacCormack solver requires the PDE state and boundary equations 
+that can be factored as follows:</p>
+
+<pre>
+      u:t = D*u:x:x - B*u:x + S;
+      when (x=x.min) f1*u + f2*u:x = f3;
+      when (x=x.max) g1*u + g2*u:x = g3;
+</pre>
+
+<p>where</p>
+
+<ul> 
+<li>B, D, S, f1, f2, f3, g1, g2, g3 are defined as in LSFEA and 
+may no contain any derivative variables;</li>
+<li>D  must be non-negative.</li> 
+<li>f1, f2, f3, g1, g2 and g3 may not contain u;</li>
+</ul>
+
+<p> For further information on the MacCormack solver see:</p>
+
+<ul>
+<li>"Computational Techniques for Fluid Dynamics 2" by C.A.J. Fletcher,
+Springer-Verlag, page 410.</li>
+<li>"Flux-Corrected Transport.I.Shasta, A Fluid Transport Algorithm That
+Works" by J.P. Boris and D.L. Book, J. Comp. Phys. 11, pages 38-69, 1973.</li>
+</ul>
+
+<h2>  <a name="toms731">The Toms731 Solver</a></h2>
+
+<p>The Toms731 solver requires the PDE state and boundary equations 
+that can be factored as follows:</p>
+
+<pre>
+      u:t = D*u:x:x + P;
+      when (x=x.min) f1*u + f2*u:x = f3;
+      when (x=x.max) g1*u + g2*u:x = g3;
+</pre>
+
+<p>where</p>
+
+<ul>
+<li>D and P are expressions of u, u:x or other non-derivative model
+variables (note that this is a more general form than the one used
+for LSFEA and MacCormack);</li>
+<li>f1, f2, f3, g1, g2 and g3 may not contain u;</li>
+<li>D is symbolically differentiable (i.e. it may not contain extern 
+variables or JSim <a href="MML_Func_Intro.html">F&P calls</a>);</li>
+</ul>
+
+<p> For further information on the Toms731 solver see:</p>
+
+<ul>
+<li><a href="http://www.netlib.org/toms/731">The Netlib: 
+Toms731</a></li>
+</ul>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

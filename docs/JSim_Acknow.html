@@ -1,0 +1,101 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match('@\<h1\>(.*)\<\/h1\>@sU',"$contents",$matches);
+    $pagtit = preg_replace('@\<.*\>@sU','',"$matches[1]");
+    require_once("phead.html"); ?>
+
+<h1><img src="../pics/acknow.gif" />
+JSim Developer and Support Acknowledgements</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>    JSim software is developed at the University of Washington by the 
+National Simulation Resource, James B. Bassingthwaighte, director,
+and is supported by NIH/NIBIB grant EB01973-22.</p>
+<p>    JSim software was designed and written primarily by Erik
+Butterworth.  Other NSR staff contributing code to the project include
+Andy Matuszkiewicz, Eric Lawson, Gary Raymond, Lucian Smith, Zheng Li, 
+Mike Kellen, Lucian Smith and 
+Asa Packer.</p>
+<p>    Andreas Schwab has contributed additional code relating to the
+MacIntosh port of JSim.</p>
+<p>    The JSim logo was designed by Tania Butterworth.</p>
+<p>    JSim makes extensive use of the Java computer language designed and
+distributed by <a href="http://www.sun.com">Sun Microsystems</a> .</p>
+<p>    JSim language processing makes use of the following toolkits:</p>
+
+<ul>
+<li>The <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">CUP</a>
+parser generator by Scott Hudson, Frank Flannery, C. Scott Ananian;</li>
+<li>The <a href="http://www.cs.princeton.edu/~appel/modern/java/JLex/">JLex</a>
+lexical analyzer generator.</li>
+
+</ul>
+
+<p>    JSim plots and graphs are produced using the <a href="http://www.epic.noaa.gov/java/sgt/">Scientific Graphics
+Toolkit</a> , by Donald Denbo.  Thanks
+and credit are also due to his sponsors <a href="http://www.noaa.gov/">NOAA</a> and
+the <a href="http://www.pmel.noaa.gov/">PMEL/EPIC group</a> .</p>
+
+<p>    JSim XML processing makes use of the <a href="http://xml.apache.org/xerces2-j/index.html">Xerces2 Java 
+Parser</a> distributed by 
+<a href="http://apache.org/">The Apache Software Foundation</a> </p>
+
+<p> JSim SBML processing makes use of the <a 
+href="http://sbml.org/Software/libSBML">libsbml library</a>.</p>
+
+<p>    The JSim computational engine makes use of the following:</p>
+
+<ul>
+<li>The <a href="http://www.unige.ch/~hairer/software.html">Radau and
+Dopri5</a> solvers for
+ordinary differential equations, written by E. Hairer and G. Wanner;</li>
+<li>The CVODE solver for ordinary differential equations was written by
+Scott D. Cohen, Alan C. Hindmarsh, Radu Serban,and Dan Shumaker at
+Lawrence Livermore National Laboratory and is copyrighted by The Regents
+of the University of California.</li>
+<li>The Tom690 and Toms731 solvers for partial differential equations
+written by Martin Berzins. These are available from 
+<a href="http://netlib.org">netlib.org</a> ;</li>
+<li>The ggopt optimization algorithm is based on work by T. Glad, A. A.
+Goldstein, J. B. Bassingthwaighte, I. S. Chan, and I. B. Russak.  Our
+implementation utilizes the blas and linpackd math packages available from
+<a href="http://netlib.org">netlib.org</a> ;</li>
+<li>The NL2SOL optimization algorithm was written by
+John E. Dennis, Jr., David M. Gay, and Roy E. Welsh, and our
+implementation is a modification of their source code.</li>
+<li>The Sensop optimzation algorithm was originally written by Joseph 
+Chan, and later improved by Rick King, Asa Packer and Gary 
+Raymond.</li>
+</li>
+<li>The <a href="http://math.nist.gov/javanumerics/jama/">JAMA</a> Java Matrix 
+package.</li>
+<li>JSim's NelderMead optimizer, originally developed by J.A. Nelder and
+R. Mead (Computer Journal, 1965, vol 7, pp 308-313), is based on an
+<a href="http://www.ee.ucl.ac.uk/~mflanaga/java/Minimisation.html">implementation</a> 
+by <a href="http://www.ee.ucl.ac.uk/~mflanaga">Dr Michael Thomas Flanagan</a> .</li>
+<li>Simulated annealing was originally developed by
+S. Kirkpatrick and C. D. Gelatt and M. P. Vecchi.  JSim's multiprocessing
+implementation was written by Gary Raymond.</li>
+<li>JSim's Bessel functions (besseli0, besseli1, besseljn, 
+besselkn, besselyn) and error functions (erf, erfc) are from the <a href 
+= "http://acs.lbl.gov/software/colt/">Colt Project</a>, copyrighted 1999 
+by <a href ="http://acs.lbl.gov/software/colt/license.html">CERN - 
+European Organization for Nuclear Research</a>.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,262 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim RTML Reference Manual</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>    This documents provides the complete current specification for
+the JSim Run-Time Markup Language (RTML).</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_RTML_Intro.html">Introduction to JSim RTML</a></li>
+</ul>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#design">RTML Design</a></li>
+<li><a href="#doc">RTML Document Structure</a></li>
+<li><a href="#page">page elements</a></li>
+<li><a href="#text">text elements</a></li>
+<li><a href="#table">table elements</a></li>
+<li><a href="#pageButton">pageButton elements</a></li>
+<li><a href="#varButton">varButton elements</a></li>
+<li><a href="#image">image elements</a></li>
+<li><a href="#menu">menu elements</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="design">RTML Design</a></h2>
+<p>    <strong>Important note:</strong> RTML design is not yet finalized, so be aware
+that RTML created using the present document may need to be somewhat
+revised in for future JSim releases.  The present document is not
+complete, but is intended to provide a starting point for a discussion of
+what the final RTML format should be.  If you're interested in
+participating in this discussion, or designing tools that generate RTML,
+please contact the JSim development team.</p>
+<p>    RTML specifies content for a set of pages and (optionally) menus
+for navigating those pages.  RTML pages are designed to meet the 
+following criteria:</p>
+
+<ol>
+<li> pages are resizable based upon dynamic user magnification preference;</li>
+<li> amenable to the development of an interactive RTML editing
+tool (not yet available);</li>
+<li> superset of the functionality of XSIM configuration files (XSIM was
+a predecessor of JSim which provided model-specific markup);</li>
+<li> simplified design compared to XSIM.</li>
+
+</ol>
+<h2>  <a name="doc">RTML Document Structure</a></h2>
+<p>    The root element of an RTML file should be named <strong>JSim</strong> . It
+has no supported attributes.</p>
+<p>    Within the <strong>JSim</strong> element, there may be one or more <a href="#page">page</a>
+elements and zero or one <a href="#menu">menu</a> elements.</p>
+<h2>  <a name="page">page elements</a></h2>
+<p>    <strong>page</strong> elements contain the specification for content of a
+single RTML page.  The JSim GUI currently allows the user to display only
+a single page at a time, although this may change at some future time.</p>
+<p>    RTML pages use an abstract coordinate system whose unit measure is the
+current font size of the JSim application.  The default value is 12
+points, but this is adjustable by the user via the "Project" tab
+"Preferences" menu.  All items within an RTML page are rescaled whenever
+the use adjusts the current font size.  The origin of this coordinate
+system is the upper left corner of the page.  Coordinates are
+progressively larger moving right and down.</p>
+<p>    <strong>page</strong> elements support the following attributes:</p>
+
+<ul>
+<li><strong>name</strong> (required): the name of the page as it appears in menus
+and as it is referenced by <strong>pageButton</strong> elements (see below).</li>
+<li>There is no current attribute for the overall size of a page.  
+Pages are upper-left justified within the window provided for them within
+JSim.</li>
+
+</ul>
+<p>    The following elements are supported within an RTML page:</p>
+
+<ul>
+<li><a href="#text">text</a> : plain text;</li>
+<li><a href="#table">table</a> : a table of variable names, values and units.</li>
+<li><a href="#pageButton">pageButton</a> : a hyperlink button to another RTML page;</li>
+<li><a href="#varButton">varButton</a> : a button associated with a model variable.
+Clicking the button will display additional information about the
+variable.</li>
+<li><a href="#image">image</a> : a pixel-based graphic image;</li>
+
+</ul>
+<p>    Example:
+<pre>
+      &lt;page name="Exchange vessel"&gt;
+         &lt;text pos="12 2.5" text="Very simple RTML page"/&gt;
+      &lt;/page&gt;
+</pre>
+</p>
+<h2>  <a name="text">text elements</a></h2>
+<p>    A <strong>text</strong> element specifies arbitrary text within a page. This
+element supports the following attributes:</p>
+
+<ul>
+<li><strong>pos</strong> (required) : the (space separated) X and Y coordinates of
+the element within the abstract coordinate system.  </li>
+<li><strong>text</strong> (required): The text to be displayed.</li>
+
+</ul>
+<p>    Example:
+<pre>
+      &lt;text pos="1.5 8" text="Electrolux. Better living today..."/&gt;
+</pre>
+</p>
+<h2>  <a name="table">table elements</a></h2>
+<p>    A <strong>table</strong> element specifies a table of variables.  Tables consist 
+of three column: names, values and units.  The vertical size of the tables
+is dependent upon the number of variables in the table in an, as yet, 
+undocumented way.  The width of the table is the sum of the widths of the
+three columns,  as determined by the <strong>widths</strong> attribute.  This 
+element supports the following attributes:</p>
+
+<ul>
+<li><strong>pos</strong> (required) : the (space separated) X and Y coordinates of
+the element within the abstract coordinate system.  </li>
+<li><strong>widths</strong> (required) : the (space separated) widths of the 
+names, values and units columns within the abstract coordinate system.</li>
+
+</ul>
+<p>    A <strong>table</strong> elements must contain one or move <strong>var</strong> elements,
+each one representing a variable to appear in the table.</p>
+<p>    A <strong>var</strong> element represents a single variable within a table.
+<strong>var</strong> supports the following attributes:</p>
+
+<ul>
+<li><strong>name</strong> (required): name of variable within the model;</li>
+<li><strong>text</strong> (optional): the text to appear within the table's name
+column.  If blank, this defaults to the value of the <strong>name</strong>
+attribute.</li>
+
+</ul>
+<p>    Example:
+<pre>
+      &lt;table pos="60.4 24.6" widths="10 7 0"&gt;
+        &lt;var name="Flow"&gt;
+        &lt;var name="Vprime" text="V'"&gt;
+      &lt;/table&gt;
+</pre>
+</p>
+<h2>  <a name="pageButton">pageButton elements</a></h2>
+<p>    A <strong>pageButton</strong> element specifies a hyperlink to another RTML 
+page.  This element supports the following attributes:</p>
+
+<ul>
+<li><strong>pos</strong> (required) : the (space separated) X and Y coordinates of
+the element within the abstract coordinate system.  </li>
+<li><strong>name</strong> (required): Name of page to jump to. </li>
+<li><strong>text</strong> (optional): The text appearing on the button. If 
+blank, the text defaults to the <strong>name</strong> attribute.</li>
+
+</ul>
+<p>    Example:
+<pre>
+      &lt;pageButton pos="10 15" name="Exchange vessel"/&gt;
+</pre>
+</p>
+<h2>  <a name="varButton">varButton elements</a></h2>
+<p>    A <strong>varButton</strong> element specifies a button associated with a
+variable.  Clicking the button will display additional information about
+the variable.  Such buttons are very useful in conjunction with
+<strong>image</strong>s to provide interactive model diagrams. This element supports
+the following attributes:</p>
+
+<ul>
+<li><strong>pos</strong> (required) : the (space separated) X and Y coordinates of
+the element within the abstract coordinate system.  </li>
+<li><strong>name</strong> (required): Name of associated variable. </li>
+<li><strong>text</strong> (optional): The text appearing on the button. If 
+blank, the text defaults to the <strong>name</strong> attribute.</li>
+
+</ul>
+<p>    Example:
+<pre>
+      &lt;varButton pos="10 15" name="p_Kfed"/&gt;
+</pre>
+</p>
+<h2>  <a name="image">image elements</a></h2>
+<p>    An <strong>image</strong> element specifies a pixel-based graphic image.</p>
+<p>    This element supports the following attributes:</p>
+
+<ul>
+<li><strong>name</strong> (required): Name of the image within the model image
+set.  The actual image data (GIF, JPEG, etc) is stored in the project
+image set associated with the model.  See <a href="MML_RTML_Intro.html">Introduction to JSIM 
+RTML</a> for more information on loading image data
+into a model image set.</li>
+<li><strong>pos</strong> (required) : the (space separated) X and Y coordinates of
+the element within the abstract coordinate system.  </li>
+<li><strong>size</strong> (required) : the (space separated) width and height of
+the element within the abstract coordinate system.  Note that this is not
+the same as the pixel dimensions of the raw data.  Images are rescaled by
+the JSim GUI to the specified width and height. </li>
+
+</ul>
+<p>    Example:
+<pre>
+      &lt;image name="myocyte" pos="0 10" size="20 10"/&gt;
+</pre>
+</p>
+<h2>  <a name="menu">menu elements</a></h2>
+<p>    A <strong>menu</strong> element specifies a menu.  The elements within the 
+menu may be page references or sub-menus.  There may be at most one menu
+in an RTML file.  This menu will appear in the custom section of 
+the "Pages" menu of the "Run Time" tab of a JSim model.  If no menu is
+present in the custom RTML file,  a default menu will be generated 
+containing all the pages in the file.  Attributes supported by <strong>menu</strong> 
+are:</p>
+
+<ul>
+<li><strong>text</strong> (required): text for this menu as it appears in parent 
+menu.</li>
+
+</ul>
+<p>    A <strong>menu</strong> item may contain only <strong>menu</strong> and <strong>page</strong>
+sub-elements.  </p>
+<p>    A <strong>page</strong> element, within a menu, is a link to a <a href="#page">page</a> 
+within the RTML document.  The element supports the following attributes:</p>
+
+<ul>
+<li><strong>name</strong> (required) : name of page to jump to;</li>
+<li><strong>text</strong> (optional) : text appearing in menu item.  If blank,
+defaults to value of <strong>name</strong> attribute.</li>
+
+</ul>
+<p>    Example:
+<pre>
+      &lt;menu&gt;
+        &lt;page name="head" text="Your Head"/&gt;
+        &lt;page name="torso" text="Your Torso"/&gt;
+        &lt;menu name="Your Legs..."&gt;
+          &lt;page name="Left"/&gt;
+          &lt;page name="Right"/&gt;
+        &lt;/menu&gt;
+      &lt;/menu&gt;
+</pre>
+</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

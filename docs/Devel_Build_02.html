@@ -1,0 +1,257 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Building JSim From Source - version 2.02 and below</h1>
+
+<p><em>This page applies to JSim versions 2.00 to 2.02. Click
+<a href="Devel_Build.html">here</a> for the current version.</p>
+
+<h2>  Introduction</h2>
+
+<p> This page describes how JSim source code (version 2.02 and below)
+is structured, and how to build a  JSim binary distribution from that
+source code.  JSim source code may currently  be obtained in two ways:
+the JSim <a href="../download/source.html">open source 
+distribution</a> or the NSR CVS archive (/cvsroot/JSIM/SRC2.0).  The
+latter is available only to NSR  collaborators.  There are minor
+differences in the build procedure depending  upon which method of
+source code access you use, which are noted in this  document.  Use of
+JSim source code must be in accordance with the file  license.html
+found in the distribution root directory.</p>
+
+<ul>
+<li><a href="#contents">Source distribution contents</a></li>
+<li><a href="#linux">Building JSim on Linux</a></li>
+<li><a href="#macos">Building JSim on MacIntosh</a></li>
+<li><a href="#win32">Building JSim on Windows</a></li>
+<li><a href="#binary">Creating a JSim binary distribution</a></li>
+<li><a href="#verify">The JSim Verification Suite</a></li>
+<<?php jscoqli() ?>
+/ul>
+
+<h2><a name="contents">Source distribution contents</a></h2>
+
+<ul>
+<li>README - read this first</li>
+<li>license.html - JSim licensing agreement, read before use</li>
+<li>JSim/  - JSim's java and non-java source code</li>
+<li>home/  - $JSIMHOME for source builds</li>
+<li>build/ - build, test and distribution scripts</li>
+<li>linux/ - linux OS specific directory</li>
+<li>macos/ - Macintosh OS X specific directory</li>
+<li>win32/ - Windows OS specific directory</li>
+<li>unix/  - Common material for Unix-based OS'es (Linux & MacOS)</li>
+<li>third/ - misc 3rd party contributions to JSim</li>
+<li>fpack/ - JSim Fortran package of XSIM-compatible models (available
+via NSR CVS access only)</li>
+<li>verify/ - verification suite</li>
+</ul>
+
+<h2>  <a name="linux">Building JSim on Linux</a></h2>
+
+<ol>
+
+<li>Perform the following in a Bash shell.
+
+</li><li>Create a new directory and unpack the source distribution .zip file, or NSR 
+CVS checkout into it.  Set environment variable JSIMSRC to this directory.</li>
+
+<li>Set your PATH to include $JSIMSRC/build.</li>
+
+<li>Install the Sun Java SDK version 1.5 or 1.6 on your system.  Set environment 
+variable JSIMSDK its location.  On NSR Linux systems, this is 
+/usr/local/jdk.</li>
+
+<li>Install gcc and gfortran version 4 on your system and edit 
+$JSIMSRC/home/lib/Makefile.global.linux to match the appropriate locations.  
+This file matches the settings on NSR Linux boxes, so you need not worry about 
+this step when building there.</li>
+
+<li>If building on NSR Linux boxes:
+<UL>
+<li>Set the environment variable JSIMAUXLIB=/NSRware/jsimauxlib</li>
+</ul>
+If on some other system, you'll need to download a copy of the extra libraries:
+<UL>
+<LI> <code>wget -r -np http://www.physiome.org/jsim/download/jsimauxlib/2.02/jre/linux_i386</code></LI>
+<LI> <code>wget -r -np http://www.physiome.org/jsim/download/jsimauxlib/2.02/libsbml/linux_i386</code></LI>
+<LI> <code>mv www.physiome.org/jsim/download/jsimauxlib/2.02 $JSIMSRC/jsimauxlib</code></LI>
+<LI> <code>rm -r -f www.physiome.org/</code></LI>
+<LI> Set the environment variable JSIMAUXLIB=$JSIMSRC/jsimauxlib</LI>
+</UL>
+JSIMAUXLIB contains libsbml native libraries and redistributable JREs for each 
+architecture.  The libsbml library is specific to the jar file used in the source
+distribution, and other versions will not work.</li>
+
+<li>Build JSim entirely with the command jsbuild.all.  If you are modifying 
+JSim,  examine this script to find short ways of building limited parts of JSim.
+This will save you a lot of time because the entire build takes a long 
+time.</li>
+
+<li>You should now be able to launch your new built JSim GUI with jsim.db,
+or the JSim batch interface with jsbatch.db.</li>
+
+</ol>
+
+<h2>  <a name="macos">Building JSim on MacIntosh</a></h2>
+
+<p>Building JSim on MacOS is largely similar to build on Linux.</p>
+
+<ol>
+
+<li>Perform the following in a Bash shell.
+
+</li><li>Create a new directory and unpack the source distribution .zip file, or NSR 
+CVS checkout into it.  Set environment variable JSIMSRC to this directory.</li>
+
+<li>Set your PATH to include $JSIMSRC/build.</li>
+
+<li>Sun's Java SDK 1.5 in already installed on MacIntosh and JSIMSDK does not
+need to be set here for JSim to build properly.</li>
+
+<li>Install gcc and gfortran version 4 on your system and edit 
+$JSIMSRC/home/lib/Makefile.global.macos to match the appropriate locations.</li>
+
+<li>Download a copy of the extra libraries:
+<UL>
+<LI> <code>wget -r -np http://www.physiome.org/jsim/download/jsimauxlib/2.02/libsbml/macos</code></LI>
+<LI> <code>mv www.physiome.org/jsim/download/jsimauxlib/2.02 $JSIMSRC/jsimauxlib</code></LI>
+<LI> <code>rm -r -f www.physiome.org/</code></LI>
+<LI> Set the environment variable JSIMAUXLIB=$JSIMSRC/jsimauxlib</LI>
+</UL>
+JSIMAUXLIB contains libsbml native libraries for each architecture. The libsbml library is
+specific to the jar file used in the source distribution, and other versions will not work.</li>
+
+<li>Build JSim entirely with the command jsbuild.all.  If you are modifying 
+JSim, examine this script to find short ways of building limited parts of JSim. 
+This will save you a lot of time because the entire build takes a long 
+time.</li>
+
+<li>JSim MacIntosh builds are in two-flavors i386 and ppc,  depending upon
+your hardware architecture.  These libraries are created in 
+$JSIMSRC/native/macos_i386 or $JSIMSRC/native/macos_ppc.  If you copy both
+directories to a single system,  you can create a universal binary in 
+$JSIMSRC/native/macos by running jsbuild.fat.</li>
+
+<li>You should now be able to launch your new built JSim GUI with jsim.db,
+or the JSim batch interface with jsbatch.db.  By default, these will run using 
+single architecture native libraries.  To run using universal libraries, 
+set the environment variable JSIMFAT=true.</li>
+
+</ol>
+
+<h2>  <a name="win32">Building JSim on Windows</a></h2>
+
+<p>JSim's Windows build requires assistance from a helper Linux or 
+MacIntosh workstation to build JSim Java code.  Only Windows native
+code is built on Windows itself.</p>
+
+<ol>
+
+<li>Build JSim from source on your helper workstation, following the <A HREF="#linux">above instructions</a>, with one change:  the auxilliary libraries to be downloaded need to be the native windows versions, not ones for linux.  If you are building on an NSR system, the above instructions need not be changed at all, as versions for all systems exist in /NSRware/jsimauxlib/.  If you are not on an NSR system, download the win32 versions with the following commands:
+<UL>
+<LI> <code>wget -r -np http://www.physiome.org/jsim/download/jsimauxlib/2.02/jre/win32</code></LI>
+<LI> <code>wget -r -np http://www.physiome.org/jsim/download/jsimauxlib/2.02/libsbml/win32</code></LI>
+<LI> <code>mv www.physiome.org/jsim/download/jsimauxlib/2.02 $JSIMSRC/jsimauxlib</code></LI>
+<LI> <code>rm -r -f www.physiome.org/</code></LI>
+<LI> Set the environment variable JSIMAUXLIB=$JSIMSRC/jsimauxlib</LI>
+</UL>
+JSIMAUXLIB contains libsbml native libraries and redistributable JREs for each 
+architecture.  The libsbml library is specific to the jar file used in the source
+distribution, and other versions will not work.</li>
+</li>
+
+<li>On your helper workstation, run jsdist.srcaux.  This will create 
+$JSIMSRC/dist/JSim_srcaux_2_??.zip.</li>
+
+<li>On your Windows workstation,  install Cygwin (a Unix-like environment for 
+Windows). Make sure sh, make and ldd are a part of the installation.</li>
+<li>Install Mingw versions of gcc 4.x and gfortran 4.x (http://www.mingw.org/). Do not use the Cygwin compilers since we need to generate libraries that depend only on MS Windows libraries.</li> 
+<li>Perform the following operations in a Cygwin bash shell:</li>
+<li>Create a new directory and unzip the srcaux .zip file from above in it.  Set 
+the environment variable JSIMSRC to this directory.</li>
+
+<li> Edit $JSIMSRC/home/lib/Makefile.global.win32 to match the appropriate locations
+of gcc and gfortran (installed above) on your system.</li>
+
+
+<li>Set your PATH variable to include $JSIMSRC/build.
+
+<LI> Set the environment variables:
+<pre>  JSIMAUXLIB=$JSIMSRC/auxlib
+  JSIMJARDIR=$JSIMAUXLIB
+  JSIMSDK=$JSIMAUXLIB/jre
+</pre>
+</li>
+<li>Build JSim native libraries with jsbuild.native.  Do not run 
+jsbuild.all like on other systems above.  jsbuild.all does not work 
+properly on Windows.</li>
+
+<li>You should now be able to launch your new built JSim GUI with jsim.db,
+or the JSim batch interface with jsbatch.db.</li>
+
+</ol>
+
+<h2>  <a name="binary">Creating JSim binary distribution</a></h2>
+
+<p>Binary distribution may be created for all 3 supported platforms (Windows, 
+MacIntosh, Linux) from either a Linux or MacIntosh workstation.</p>
+
+<ol>
+
+<li>Build JSim from source on your Linux or MacIntosh workstation.</li>
+
+<li>If you wish to build binary distributions for other platforms as well,
+build on those platforms and copy the architecture-specific files to 
+$JSIMSRC/native.</li>
+
+<li>Run jsdist.bin ARCH,  where ARCH is one of linux_i386, macos, macos_i386,
+macos_ppc, or win32.  The resulting .zip archive will be created in 
+$JSIMSRC/dist.</li>
+
+<li>Install your newly created .zip archive using <a 
+href="/jsim/download">the standard installation instructions for the target
+machine</a>.</li>
+
+</ol>
+
+<h2>  <a name="verify">Running the JSim verify suite</a></h2>
+
+<p>$JSIMSRC/verify contains various regression tests of JSim computational 
+functionality.  These regressions tests are fairly exact for Linux builds,
+and somewhat less exact for other architectures.  The fpack, xsim and xfunc
+tests are not currently supported under Windows.  Run the suite as follows:</p>
+
+<ol>
+
+<li>Perform the following in a Bash shell.</li>
+
+<li>run ". jsverify.env DIST" where DIST is either "src" for the JSim source 
+build or a home directory for a JSim binary distribution.</li>
+
+<li>cd $JSIMSRC/verify</li>
+
+<li>Execture "runall [SWITCHES] [DIRS]" where DIRS is a list of subdirectories 
+to verify. If DIRS is empty, all subdirectories are verified.  If DIRS is the 
+special value "win32" (which is not a subdirectory),  all subdirectories
+except fpack, xfunc and xsim are verified.</li>
+
+<li>The results of runall are saved in "log" and echoed to the screen.  Examine
+the runall script for further details.</li>
+
+</ol>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

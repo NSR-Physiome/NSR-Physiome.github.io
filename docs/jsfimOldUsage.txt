@@ -1,0 +1,13 @@
+Usage: jsfim [ switches ] project datafile
+
+Switches:
+  <a href="#fgen">-fgen</a> v=curve      Assign v to funcgen using curve from datafile 
+  <a href="#o">-o</a> file            Direct output to specified file    
+  <a href="#log">-log</a> file          Save optim reports in log file
+  <a href="#ofmt">-ofmt</a> dataformat   Specify non-default output data format
+  <a href="#oprec">-oprec</a> integer     Specify numeric output precision
+  <a href="#stopAfter">-stopAfter</a> integer Stop after specified # of curves (debug only)
+  <a href="#oproj">-oproj</a>             Write modified project (debug only)
+  <a href="#silent">-silent</a>            Repress normal informative messages
+  <a href="#usage">-usage</a>             Print usage synopsis
+  <a href="#mp">-mp</a> N              Enable maximum N-processor multiprocessing  

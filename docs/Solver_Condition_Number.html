@@ -1,0 +1,146 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Optimization Report: Condition Number</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<pre>
+<p><strong>
+What does the condition number on the optimization report mean?</strong>
+Notation: Let the observed data be given as
+
+        {y  = f(P,x ) + r , i=1..m }
+          i        i     i
+
+        where f(P,x ) is a mathematical model, a function of the parameter vector P
+                   i
+                   
+        of length n, x  is the independent variable defined at m points, and the r 
+                      i                                                           i
+                                                       2
+        are random errors with mean zero and variance s  . In vector notation,
+                                                       i
+        Y = F(P,X) + R.
+
+        A weighting matrix, W, of size m x m, W is defined as 
+
+                                             2
+        W = diag(w , w , ... w ), where w = s .
+                  1   2       m          i   i
+
+        The m x 1 residual vector R is given by
+
+        R(P) = Y-F(P,X).
+
+        The sum of the squares of the weighted residuals, SSR(P) is denoted by
+                     T
+        SSR(P) = R(P)  W  R(P).
+
+
+        The <strong>sensitivity matrix S(p ,x ,h  ) = (f(P+h  *I ,x ) - f(P,x ))/h
+                                  j  i  ij          ij  j  i         i    ij</strong>
+       
+        for 1&lt;=i&lt;=m and 1&lt;=j&lt;=n, is an approximation of the Jacobian matrix where I is the
+                                                                                   j
+        j&apos;th column of a n x n identity matrix and h   is the step size or mesh spacing
+                                                    ij
+        for j&apos;th parameter and i&apos;th observation.
+                                             
+        The covariance matrix of the solution parameters can be estimated by the Hessian
+
+        matrix at the solution (i.e., the second derivative matrix).                                                  
+        
+	Near the solution for small residuals the co-variance matrix of P from an 
+  
+        optimization run is estimated by
+
+                               T        -1              
+        Cov(P) = SSR/(nh-nx)*[S * W * S]  
+
+        where nh is the number of data points and nx the number of parameters,
+
+        hence (nh-nx) represents the degrees of freedom. 
+
+        The n x n correlation matrix is given by
+
+        Correlation(P) = Cov(k,l)/sqrt(Cov(k,k)*Cov(l,l)). 
+
+<strong>                                                            T
+        The condition number is calculated for the matrix [S * W * S].
+
+What is a large versus small condition number?</strong>
+
+Back when single precision was the standard for scientific programming
+in FORTRAN, a real variable had approximately 6.5 digits of precision.
+Matrices with condition numbers near 1 were said to be well-conditioned. 
+Matrices with condition numbers much greater than one (such as around 
+10^5 for a 5 x 5 Hilbert matrix) were said to be ill-conditioned.
+
+If kappa(A), the condition number of A, equals 10^k, then you may lose 
+up to k digits of accuracy on top of what would be lost to the numerical 
+method due to loss of precision from arithmetic methods.
+
+If a condition number equals 10^16, then you have lost 16 digits of 
+precision in your result.
+
+<strong>What causes large condition numbers?</strong>
+
+If two parameters are close to being highly dependent on each other 
+(defined as having a correlation value whose absolute value is greater 
+than 0.98 can cause a large condition number. 
+
+Having parameters that the fit is insensitive to can also result in a 
+large condition number.  This may be manifested as confidence intervals
+that are an order of magnitude or larger then the parameter value. In 
+this case the model fit tends to be insensitive to changes in that parameter.
+
+<strong>What is the relationship between condition numbers and the probable 
+reliability of estimates of parameter confidence intervals or ranges 
+quantitatively?</strong>
+
+This question makes an unwarranted assumption, that there is an estimate 
+of confidence intervals which is independent of the numerical process used
+to calculate them. The confidence intervals given by the JSim optimizers 
+are those derived by equations 18 and 19 in Chan et al. (1993). 
+
+The question is not &quot;Are the confidence intervals
+correct?&quot;, the question is &quot;Are the confidence intervals
+useful?&quot; A large condition number implies that the
+optimization problem you are doing is poorly formulated.
+For example, if you optimize on a parameter which does
+not affect the fit, you will probably get a NaN for
+a condition number.
+
+From the SENSOP paper, &quot;Near the solution for small!
+residuals, the right hand side of Eq. 18 below is an
+approximation! to the covariance matrix.
+
+Cov(theta) =SSR(theta)/(m-p)* (S(theta)^T W S(theta))^-1.
+
+The matrix (S(theta) transpose *W* S*(theta))
+is the matrix whose condition number is calculated.
+</pre>
+<h2>Reference</h2>
+<pre>
+Chan IS, Goldstein AA, Bassingthwaighte JB. SENSOP: a derivative-free 
+solver for non-linear least squares with sensitivity scaling. Ann. 
+Biomed. Eng. 21: 621-631, 1993.
+</pre>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>
+

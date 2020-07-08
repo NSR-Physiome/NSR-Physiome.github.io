@@ -1,0 +1,341 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Introductory Survey of MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> MML (for "Mathematical Modeling Language") is a concise, ASCII text
+description of model calculations that is used by <a
+href="../index.html">JSim</a>.  This document is an introductory survey 
+of MML, with pointers to further information.</p>
+
+<p> Prerequisites: </p>
+<ul>
+<li><a href="overview.html">JSim Overview</a> (recommended)</li>
+<li><a href="User_Intro.html">Introduction to the JSim GUI 
+</a>(recommended)</li>
+</ul>
+
+<p>Contents:</p>
+<ul>
+  <li><a href="#simple">A Simple MML Model</a></li>
+  <li><a href="#ode">Ordinary Differential Equations (ODEs)</a></li>
+  <li><a href="#units">Physical Units</a></li>
+  <li><a href="#extern">Driving Data and Signals</a></li>
+  <li><a href="#parms">Parameters and Parameter Sets</a></li>
+  <li><a href="#constraints">Understanding Constraints</a></li>
+  <li><a href="#topics">Further topics</a></li>
+  <?php jscoqli() ?>
+</ul>
+
+<h2> <a name="simple">A Simple MML Model </a></h2>
+
+<p> Below is a simple model using trig functions: </p>
+<?php jsTextDownApp("examples/MML_Intro/intro_alg.proj"); ?>
+
+<p> Items of note:</p>
+<ul>
+
+<li>An MML model is a set of nested components.  There must be one 
+top-level
+component, in this case of type "math".  This document will consider only
+top-level components of type math (for details, see <a
+href="MML_Templates.html">templates</a>). The name given the math
+component (here "main") is inconsequential to JSim operation.  Content of
+the math component is delimited by curly braces {}.</li>
+
+<li>Inside the math component are variable declarations and
+equations. A variable must be declared before it is used in an equation.
+Variables types used here are of type "realDomain" and "real".
+</li>
+
+<li>A realDomain represents an independent variable, typically time or 
+space. Each realDomain (here "t") contains subvariables "min" (minimum 
+value), "max" (maximum value), "delta" (grid point separation) and "ct" 
+(number of grid points).  When this model runs, "t" will be calculated 
+as a regularly spaced grid.  To be calculable, the model writer must <a 
+href="#constraints">constrain</a> 3 of the 4 subvariables. Note that 
+subvariables are separated by a period (e.g. "t.min").</li>
+
+<li>A "real" variable represents a either constant or a dependent 
+variable (dependent upon realDomains),  
+whose value during a
+single model run varies
+over its declared realDomains.  Here "amp" and "period" are declared
+without realDomains so they have a unique value during a
+single model run,  while "u", "v" and "w" are declared with realDomain 
+"t" so their values will vary with those of "t". See <a href="MML_realConsts.html">
+Variable constants</a> for more information concerning variables with no 
+domain dependencies such as "amp" an "period".</li>
+
+<li>Variable names must be alpha-numeric (including underscore) and start
+with a letter.  For technical reasons, they may not start with the letters
+"JS" in any capitalization or contain two successive underscores.  
+Variables names are case-sensitive, as is MML in general.</li>
+
+<li>MML algebraic syntax is largely intuitive. The constant "PI" and the
+functions "sin()"  and "cos()" are built into JSim.  See <a
+href="MML_Ref.html#algebra">here</a> for more information, including
+a complete list of built-in functions.</li>
+
+<li>Spacing (spaces, tabs and new-lines) does not affect MML semantics.  
+Single line commentary may be added after double-slashes (//).  Extended
+C-style comments (/* */) are also supported.</li>
+
+<li>Many older models contain the first line "JSim v1.1".  This syntax is
+still supported, but not longer recommended.</li>
+
+</ul>
+
+<h2> <a name="ode">Ordinary Differential Equations (ODEs)</a> </h2>
+
+<p> ODEs are used in research and education for models ranging from
+very simple to exceedingly complex.  A simple MML model of exponential 
+decay
+using an ODE is as follows:</p> 
+<?php jsTextDownApp("examples/MML_Intro/intro_ode.proj"); ?>
+
+<p>To be
+solvable by JSim,  an ODE variable must have two  <a 
+href="#constraints">constraints</a>:</p>
+<ol>
+<li> an initial condition (IC) that sets the initial value of the 
+variable using the "when" clause;</li>
+<li> an ODE state equation relating the variable's derivative to the
+variable itself or other model varibles.</li>
+</ol>
+
+<p> Note that MML uses the colon (:) operator to represent
+differentiation. See <a href="MML_ODE.html">Using ODEs in MML</a> for more
+information.</p>
+
+<h2> <a name="units">Physical Units</a> </h2>
+
+<p> MML allows (but does not require) defining physical units (e.g.
+m/sec^2) for variables.  Along with making the model easier to
+read, this allows JSim to perform integrity checks that catch
+common errors, thus reducing debugging time.  Two related issues are 
+involved:<p>
+<ol>
+<li>Inserting conversion factors. For example, when adding centimeters
+to millimeters,  one variable must be adjusted by a factor of 10;</li>
+<li>Detecting illegal constructs. For example, adding meters/second
+to meters/second^2 is fundamentally incorrect.
+</ol>
+
+<p> When JSim compiles a model containing the optional "unit
+correction on" clause,  appropriate conversion factors are inserted into 
+constructs of the 1st sort,  while constructs of the 2nd sort generate
+a compilation error.  Consider the model:</p>
+
+<?php jsTextDownApp("examples/MML_Intro/intro_unit.proj"); ?>
+
+<p>Items of note:</p>
+
+<ul>
+
+<li> The "unit conversion on" clause enables JSim unit checking.  
+"nsrunit" is JSim's distributed unit file that is recommended, 
+and sufficient for 
+most purposes.  Model writers may define additional units, if desired,
+or even use an entirely separate file of unit definitions.</li>
+
+<li> In this simple case, the conversion factor inserted for the "s3"  
+equation is fairly easy to see.  However in large models, conversion
+factors are tedious and difficult to keep track of.  They also clutter up
+the code, for example 1 faraday = 96485.341 coulomb.</li>
+
+<li> The formulation above discourages some common typos.  For example, if
+the parentheses in the "s3" equation were mistakenly omitted, JSim would 
+reject the
+model due to unit imbalance. Our experience is that errors of this
+general form (although more subtle) are disturbingly common in papers
+submitted to professional journals, presumably due to a lack of automated
+unit checking tools such as JSim. <li>
+
+<li> See <a href="MML_Units.html">Using Physical Units in MML</a> for
+further infomation.</li>
+</ul>
+
+<h2> <a name="extern"> Driving Data and Test Signals </a> </h2>
+
+<p>Many scientific analyses require driving model inputs with
+experimentally measured data or idealized external test signals.  JSim's
+approach is to provide these at run-time, rather than to encode them
+directly in MML.  This allows easy switching back and forth between
+various driving functions at run-time.  In MML, the "extern" declaration
+is used to label variables that will be supplied externally via the
+run-time environment.  The following MML models the concentration in a
+stirred tank whose inflow is supplied externally:</p>
+
+<?php jsTextDownApp("examples/MML_Intro/intro_extern.proj"); ?>
+
+<h2> <a name="parms"> Parameters and Parameter Sets </a> </h2>
+
+<p> When JSim compiles an MML model,  it classifies variables as
+either "input" or "output":
+<ul>
+<li>Variables set equal to numeric constants in MML (e.g. t.min, t.max,
+t.delta, F and V in the above model)
+are classified as inputs;</li>
+<li>Variables declared "extern" (e.g. Cin 
+in the above model) are classified as inputs;</li>
+<li>All other variables are classified as outputs.</li>
+</ul>
+
+<p> JSim model "parameters" are values that affect model calculations that
+the user may alter without model recompilation.  There are 3 types of
+parameters:</p>
+
+<ol>
+<li>MML variables classified as "inputs" above;</li>
+<li>numeric solver controls, e.g. which ODE solver algorithm to use
+<a href="Solver_ODE_Guide.html">(more info)</a>;</li>
+<li>function generator controls, e.g. the amplitude of a test signal
+<a href="User_Fgen.html">(more info)</a>.</li>
+</ol>
+
+<p> A collection of values for all the parameters in a JSim model is
+called a "parameter set". The values generated during a model run reflect
+both the model's MML code (which provides default parameter values) and
+the model's "current parameter set".  The JSim GUI allows users to save
+and restore distinct parameter sets for modeling varying experimental
+conditions (e.g. "baseline", "elevated heart rate").  See <a
+href="User_ParSets.html">JSim Parameter Sets</a> for further info.</p>
+
+<p><strong>New User Warning:</strong> Values in the current parameter set are
+preserved between compiles.  This usually saves modelers work, because
+most editing is the fine-tuning of model calculations, however it can
+cause a confusing scenario for new users. When an MML model is first
+compiled, the default values (e.g. V=20 in the above model) are loaded
+into the current parameter set.  If you were to modify the MML to V=25 and
+recompile, the value shown in the JSim GUI after recompilation would still
+be 20, a value restored from the current parameter set.  The compilation
+has altered V's default value to 25 (which you can see by selecting
+"Revert to model defaults" from the ParSet menu), but not its current
+value.  This behaviour is somewhat controversial and is further discussed
+<a href="User_ParSets.html#controversy"> here</a>.</p>
+
+<h2> <a name="constraints"> Understanding Constraints </a> </h2>
+
+<p class="crush"> MML is a declarative language, not a procedural one.  
+MML models primarily consist of</p>
+
+<ul class="crush">
+<li>declarations of physical units;</li>
+<li>declarations of variables;</li>
+<li>declarations of constraints on those variables.</li>
+</ul>
+<p>The most common type of constraints are mathematical equations. 
+Consider the following:</p>
+
+<?php jsTextDownApp("examples/MML_Intro/intro_constraints.proj"); ?>
+
+<p class="crush">Notes:</p>
+<ul class="crush">
+<li>This model will calculate a=5, b=4, c=9.</li>
+<li>The order equations are declared in MML does not affect
+the results.  Any reordering of eqns 1, 2 and 3 would produce the
+same results.</li>
+<li>Equations do not necessarily imply calculation of the left-hand side
+from the right-hand side (as they do in procedural languages
+such as Fortran, C, Java).</li>
+</ul>
+
+<p>"extern" is another type of constraint.  Substituting the following
+for eqn 3 in the above model would require the JSim user to specify a
+value for "a" before the model can run:</p>
+<pre>extern a;</pre>
+
+<p>Understanding constraints is important because JSim requires all model
+variables to be completely constrained, that is, it ensures there is no
+ambiguity in the model calculations.  If any one of the 3 equations in the
+above model were omitted, compilation would abort with a "model
+underconstrained" error message.  Alternatively, adding a 4th equation
+such as </p>
+<pre>b=6  // eqn 4</pre>
+<p> would cause compilation abort with a "model 
+overconstrained"
+error message.  This may seem needlessly picky, but it is actually an
+advantage.  This approach guarantees that model equations are complete and
+consistent, ultimately clarifying thinking, reducing debugging and
+improving scientific communication.</p>
+
+<p>For simple, equation-based models, a fully constrained model will have
+as many variables as equations.  The current JSim compiler is not smart
+enough to detect consistent systems with more equations that variables, as
+might occur in the above model with the added relation "b=4".  In this
+case, the compile would abort with a "model overconstrained" error
+message.  Modelers can avoid this situation by matching the number of
+equations with the number of variables to be solved.</strong>
+
+<p class="crush">Some exceptions to the #variables = #constraints include 
+the following (follow links for details):</p>
+<ol class="crush">
+<li>ODE variables require 2 equations - an initial condition and a state 
+equation;</li>
+<li>1D PDE variables <a href="MML_PDE.html">(more info)</a>require 4 
+equations - an initial condition, two
+boundary conditions and a state equation;</li>
+<li>Event variables <a href="MML_Events.html">(more info)</a>require an 
+initial condition and one or more
+event statements;</li>
+<li>MML procedures <a href="MML_Func_Intro.html">(more info)</a> may 
+constrain multiple variables with a single statment.</li>
+</ol>
+
+<p> By framing models in terms of constraints,  MML can easily
+intermix mathematics (explicit & implicit equations, ODEs, PDEs),
+discrete events and procedural code (e.g. Java, C, Fortran).  This
+allows modelers to naturally mix computational methods as required
+by the science,  rather than by shoehorning all model calculations
+into a single computational framework.</p>
+
+<h2> <a name="topics"> Further Topics </a> </h2>
+
+<p> Most MML modeler writers will need to be familiar with the previous
+topics.  Other features of MML are usually best learned as need arises,
+to wit:</p>
+<ul>
+<li>Implicit equations<a href="MML_Implicit.html">(more info)</a>
+- JSim supports both linear and non-linear implicit (sometimes
+called simultaneous) equations.</li>
+<li>Partial differential equations (PDEs) <a 
+href="MML_PDE.html">(more info)</a> - JSim currently supports a 
+variety of 1-dimensional PDEs.  Entended 1D support and some 2D 
+support is under development.</li>
+<li>Integrals and Summations <a href="MML_Integrals.html">(more info)</a> 
+- MML
+constructs for integration and summation.</li>
+<li>Events <a href="MML_Events.html">(more info)</a> - MML 
+constructs appropriate for discrete state changes, such as
+gate openings and closings.  Event also support some recursive
+function definitions.</li>
+<li>Functions and procedures <a href="MML_Func_Intro.html">(more info)</a> 
+are mechanisms for embedding code from procedural languages such as 
+Java, C and Fortran as constraints within MML models.
+</li>
+<li>Templates <a href="MML_Templates.html">(more info)</a> are MML's
+mechanism for structuring model code and writing reusable model 
+components.</li>
+</ul>
+
+
+<h2> <a name=""> </a> </h2>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet;
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

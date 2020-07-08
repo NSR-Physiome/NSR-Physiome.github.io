@@ -1,0 +1,177 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim ODE Solver Algorithms</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> JSim allows the user to select which ODE solver to use. With
+ODE solvers, there is usually a trade-off between speed and accuracy--more
+accurate ODE solvers usually require more computation time.
+
+The ODE solvers are listed in order of increasing complexity.</p>
+<ul>
+<li> <a href="#Euler">Euler</a></li>
+<li> <a href="#RK2">RK2</a></li>
+<li> <a href="#RK4">RK4</a></li>
+<li> <a href="#KM">KM</a></li>
+<li> <a href="#Fehlberg">Fehlberg</a></li>
+<li> <a href="#CVode">CVode</a></li>
+<li> <a href="#Dopri5">Dopri5</a></li>
+<li> <a href="#Radau">Radau</a></li>
+<li> <a href="#Auto">Auto</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="Euler"> Euler: forward one-step</a></h2>
+<h3>    Parameters:</h3>
+<ul>
+<li> nstep: Subdivides the stepsize of the problem. If the independent
+variable is "t", the stepsize is t.delta/nstep. Default value is 2. Error is
+first order (proportional to actual step size).</li>
+</ul>
+
+<h2><a name="RK2"> RK2: 2nd order Runge-Kutta, also known as modified
+trapezoidal method</a></h2>
+
+
+<h3>    Parameters:</h3>
+<ul>
+<li> nstep: Subdivides the stepsize of the problem. If the independent
+variable is "t", the stepsize is t.delta/nstep. Default value is 2. Error is
+second
+order (proportional to actual step size squared).</li>
+</ul>
+
+<h2><a name="RK4"> RK4: 4th order Runge-Kutta</a></h2>
+<h3>    Parameters:</h3>
+<ul>
+<li> nstep: Subdivides the stepsize of the problem. If the independent
+variable is "t", the stepsize is t.delta/nstep. Default value is 2.</li>
+</ul>
+
+<h2><a name="KM"> KM: Runge-Kutta Merson with adaptive stepsize</a></h2>
+
+<h3>    Parameters:</h3>
+<ul>
+<li> minstep: Minimum stepsize for problem. Default value is 1.0e-4.  </li>
+<li> maxstep: Maximum stepsize for problem. Default value is 1.0e-1. </li>
+<li> tol: Error tolerance for solution. Default value is 1.0e-6. </li>
+</ul>
+<h2><a name="Fehlberg"> Fehlberg: Runge-Kutta-Fehlberg (RKF45)</a></h2>
+<h3>    Parameters:</h3>
+<ul>
+<li> minstep: Minimum stepsize for problem. Default value is 1.0e-4.
+</li>
+<li> maxstep: Maximum stepsize for problem. Default value is 1.0e-1. </li>
+<li> tol: Error tolerance for solution. Default value is 1.0e-6. </li>
+
+</ul>
+
+<h2><a name="CVode"> CVode: BDF and Adams-Moulton methods</a></h2>
+<h3>    Parameters:</h3>
+<ul>
+<li> reltol: Relative tolerance in solution. Default value is 1.0e-7.
+</li>
+<li> abstol: Absolute tolerance in solution. Default value is 1.0e-8.
+<li> maxsteps: Maximum number of steps. Default value is 100000. </li>
+<li> stiff: checking
+the box marked "stiff" invokes a BDF (backward differentiation
+formula) otherwise Adams-Moulton methods are used.
+</li>
+
+</ul>
+
+
+<h2><a name="Dopri5"> Dopri5: Dorman Prince 5th order with variable stepsize
+(explicit Runge-Kutta Method)</a></h2>
+<h3>    Parameters:</h3>
+<ul>
+<li>reltol: Relative error tolerance. Default is 1.0e-7.</li>
+<li>abstol: Absolute error tolerance.Default is 1.0e-7.</li>
+<li>nstep: Number of computed steps. Default is 100000.</li>
+<li>stiff: Test for stiffness after each j*stiff steps, where j is
+some integer. Default is 1000. </li>
+<li>round: Rounding Unit. Default is 2.3e-16.</li>
+<li>safety: Safety factor in step size prediction. Default is 0.9.</li>
+<li>loselect: Step size selection. The new internal step size is chosen
+subject to the restriction 
+<br>loselect less than or equal to (new step size)/(old step size). <br> Default is 0.2.</li>
+<li>hiselect: Step size selection. The new internal step size is chosen
+subject to the restriction <br>(new step size)/(old step size) 
+less than or equal to hiselect.
+ Default is 10.</li>
+<li>beta: Beta for stabilized step size control. Larger values of
+beta (less than or equal to 0.1) make the step size control more stable.
+Default is 0.04.</li>
+</ul>
+<h2><a name="Radau"> Radau: Implicit Runge-Kutta method with variable order
+(5,9,13) with step size control</a></h2>
+<h3>    Parameters:</h3>
+<ul>
+<li>reltol: Relative error tolerance. Default is 1.0e-4.</li>
+<li>abstol: Absolute error tolerance.Default is 1.0e-7.</li>
+<li>nstep: Number of computed steps. Default is 100000.</li>
+<li>round: Rounding Unit. Default is 1.0e-16.</li>
+<li>safety: Safety factor in step size prediction. Default is 0.9.</li>
+<li>minord: The minimum order of the problem is 2*minord-1. Possible
+values are 1, 3, 5, and 7. Default is 3. </li>
+<li>maxord: The maximum order of the problem is 2*maxord-1. Possible
+values are 1, 3, 5, and 7. Default value is 7.</li>
+<li>initord: The initial order of the problem is 2*initord-1. Possible
+values are 1, 3, 5, and 7. Default value is 3. </li>
+<li>newton: The maximum number of Newton iterations for the solution
+of the implicit system in each step is [newton+(order-3)*2.5], where order
+is the order of the solution (see minord, maxord, initord). Default value is 7. </li>
+<li>jacob: Decides whether the Jacobian should be recomputed; increase
+jacob to 0.1 when Jacobian evaluations are costly. For small systems,
+jacob should be smaller (0.001). Negative value forces the code to compute
+the Jacobian after every step. Default value is 0.001. </li>
+<li>losize: IF [losize LessThan Hnew/Hold LessThan hisize] where Hnew is
+is the new step size and Hold is the old step size, then the step
+size is not changed. For small systems use losize=1.0, hisize=1.2. For
+large systems, try losize=0.99, hisize=2.
+Default value is 1.0. </li>
+
+<li>hisize: IF [losize LessThan Hnew/Hold LessThan hisize] where Hnew is
+is the new step size and Hold is the old step size, then the step
+size is not changed. For small systems use losize=1.0, hisize=1.2. For
+large systems, try losize=0.99, hisize=2.
+Default value is 1.2. </li>
+
+<li>loselect: The new step size is chosen subject to the restriction
+[loselect LessThanOrEqualTo Hnew/Hold LessThanOrEqualTo hiselect],  where
+Hnew is
+is the new step size and Hold is the old step size. Default value is 0.2. </li>
+<li>hiselect: The new step size is chosen subject to the restriction
+[loselect LessThanOrEqualTo Hnew/Hold LessThanOrEqualTo hiselect],  where
+Hnew is
+is the new step size and Hold is the old step size. Default value is 8. </li>
+<li>locontract: Order is increased if the contractivity factor is smaller
+than locontract. Default value is 0.002. </li>
+<li>hicontract: Order is decreased if the contractivity factor is larger
+than hicontract. Default value is 0.8. </li>
+<li>hiorder: Order is decreased only if the stepsize ratio satisfies
+ [loorder LessThanOrEqualTo Hnew/H LESSThanOrEqualTo hiorder], where
+Hnew is the new stepsize and H is the initial step size taken to be 1.0E-6. Default value is 1.2. </li>
+<li>loorder: Order is decreased only if the stepsize ratio satisfies
+ [loorder LessThanOrEqualTo Hnew/H LESSThanOrEqualTo hiorder], where Hnew
+is the new stepsize and H is the initial step size taken to be 1.0E-6. Default value is 0.8. </li>
+</ul>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>
+

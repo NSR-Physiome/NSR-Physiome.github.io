@@ -1,0 +1,572 @@
+<?php
+    // This block is the phphead.frg file from tpt.
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match('@\<h1[^\062]*\>(.*)\<\/h1\>@sU',"$contents",$matches);
+    $pagtit = preg_replace('@\<.*\>@sU','',"$matches[1]");
+    require_once("phead.html");
+    // phead.html provides $haystack, the name of the current file
+?>
+
+<h1><img src="../pics/news.gif" />Introduction to JSim Version 2.0</h1>
+
+<p class="first">JSim version 2.0 features a rewrite of significant 
+portions of JSim's MML compiler.  This update fixes some longstanding 
+bugs and enables a host of new features, some of which are available 
+immediately, and some of which will appear over the coming months.  This 
+page is not meant to be a complete tutorial on new features, but merely 
+an overview.  </p>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#tech">Compiler Overview</a></li> 
+
+<li><a href="#bugs">Bug fixes in version 2.0</a></li> 
+  <ul>
+  <li><a href="#allseq">No more "Not all tools sequenced" error messages</a></li> 
+  <li><a href="#impfind">Faster detection of underspecified models and implicit equations </a></li> 
+  <li><a href="#block">Improved ODE & PDE blocking</a></li> 
+  <li><a href="#museq">Improved microstep sequencing</a></li> 
+  <li><a href="#eventseq">Improved event sequencing</a></li> 
+  <li><a href="#relseq">Improved relation sequencing</a></li> 
+  <li><a href="#vfc">Improved VFC sequencing</a></li> 
+  <li><a href="#diag">Improved user diagnostics</a></li> 
+  <li><a href="#fastbug">Expedited bug resolution</a></li> 
+  </ul>
+
+<li><a href="#new">New features in version 2.0</a></li> 
+  <ul>
+  <li><a href="#mucache">Improved microstep caching</a></li> 
+  <li><a href="#event">Improved event sequencing</a></li> 
+  <li><a href="#odeorder">Nth order ODEs</a></li> 
+  <li><a href="#odeevent">Events for ODE variables</a></li> 
+  <li><a href="#procic">Procedures may be used as initial conditions</a></li> 
+  <li><a href="#when">More flexible initial condition and boundary condition specification</a></li> 
+  <li><a href="#domains">More flexible domain controls</a></li> 
+  <li><a href="#xmml">XMML Output</a></li> 
+  <li><a href="#graph">Model browser</a></li> 
+  <li><a href="#sbmlout">SBML Output</a></li> 
+  <li><a href="#trace">Improved variable tracing</a></li> 
+  <li><a href="#integral">More consistent integrals</a></li>
+  <li><a href="#sum">More flexible sums</a></li>
+  </ul>
+
+<li><a href="#coming">Coming features in version 2.0</a></li> 
+  <ul>
+  <li><a href="#statedim">N-dimensional state variables</a></li> 
+  <li><a href="#sbmlevent">SBML-style events in MML</a></li> 
+  <li><a href="#impblock">Implicit block declarations in MML</a></li> 
+  <li><a href="#pdes">2D & 3D PDE solver support</a></li> 
+  <li><a href="#bettergraph">Improved model browser</a></li> 
+  <li><a href="#sync">Synchronous run-time support</a></li> 
+  <li><a href="#sbw">Improved SBW support</a></li> 
+  <li><a href="#runvars">User modifiable run-time variables</a></li> 
+  <li><a href="#api">Steppable API for joint JSim/CFD projects</a></li> 
+  </ul>
+
+<li><a href="#knownbugs">Known bugs in version 2.0</a></li> 
+
+</ul>
+
+
+
+<h2><a name="tech">Compiler Overview</a></h2>
+
+<p>Some technical understanding of the JSim compiler is helpful in 
+understanding improvements in JSim version 2.0. The compiler consists 
+of 8 phases, each of whose results feeds to the next.  The starting point 
+is MML model text.  The end point is a JSim model run-time object or an 
+appropriate error message. The compiler phases, in order of execution, are 
+listed below.  Phases 4 through 7 were rewritten for version 2.0.  The JSim 
+model run-time library (utilized by the runnable model object) has not been 
+changed for initial release, although some changes will be rolled in in the 
+coming months. </p>
+
+<table border=true cellspacing=0 cellpadding=2>
+
+<tr> <th>#</th> <th>Phase</th> <th>Description</th> </tr>
+
+<tr> <th>1</th> <td>Parsing</td> <td>Scans MML text and, based on MML's 
+syntactic rules, creates data structures that comprise the model: units, 
+variables, equations, events, etc.</td></tr>
+
+<tr> <th>2</th> <td>Flattening</td> <td>Reduces templates (BCL items) 
+to flat (mathematical) MML.  Currently, this phase affects only a small 
+number of models (XSim and MFAX models).</td> </tr>
+
+<tr> <th>3</th>
+<td>Unit correction</td> <td>If unit conversion is on, checks for 
+unit errors,  adds conversion factors to equations and assigns units to 
+variables whose units were not specified in the MML.</td> </tr>
+
+<tr> <th>4</th>
+<td>Tooling</td> <td>Examines equations to figure out how each 
+variable will be calculated (e.g. via an expression, an ODE, an 
+implicit equation).  Generates errors for over-specified and 
+under-specified 
+models.</td> 
+</tr>
+
+<tr> <th>5</th>
+<td>Sequencing</td> <td>Places all calculations in proper order so 
+that variables are calculated before they are used.  Generates errors 
+for circular dependencies.</td> 
+</tr>
+
+<tr> <th>6</th>
+<td>ODE & PDE blocking</td> <td>Collects ODEs and PDEs into blocks to 
+be solved together, resulting in faster and more accurate calculations than 
+if calculated individually.</td></tr>
+
+<tr> <th>7</th>
+<td>Java code generation</td> <td>Writes Java code that uses the 
+JSim run-time library to perform model calculations based on the above 
+calculation sequence.</td> </tr>
+
+<tr> <th>8</th>
+<td>Java compilation & instantiation</td> <td>Compiles the 
+generated model Java code using Sun's Java compiler, and creates a model 
+object ready for use within the JSim computational engine. </td> 
+</tr>
+
+</table>
+
+<h2><a name="bugs">Bug Fixes in version 2.0</a></h2>
+
+<p><strong><a name="allseq">No more "Not all tools sequenced" error 
+messages</a></strong>: This message in version 1.6 indicated that the 
+sequencing phase failed to place all calculations in correct sequence. It 
+was very frustrating to users because the compiler could not give the user 
+specific information as to where the problem was. In most cases, the 
+problem was in the compiler which made internal errors in formulating 
+calculation dependencies.  These errors have been corrected in version 2.0.  
+However, the message could also be caused by genuine circular dependencies 
+in model calculations.  Version 2.0 contains algorithms to locate such 
+circular dependencies and present them to the user.</p>
+
+<p><strong><a name="impfind">Faster detection of underspecified models and 
+implicit equations</a></strong>: In version 1.6, detection of implicit 
+equation blocks was done via an inefficient and exhaustive search of the 
+unprocessed equations. This could take minutes, or even hours, because a 
+system of N equations contains N! possible implicit equation blocks.  In 
+practice, blocks of more that 3 implicit equations were rarely found before 
+the compilation timed out.  Even worse, every underspecified model made 
+this search, meaning that underspecified models often had very long 
+compilation times, and ended up needing to be canceled by the user.  
+Version 2.0's implicit equation search is much more efficient and, by 
+default, limits itself to 1,000,000 search blocks with a maximum block size 
+of 10 equations.  Testing indicates this algorithm performs quickly and 
+accurately for all known MML models, and should enable modelers to use more 
+implicit equations in their models. Even better, this eliminates long 
+compile times for underspecified models.  The user may tune the parameters 
+of the implicit search in the case of models needing a larger search space. 
+See also <a href="#impblock">Implicit block declarations in MML</a>.</p>
+ 
+<p><strong><a name="block">Improved ODE & PDE blocking</a></strong>: In 
+version 1.6,  ODEs and PDEs were blocked before they were sequenced.  
+Version 2.0 performs blocking (phase 6) after sequencing (phase 5). This
+eliminates one case of the <a href="#allseq">Not all tools sequenced</a> 
+bug above.</p>
+
+<p><strong><a name="museq">Improved microstep sequencing</a></strong>: In 
+version 1.6, variables were sometimes calculated out of order within ODE 
+microsteps.  This behaviour was inconsistent, but when it occured would 
+result in numerical inaccuraccy, solver aborts or poor performance.  In a 
+case study with Max Neal's VS001 model, calculations were made out of 
+order, but numerical inaccuraccy was masked by the use of an adaptive ODE 
+solver.  However the resulting numeric instability caused the solver to 
+call the microstep routine about twice as many times, resulting in a 
+doubling of calculation time.  This bug is fixed in version 2.0. </p>
+ 
+<p><strong><a name="eventseq">Improved event sequencing</a></strong>: In 
+version 1.6, events were sometimes sequenced out of order. 
+This could force modelers to make obscure and seemingly arbitrary hacks to 
+their models for them to run correctly. These problems have been fixed in 
+version 2.0, however event sequencing remains a difficult and 
+subtle subject.  More documentation on this will be forthcoming.</p>
+ 
+<p><strong><a name="relseq">Improved relation 
+sequencing</a></strong>: Relations can be used in MML to trigger error 
+conditions so that worthless long model runs can be avoided.  In version 
+1.6, the sequencing algorithm often placed relation tests well after the
+calculation of a variable, blunting the effectiveness of the mechanism.
+This has been corrected in version 2.0 where relations are now sequenced 
+immediately after the relevant variable is calculated.</p>
+
+<p><strong><a name="vfc">Improved VFC sequencing</a></strong>: Variable 
+function calls (VFCs) are queries to the non-current value of a 
+variable.  Two notable uses are for delay lines and data curve 
+interpolation.  These two VFCs differ for sequencing purposes.  Delay 
+VFCs may be calculated in the same loop as the source variable, while 
+arbitrary query VFCs can only be calculated once the source variable is 
+complete.  Version 1.6 did not attempt to distinguish these two cases, 
+often resulting in VFCs returning NaNs.  Version 2.0 attempts to 
+recognize delays, and sequence them within the same loop as their source 
+variable.  VFC's not recognized as delays are attempted to be sequenced 
+after the source variable loop is complete.  If this attempt results in 
+a circular dependency, the VFC is sequenced as a delay and a warning 
+message is issued to inform the user of the situation.</p>
+
+<p><strong><a name="diag">Improved user diagnostics</a></strong>: 
+Generating good error messages, especially for code as complicated as a 
+language compiler, remains a bit of an art, and subject to continuous 
+feedback and review.  In general, version 2.0 error messages were improved 
+in the following ways:</p>
+
+<ul>
+<li>A systematic review of all error messages was performed.</li>
+<li>An attempt was made to distinguish internal compiler errors from errors
+resulting from incorrectly written models.</li>
+<li>An attempt was made to add line number information to more error 
+messages.</li>
+<li>Messages regarding circular sequence dependencies (see above) are now 
+much more explicit.</li>
+<li>Messages relating to underspecified and overspecified models remain 
+difficult to interpret.  However, new <a href="#graph">model 
+dependency graphs</a> are expected to be helpful in these cases.</li>
+<li>Despite these efforts,  we expect users will still express confusion 
+over some error messages.  We will continue to work to address these 
+concerns.</li>
+</ul>
+ 
+<p><strong><a name="fastbug">Expedited bug resolution</a></strong>: The 
+version 2.0 compiler have a more modular design and contain better internal 
+workings auditing, in hopes of expediting resolution of future bugs.  The 
+version 1.6 compiler had been hacked numerous times over the previous 9 
+years, resulting in code that was exceedingly difficult and time-consuming 
+to debug.  Our hope is that future bugs can be resolved much more quickly, 
+but time will tell... </p>
+ 
+<h2><a name="new">New Features in version 2.0</a></h2>
+
+<p><strong><a name="mucache">Improved microstep caching</a></strong>: 
+Version 2.0 does a better job of calculating ODE microstepped 
+variables.  For example, under version 1.6,  variable <i>a</i> in the 
+following model was not microstepped,  leading to less accurate 
+numerical solution:</p>
+ 
+<pre>
+math main {
+        realDomain t, x;
+        t.min=0; t.max=3; t.delta=0.25;
+        x.min=0; x.max=1; x.delta=0.1;
+        real a(t) = t+1;
+        real u(t,x);
+        when (t=t.min) u=x;
+        u:t = a + u;
+}
+</pre>
+
+<p><strong><a name="event">Improved event sequencing</a></strong>: 
+Multiple events in a model can create ambiguous calculation semantics.
+Version 2 properly sequences unambiguous calculations, and 
+issues warnings about ambiguous calculations.  Version 1 did 
+not guarantee proper event sequencing and issued no 
+warnings.
+
+
+<p><strong><a name="odeorder">Nth order ODEs</a></strong>: Version 2.0 allows 
+modelers to write Nth order ODEs directly in MML.  In version 1.6, modelers 
+needed to explicitly reduce and Nth order ODE to N separate 1st order ODEs.
+
+Example usage:</p>
+
+<pre>
+math main {
+  realDomain t;
+  t.min=0; t.max=2*PI; t.ct=13;
+  real u(t);
+  when (t=t.min) { u=1; u:t=0; }
+  u:t:t = -u;  // 2nd order sinusoidal ODE 
+}
+</pre>
+ 
+<p><strong><a name="odeevent">Events for ODE variables</a></strong>: Version 2.0 
+allows events to affect ODE variables.  Under version 1.6,  events could 
+only affect realState or intState variables.  Example usage: </p>
+
+<pre>
+math main {
+  realDomain t;
+  t.min=0; t.max=5; t.delta=.1;
+  real u(t);
+  when (t=t.min) u=1;
+  u:t = -u;
+  event (u<.2) u=1;
+}
+</pre>
+ 
+<p><strong><a name="procic">Procedures may be used as initial 
+conditions</a></strong>: In version 1.6, procedure calls within 
+when clauses were not treated correctly.  This problem has been 
+fixed in version 2.0.  Example usage:</p>
+
+<pre>
+source procedure double(a; b) {
+        language="java";
+        reentrant="true";
+        maincode={{
+            double aval = a.realVal();
+            b.set(aval*2);
+        }};
+}
+
+math main {
+        realDomain t;
+        t.min=0; t.max=3; t.delta=1;
+        real u(t) = t+1;
+        real v(t);
+        when (t=t.min) double(u, v);
+        v:t = -v;
+}
+</pre>
+
+<p><strong><a name="when">More flexible initial condition and boundary 
+condition specification</a></strong>: Under version 1.6, specification 
+of initial and boundary conditions required a "when" clause.  When 
+clauses are still supported under version 2.0, but modelers may 
+alternatively use variable function calls (e.g. u(t.min)).  This change 
+was made to support future PDE boundary conditions which equate left and 
+right hand boundaries (e.g. u(x.max) = v(x.min)).  Example usage:</p>
+ 
+<pre>
+math main {
+        realDomain t;
+        t.min=0; t.max=3; t.delta=0.25;
+        real u(t);
+        u(t.min)=1;
+        u:t = u;
+}
+</pre>
+
+<p><strong><a name="domains">More flexible domain controls</a></strong>: 
+Under version 1.6, for domain x, specification of domain controls x.min 
+and x.max were required along with one of x.delta and x.ct.  Under 
+version 2.0 any 3 domain controls is sufficient. Example usage:</p>
+
+<pre>
+math main {
+  realDomain t;
+  t.min=0; t.delta=3; t.ct=4;  // t.max=12 will be calculated
+}
+</pre>
+
+<p>Also under version 2.0, some domain  controls may be left undefined.
+In this case,  a warning message will be issued and
+the user must specify the control before running the model. Example 
+usage:</p>
+
+<pre>
+math main {
+  realDomain t;
+  t.min=0; t.delta=1; // t.max must be specified at run-time
+}
+</pre>
+ 
+<p><strong><a name="xmml">XMML Output</a>:</strong> XMML is an XML 
+representation of a JSim model, designed to export models to modeling 
+and bioinformatics applications.  XMML is the underlying technology for 
+<a href="#graph">JSim model graphs</a> and <a href="#sbmlout">SBML 
+export</a>.  It is also used in Max Neal's SemSim application.  See
+specification in <a href="MML_XMML.html">JSim XMML</a>.</p>
+
+<p><strong><a name="graph">Model browser</a>:</strong> Version 2.0 
+implements the model browser, a tool for exploring model structure 
+visually via graphical representations of model dependencies.  Initially 
+a very basic version of this concept will be available which be refined 
+and improved upon in the coming months.  Browser graphs utilize <a 
+href="#xmml">XMML</a> as a communcations medium.  In the JSim GUI, a 
+model's browser may be found within the new "Browser" tab.  Thanks to 
+Bart Jardine for the model graph implementation.  <a 
+href="User_Browser.html">Browser documentation</a> is under 
+development.</p>
+
+<p><strong><a name="sbmlout">SBML Output</a>: </strong> Version 2.0 
+allows you to output MML models as SBML.  Since SBML has a small 
+mathematical vocabulary in comparison with MML, this feature works only 
+for a subset of MML models (those with a single domain, ODEs, implicit 
+equations and events).  SBML output utilizes <a href="#xmml">XMML</a> as 
+a communcations medium. Further documentation of this feature may be 
+found <a href="MML_SBML.html#export">here</a>. Thanks to Lucian Smith 
+for the SBML output implementation. </p>
+
+<p><strong><a name="trace">Improved variable tracing</a>: </strong> Version 2.0 
+implements the -initNaN, -traceNaN, -abortNaN and -traceVars compiler switches in a 
+more efficient way, and a time-point is now provided for microstepped 
+calculation output.</p>
+
+<p><strong><a name="integral">More consistent integrals</a>: </strong> 
+In version 2.0, the short and long integral formulations are calculated 
+via an interpolative procedure.  Previously, the short form was 
+calculated via an interpolative procedure and the long form via a hidden 
+ODE.  Thus I1 and I2 calculate the same under version 2, but not version 
+1:
+
+<pre>
+math main {
+  realDomain t;
+  t.min=0; t.max=5; t.delta=1;
+  real a(t) = t^2;
+  real I1 = integral(a@t); // integral short form
+  real I2 = integral(t=t.min to t.max, a); // integral long form
+}
+</pre>
+
+<p>New documentation for integrals may be found <a 
+href="MML_Integrals.html#integrals">here</a>.
+
+<p><strong><a name="sum">More flexible sums</a>: </strong> 
+Version 2 supports a long form of the sum function analagous
+to the long form of the integral function:
+
+<pre>
+math main {
+  realDomain t;
+  t.min=0; t.max=5; t.delta=1;
+  real a(t) = t^2;
+  real S(t) = sum(t=t.min to t, a);
+}
+</pre>
+
+<p>New documentation for sums may be found <a 
+href="MML_Integrals.html#sums">here</a>.
+
+
+
+<h2><a name="coming">Coming Features in version 2.0</a></h2>
+
+<p><strong><a name="statedim">N-dimensional state 
+variables</a></strong>: Version 2.0 allows multi-domain realState and 
+intState variables.  Under version 1.6, state variable had to be 
+1-dimensional.  Example usage:</p>
+
+<pre>
+math main {
+  realDomain t, x;
+  t.min=0; t.max=10; t.delta=1;
+  x.min=0; x.max=1; x.delta=.1;
+  realState r(t,x);
+  when(t=t.min) r=1;
+  event(t>5) r=r+1;
+}
+</pre>
+
+ 
+<p><strong><a name="sbmlevent">SBML-style events in MML</a></strong>: 
+Historically, JSim events and SBML events have differed in their 
+triggering semantics.  In JSim, an event is launched whenever its 
+trigger expression evaluates to true.  In SBML, an event is launched 
+when it trigger expression becomes true, i.e. on the "rising edge".  
+In the next few months, MML syntax will be expanded to allow the user to 
+designated events with rising edge trigger semantics.  At the same time, 
+various other features of SBML events (delays, cancelable events, 
+initial trigger values) will also be implemented.  These changes are 
+made possible by fixes to basic event handling in version 2.0. </p>
+ 
+<p><strong><a name="impblock">Implicit block declarations in 
+MML</a></strong>: While version 2.0 has significantly improved 
+detection of implicit equation blocks,  it remains an inherently 
+difficult problem.  If modelers end up writing large number of 
+implicit equations in their models,  it is possible that an explicit MML 
+declaration will be needed for adequate compiler performance.  If 
+so,  such a declaration might look something like for following:</p>
+
+<pre>
+... lots of model equations ...
+implicit {
+  a + b + c = 0;
+  a^2 - c = 10;
+  b + c = 5;
+}
+... lots more model equations ...
+</pre>
+ 
+<p><strong><a name="pdes">2D & 3D PDE solver support</a></strong>: The 
+tooling and sequencing phases of the version 2.0 compiler now support 2D 
+and 3D PDEs. In order to make such equations available to users, NSR 
+will be implementing run-time numeric methods to solve such problems. As 
+with current 1D PDE solvers, implementation of such methods will be an 
+ongoing process in JSim development. </p>
+ 
+<p><strong><a name="bettergraph">Improved model browser</a></strong>: 
+The initial release of version 2.0 will include a fairly minimal 
+implementation of the <a href="#graph">model browser</a>.  The 
+graphs will be refined and improved based on user feedback as part of 
+the ongoing process of JSim development.  Bart Jardine will be primarily 
+responsible for this development.  Below are some example graphs from a 
+prototype by Gary Yngve, which illustrate where we're headed: </p>
+ 
+<ul>
+<li><a href="../pics/browser1.jpeg">example 1</a></li>
+<li><a href="../pics/browser2.jpeg">example 2</a></li>
+<li><a href="../pics/browser3.jpeg">example 3</a></li>
+</ul>
+
+<p><strong><a name="sync">Synchronous run-time support</a></strong>: 
+Currently, the JSim computational engine runs asynchronously from the 
+user interface.  This methodology provides buffering for high 
+performance.  However, there are some scenarios that would be better 
+served by synchronous operation, that is, a lock step between the 
+computational engine and user interface.  Now that underlying changes 
+have been made in the version 2.0 compiler, it will now be possible to 
+provide a synchronous run-time option, thus enabling three functionality 
+targets: <a href="#sbw">improved SBW support</a>, <a 
+href="#runvars">user modifiable run-time variables</a> and a <a 
+href="#api">steppable API for joint JSim/CFD projects</a>. See 
+below.</p>
+ 
+<p><strong><a name="sbw">Improved SBW support</a></strong>: With a <a 
+href="#sync">synchronous run-time</a> available JSim will be able to 
+function within SBW as "simulator".  Currently, JSim functions in SBW 
+only as an "analyzer".  Also, with <a href="#sbmlout">SBML output</a> 
+available, JSim will also be able to function as an SBW "editor". </p>
+ 
+<p><strong><a name="runvars">User modifiable run-time variables</a></strong>: 
+With a <a href="#sync">synchronous run-time</a> available, it will be 
+possible for users to modify some model variables during the course of a 
+model run.  In particular,  time-variable inputs and ODE state variables 
+should be modifiable.
+</p>
+ 
+<p><strong><a name="api">Steppable API for joint JSim/CFD 
+projects</a></strong>: With a <a href="#sync">synchronous run-time</a> 
+available, a synchronous API will allow program driven intra-run 
+interaction with external programs.  In particular, this functionality 
+will support joint JSim/CFD (computational fluid dynamics) models now 
+under development. </p>
+
+<h2><a name="knownbugs">Known bugs in version 2.0</a></h2>
+
+<p>The following bugs are not yet resolved. However, we continue to work 
+on them:</p>
+
+<p>3 of 5000 tested models generate spurious error messages that
+were not generated in version 1.</p>
+
+<p>7 of 5000 tested models take a long time to compile - about 
+90 seconds on the NSR server (gloin).</p>
+
+<p>Event warnings are sometimes generated unnecessarily.  For
+example,  the fibonacci calculation:
+
+<pre>
+math main {
+  realDomain n;
+  n.min=1; n.max=10; n.delta=1;
+  intState f(n);
+  when (n=n.min) f=1;
+  event (n>2) f = f(n-1) + f(n-2);
+}
+</pre>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

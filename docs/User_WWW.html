@@ -1,0 +1,94 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+ <h1>Running a JSim model from a Web Browser link</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+<p>    With the limited support for Java applets in browsers, JSim now makes use of <a href="https://www.java.com/en/download/faq/java_webstart.xml">Java Web Start technology</a> to run models on your computer. A user downloads a model.jnlp file which gives the local Java installation information about what files need to be loaded and run. To do this, your computer must have <a href="https://java.com/en/download/">Java installed</a>.  This page
+provides configuration information for many common platforms.  For
+more information about JSim,  see the <a href="../index.html">JSim Home Page</a> .</p>
+
+<h2> Browser compatibility:</h2>
+<ul>
+<li><strong>Google Chrome:</strong> Works. </li>
+<li><strong>Mozilla Firefox:</strong> Works. </li>
+
+<li><strong>MS Edge browser:</strong> Works. </li>
+
+<li><strong>MS Internet Explorer 11:</strong> Works (Windows 7). </li>
+
+<li><strong>Apple Safari (OS 10.10+):</strong> Works.</li>
+
+</ul>
+<h2>Security Issue:</h2>
+<ul>
+<li> <p>When starting JSim you may see a Java security warning message. Java will not run the Java Web Start file unless an exception is manually added. To do this:<br /> <br /> Go to the Java Control panel (In MS Windows it is under Java -> Configure Java). Select the 'Security' tab and at the bottom should be a place to add a website to the exception list. Add 'https://www.physiome.org' to the list. Restart the browser and go to the JSim model page. The JSim model should start up after downloading and executing the JSim WebStart file.</p><p>Apple MacOS Java Control Panel:</p>
+  <img src="../pics/JAVA_WS/JavaWS_JavaControlPanelExcept.png" /> 
+
+</li>
+
+</ul>
+<p> Specific configuration information:</p>
+
+<ul>
+<li><a href="#windows">Windows</a></li>
+<li><a href="#macos">Macintosh</a></li>
+<li><a href="#linux">Linux</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<p>    Users with additional or updated information to share regarding 
+Java
+Web Start and JSim compatibility with different browsers should 
+<a href="/Contact"> contact us</a>.</p>
+<h2>  <a name="windows">Windows 10 Configuration</a></h2>
+
+<p>    Configuration for Windows 10 and Windows 7:</p>
+<ul>
+<li>Confirm Java installed: <a href="http://www.java.com/en/download/index.jsp">Download Java version 8 (Java 1.8) or higher,</a> and install.</li>
+<li>Download the JSim model jnlp file. The browser will ask what you want to do with it. Either open with Java Web Start Launcher or save file in download directory and then open with Java Web Start. </li>
+<li>Remember to add https://www.physiome.org to Exception site list in the Java Control Panel (under Security tab) for Windows 7. </li>
+</ul>
+
+
+<h2>  <a name="macos">Mac OS X Configuration</a></h2>
+
+<p> Mac OS 10.10+ "Yosemite" and higher supported. Java must be installed.<br />
+
+<ul>
+<li>Confirm Java installed, if not,  <a href="http://www.java.com/en/download/index.jsp">download Java version 8 (Java 1.8) or higher,</a> and install.</li>
+<li>The Java Web Start file (model.jnlp) is considered an application by Apple so it will not open unless you explicitly allow it as it is not signed with a developer certificate:
+<p><img src="../pics/JAVA_WS/JavaWS_unIdentified.png" />  </p> <p> It is necessary to go to the security panel of the OS and enable:</p>
+<p><img src="../pics/JAVA_WS/JavaWS_AppException.png" /></p><p>Click the 'Open Anyway' button to allow the file to be run by Java. </p></li>
+<li><p>Java should then load the file with one final confirmation that you want to run it:</p><p><img src="../pics/JAVA_WS/JavaWS_javaRun.png" />  </p> <p>Clicking 'Run' should launch JSim with the model loaded, ready for anaylsis. </p> </li>
+
+</ul>
+</p>
+
+<p><h2>  <a name="linux">Linux OS Configuration</a></h2>
+<p> Tested on CentOS 7</p>
+<ul>
+<li>Confirm OpenJava is installed.</li>
+<li>Download the JSim model jnlp file. The browser will ask what you want to do with it. Either open with java IcedTea Web Start or save file in download directory and then open with Java Web Start:<p><img src="../pics/JAVA_WS/Linux_openFile.png" />  </p> </li>
+</ul>
+<ul>OpenJava may ask you to confirm you want to run JSim:<p><img src="../pics/JAVA_WS/Linux_firefox_permissionApplet.png" />  </p><p>Clicking 'Run' should launch JSim with the model loaded, ready for anaylsis. </p>
+</p>
+<br />
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

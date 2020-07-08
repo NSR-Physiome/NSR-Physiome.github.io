@@ -1,0 +1,156 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Introduction to JSim Sensitivity Analysis</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+
+<p>    This document describes model sensitivity analysis under JSim.  
+Sensitivity analysis is the process of determining how small pertubations
+of model inputs affect model outputs.  Suppose a model has an input
+parameter <strong>p</strong> and an output <strong>f(t)</strong>.  The derivative <strong>df/dp</strong>
+(<strong>f:p</strong> in JSim syntax) quantifies how <strong>f</strong> changes with small
+perturbations of <strong>p</strong>.</p>
+
+<p> Prerequisites: </p>
+<ul>
+<li> <a href="User_Intro.html">Introduction to the JSim GUI</a> (required) </li> 
+<li><a href="User_Projects.html">JSim Projects</a> (recommended)</li>
+</ul>
+
+<p> Contents: </p>
+<ul>
+<li> <a href="#analytic_vs_finite">Analytic Approach vs. Finite Differences </a></li>
+<li> <a href="#example">A First Example </a></li>
+<li> <a href="#abs_vs_rel">Absolute versus Relative Sensitivity </a></li> 
+<?php jscoqli() ?>
+</ul>
+
+<p> <img src="../pics/movie.gif">A video designed to accompany this
+document may be found <a href="../movies/index.html#User_Sens">here</a>
+.</p>
+
+<h2><a name="analytic_vs_finite" id="analytic_vs_finite">  Analytic Approach vs. Finite Differences</a></h2>
+<p>    Numerical calculation of <strong>f:p</strong> can be done analytically or via
+finite differences.  Since JSim models are normally specified analytically
+in MML, calculation of <strong>f:p</strong> can be simple in some circumstances.  
+For instance if:
+<pre>
+f=p*sin(t)
+</pre>
+</p>
+<p>    then, by simple calculus:
+<pre>
+f:p=sin(t)
+</pre>
+</p>
+<p>    Unfortunately, two problems may arise with the analytic approach.  
+First, not all JSim models are completely analytic.  Specifically, JSim
+cannot symbolically differentiate variables that are calculated from JSim
+function generators or external functions and procedures.  Second, if a
+model is very large, the overhead for calculating analytic derivatives may
+be large, making analytic calculation inefficient.</p>
+<p>    Alternatively, we may use finite differences to calculate <strong>f:p</strong>.  
+This involves making two model runs at <strong>p=p0</strong> and <strong>p=p0+delta</strong>
+(for small delta)  and estimating:
+<pre>
+f:p=(f(p0+delta)-f(p0))/delta  
+</pre>
+</p>
+<p>    The advantages of this approach are that it can work for any JSim
+model (not just a differentiable one) and that computation time is bounded
+and predictable (twice that of a normal model run).  The disadvantages are
+that the user must now configure two model runs (instead of one) and wait twice
+as long for results.</p>
+<p>    At present, JSim only supports sensitivity analysis using finite
+differences.  Future JSim releases will, hopefully, also support the
+analytic method where appropriate.</p>
+
+<h2><a name="example" id="example">  A First Example</a></h2>
+
+<p> Consider the following model, which generates exponential decay and 
+decaying sine & cosine waves:</p>
+
+<?php jsTextDownApp("examples/User/sens1.mod"); ?>
+
+<p> Either download the model and load it into your local JSim application or
+run it in the JSim applet as you prefer.  Then play with the model a bit until
+you understand its behaviour.</p>
+
+<p>    Now let's analyze the model's sensitivity to the decay parameter.  
+Open JSim's "Sensitivity" subtab within the model tab.  You will see a 3
+column table. In the "Parameter" column type in "<strong>decay</strong>" (or select
+<strong>decay</strong> from the list that appears when you push the associated arrow
+button).  The box should blacken (indicating that "<strong>decay</strong>" is
+acceptable here), a check mark should appear in the OK column, and
+<strong>decay</strong>'s current value will be shown in the "Value"  column. If
+you've changed <strong>decay</strong>'s value while you were playing around above,
+change it back to 1 (the default value).  The "Delta" column should show
+the default value of 0.01.  This indicates that the two values
+<strong>decay</strong> will assume in the finite differences method will be 1 and
+1.01 (delta is always added to the current value).  Now press the "Run"
+button at the top of the Sensitivity subtab.  JSim will run the model
+twice, once for <strong>decay=1</strong>, once for <strong>decay=1.01</strong>.</p>
+<p>    To examine results, go to a plot page.  You may now examine variables
+such as <strong>u:decay</strong>, <strong>v:decay</strong> and <strong>w:decay</strong>.  You may use
+these variables in expressions such as:
+<pre>
+u:decay/amp
+10*u:decay
+(v*w):decay
+</pre>
+</p>
+<p>    If, at this point, you try plotting e.g. <strong>v:phase</strong> you will
+notice that the expression is accepted by JSim (the box blackens and the
+item appears in the legend)  but no data is graphed.  This is because JSim
+cannot calculate this data without doing a sensitivity analysis on <strong>phase</strong>.
+To remedy this, go back to the "Sensitivity" subtab, put "<strong>phase</strong>" into the
+2nd row Parameter box, and rerun the sensitivity.  Now JSim will perform 3
+model runs:  an unperturbed run, a run with <strong>decay</strong> perturbed, and a run
+with <strong>phase</strong> perturbed.  Once the runs complete, data for <strong>v:phase</strong>
+will appear in the plot page.</p>
+<p>    Note that a normal (single) model run,  which happens when you press
+the "Run" on a model's "Run Time" tab does not generate any sensitivity 
+data.  Therefore,  sensitivity derivatives will show no data on plot
+pages after normal model runs.  We realize that,  in some circumstances,  
+this could be confusing and are looking into ways to alert new users to
+what's going on without hampering the work of expert users.  Thank you
+for your patience in this regard.</p>
+
+<h2><a name="abs_vs_rel" id="abs_vs_rel">Absolute versus Relative Sensitivity</a></h2>
+<p>
+Often during model analysis we are interested in which parameter is a function most sensitive to. To do this we must compare the relative, normalized, sensitivity of a function to different parameters. Using the above example model, let us look at a plot of the absolute sensitivity of function u(t) to amplitude (amp) and decay. First load the model (sens2.proj) and go to the "Sensitivity" subtab:
+<?php jsDownApp("examples/User/sens2.proj"); ?>
+<br /><br />
+In the Sensitivity Analysis Configurator we pick paramters <strong>amp</strong> and <strong>decay</strong> with "Value" of 1 and "Delta" of 0.01 for each and then run the sensitivity. Go to the "Abs_Sensitivity" plot page. From the absolute sensitivity plot, the sensitivity of function u(t) to both parameters <strong>amp</strong> and <strong>decay</strong> go to zero.</p>
+<p>
+Now if take a look at the relative sensitivites we will see a different picture. To plot this we need to make sure the "Delta" for each paramter we are comparing is the same percentage of its value (For this example it is 1%). Both <strong>amp</strong> and <strong>decay</strong> have a "Delta" of 0.01 and "Value" of 1. If <strong>amp</strong> has a "Value" of 5.5 then its "Delta" must be set to 0.055 to give a 1% change. In JSim, Relative sensitivity is plotted as:<br />
+<pre>
+f:p*(p/f), 
+where f:p=(f(p0+delta)-f(p0))/delta
+
+So for this example we have:
+u:amp*(amp/u), and
+u:decay*(decay/u)
+</pre>
+Go to the "Rel_Sensitivity" plot page to look at the relative sensitivity of function <strong>u(t)</strong> to paramters <strong>amp</strong> and <strong>decay</strong>. Note how these are plotted. From this plot we see that function <strong>u(t)</strong> has a constant sensitivity, with time, to parameter <strong>amp</strong> which is not immediately apparent in the absolute sensitivity plot.
+</p>
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

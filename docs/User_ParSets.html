@@ -1,0 +1,225 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Parameter Sets</h1>
+
+<h3>Introduction</h3>
+
+<p>JSim parameter sets are collections of values given to parameters at 
+run-time.  Parameters, in JSim parlance, include model input variables 
+and control settings for numeric solvers, function generators, loops, 
+sensitivity analysis and optimization.  Each model in a project 
+has a "current parameter set" which is used when the model is run.  In 
+addition, the user may create one or more alternative parameter sets 
+that are stored in separate tabs on the left hand side of the JSim 
+GUI.</p>
+
+<p>Multiple parameter sets are useful when exploring multiple scenarios, 
+for example high, mid and low flow regimes of a perfusion model.  
+Keeping a separate parameter set for each scenario allow the user to 
+easily recreate different scenarios, thus enhancing the general 
+scientific goal of reproducibility.</p>
+
+<p> Prerequisites:</p>
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim GUI</a></li>
+<li><a href="User_Projects.html">JSim Projects</a></li>
+</ul>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#basic">Basic Parameter Set Operations</a></li>
+<li><a href="#groups">Parameter Groups</a></li>
+<li><a href="#compile">Parameter Preservation during Model Compile</a></li>
+<li><a href="#expr">Algebraic Expressions in Parameter Assignments</a></li>
+<li><a href="#mult">Using Parameter Sets with Multiple Models</a></li>
+<li><a href="#lock">Locking Parameter Sets</a></li>
+<li><a href="#select">Selective Parameter Import</a></li>
+<li><a href="#files">Parameter Files</a></li>
+</ul>
+
+<h3><a name="basic">Basic Parameter Set Operations</a></h3>
+
+<p>Parameter sets are normally accessed via options in a compiled 
+model's "ParSet" menu.  "Loading" a parameter set means setting the 
+model's current parameter values to those stored in the parameter set 
+selected.  "Storing" a parameter set means taking the model's current 
+parameter values and putting them into the named parameter set for later 
+retrieval.  The values displayed in a parameter set tab are not directly 
+editable.  To change the values in a parameter set, the simplest 
+procedure is to load the parameter set into a model, edit the parameter 
+values within the model, and then store the model values back into the 
+same parameter set. (Also see "Selective Parameter Import" and 
+"Parameter Files" later in this document.)</p>
+
+<p>Selecting "Revert to Model Defaults" from a model's "ParSet" menu 
+reverts model input parameters to the values specified in the MML model, 
+and function generators and numeric solver settings to their original 
+default values.</p>
+
+<h3><a name="groups">Parameter Groups</a></h3>
+
+<p>The values in parameter set can be viewed by examining a parameter 
+set tab's "View" subtab.  The values are divided into several parameter 
+"groups":</p>
+
+<ul>
+<li> Parameter group "inputs" contains model input variables; </li>
+<li> Parameter group "solver" contains numerical solver settings; </li>
+<li> Parameter group "function:xxx" contains setting for a
+function generator named "xxx";</li>
+<li> Parameter group "loops" contains settings for model loops;</li>
+<li> Parameter group "sens" contains settings for model sensitivity
+analysis;</li>
+<li> Parameter group "optim" contains settings for model
+optimization;</li>
+<li> Parameter group "memory" doesn't do anything at present, but
+is reserved for future use.</li>
+</ul>
+
+<p>When a parameter set is stored, the parameter groups "inputs" and 
+"solver" and "function" (if any) are always stored.  Groups "loops", 
+"sens" and "optim" are stored only if the model's configuration for 
+Loops, Sensitivity and Optimization is non-empty.  When a parameter set 
+is loaded, only those parameter groups present in the parameter set are 
+updated.  This is done to prevent accidental overwriting of Loops, 
+Sensitivity and Optimization configuration when loading a parameter set 
+with empty configurations.</p>
+
+<h3><a name="compile">Parameter Preservation during Model Compile</a></h3>
+
+<p>Before a model is compiled, its current parameter set is stored in a 
+temporary buffer, and then reloaded once the compilation is complete.  
+Experienced JSim modelers find this behaviour natural, but it can be 
+confusing to new modelers.  Consider the following model:</p>
+
+<pre>
+math Example1 {
+  real A=1;
+  real B=10*A;
+}
+</pre>
+
+<p>When Example1 is first compiled, the model's "Run Time" tab will show 
+input parameter A with a value of 1.  If the modeler then modifies the 
+MML code to A=2 and recompiles, the Run-Time display will still show A 
+with a value of 1.  This is because the current parameter set, 
+containing the original value A=1, is reloaded after compile. If you 
+want models to revert to their default values, select "Revert to model 
+defaults" from the model's "ParSet" menu.</p>
+
+<h3><a name="expr">Algebraic Expressions in Parameter Assignments</a></h3>
+
+<p>Model input parameter values may be either numeric values or 
+algebraic expressions of other model input parameters. Consider the 
+model:</p>
+
+<pre>
+math Example2 {
+  real A=1;
+  real B=2;
+  real C=3;
+  real D=B+C;
+}
+</pre>
+
+<p>The default parameter values are A=1 and B=2, but the user could 
+change the parameter assignment of from "B=2" to e.g. "B=A+5". When the 
+model ran, B=6 and D=9 would be calculated.  Parameter assignment 
+expressions are restricted to the basic arithmetic and functional 
+operators described in the <a href="MML_Ref.html#algebra"> MML Reference 
+Manual</a>.</p>
+
+<p>Parameter expressions can be cascaded.  For example, B=A+5 and C=B*2 
+(resulting in B=6, C=12, D=18).  However, circular dependencies in 
+parameter assignments will generate an error message at run-time (e.g. 
+A=C, B=A+5, C=B-5). Assuming no circular dependencies, JSim will order 
+the input assignments at run-time to ensure correct calculation. The
+user does not need to specify the order of assignment calculations.</p>
+
+<p>Parameter assignment expressions may contain constants and model 
+input variables, but no model outputs (e.g. A=D+1 would be rejected). If 
+model unit correction is on, parameter assignment expressions will be 
+unit corrected before their values are calculated.</p>
+
+<p>Note that algebraic expression may only be used for assignments to 
+model input parameters (parameter group "inputs").  They may not be used 
+for parameters in other groups ("solver", "function", etc.)</p>
+
+<p>Algebraic expressions in parameter values are useful in several 
+situations.  One examples is if a parameter optimization shows high 
+corelation between two optimized parameters P1 and P2, it may be 
+advisable to calculate P1 from P2 with an appropriate assignment 
+expression. This reduces the number of degrees of freedom in the 
+optimization, improving optimization results and performance.</p>
+
+<h3><a name="mult">Using Parameter Sets with Multiple Models</a></h3>
+
+<p>While parameter sets are most often used with a single model, this
+is not always the case. Parameter sets are loaded into models by
+matching parameter names with model input variable names.  If two
+models have similar input variables,  it may be useful to apply the
+same parameter to both of them.  This could be a useful approach when
+alternative hypotheses require different model calculations,  even
+thought their parameterization is similar.</p>
+
+<h3><a name="lock">Locking Parameter Sets</a></h3>
+
+<p>Parameter sets represent a modeler's accumulated knowledge of a 
+particular model scenario and so become more valuable as more time is 
+spent on them.  To prevent accidental destruction of a valuable 
+resource, a parameter set may be "locked".  When a parameter set is 
+locked, any attempt to store new values into it will trigger a warning 
+dialog, asking the user to confirm the update or cancel.</p>
+
+<p>In JSim versions 2.12 and earlier, the parameter set locking control 
+can found in the parameter set "Edit" menu.  In JSim versions 2.13 and 
+above, the locking control can be found in at the top of the parameter 
+set "View" subtab.</p>
+
+<h3><a name="select">Selective Parameter Import</a></h3>
+
+<p>In the parameter set "File" menu, the "Import selected pars..." 
+option allows the user to import selected parameter groups into a 
+parameter set.  This option triggers a dialog showing the 
+parameter groups present in the source parameter set,  and allowing 
+the user to select which groups to import into the target parameter
+set.</p>
+
+<h3><a name="files">Parameter Files</a></h3>
+
+<p>Parameter files (with suffix .par) have a simple text format so that 
+parameter sets can be generated or manipulated using external software.  
+.par file format is identical to the text visible in a parameter set's 
+"View" subtab.  You can create a .par by selecting "Export par file..." 
+in a parameter set's "File" menu.  .par file format is not (at present) 
+formally documented, but is largely self-explanatory. Once you 
+understand the format, you can modify a .par file (or create one de 
+novo) using editor or other custom software.</p>
+
+<p>To import an externally generated .par file into JSim, select "Import 
+paramter file (.par)" from the Project tab's Add menu.  Alternatively, 
+you may import .par files into JSim by specifying them on the command 
+line.</p>
+
+<p>NOTE for XSIM USERS: XSIM (JSim's predecessor) also stored parameters 
+in files with suffix .par, although the format is very different from 
+JSim .par files.  XSIM par files start with the characters "xs01". You 
+may import XSIM style .par files into a model by selecting "Import XSIM 
+parameter file..." for the "File" menu in the model tab.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

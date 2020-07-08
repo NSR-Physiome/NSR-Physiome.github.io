@@ -1,0 +1,314 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Administering a JSim Server</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction </h2>
+<p>    This document describes how to run a JSim server, which allows JSim
+clients (such and jsim and jsbatch) to run in remote mode, that is, to
+perform their model calculations on a remote host rather than on their
+local machine. The primary reasons for doing this are:</p>
+
+<ol>
+<li> The server may have more computational power,  allowing faster
+calculation of models than is available on the local host;</li>
+<li> The WWW applet version of JSim  must always use remote mode, since 
+JSim's 
+computational engine
+relies, in part, on legacy C and Fortran numeric solvers that may not be
+run in an applet.</li>
+
+</ol>
+<p>JSim server is available for Linux and MacOS and Windows.
+This document assumes reasonable familiarity with Unix system and computer 
+network administration. Windows administrators will need to translate the
+directions appropriately for their systems.</p>
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#how">How JSim Servers Work</a></li>
+<li><a href="#manual">The jsserver Manual</a></li>
+<li><a href="#limit">Cautions/Limitations</a></li>
+<li><a href="#basic">Step-by-step Basic Server Administration</a></li>
+<li><a href="#connect">Connecting to a JSim Server</a></li>
+<li><a href="#firewall">Traversing a firewall</a></li>
+<?php jscoqli() ?>
+</ul>
+<h2>  <a name="how">How JSim Servers Work</a></h2>
+<p>    JSim servers are based on Java's Remote Method Invocation (RMI)
+protocol.  A JSim server creates an RMI registry on a specified port (1099
+by default), and registers an object (named JSimServer by default) that
+responds to client connection requests.  A client in this case is a either
+single instance of jsim or jsbatch run with the -server switch or an WWW
+page containing the JSim applet.  If a client's connection request is
+honored, a new client-specific server object (e.g. JSimServer.charlie0) is
+registered to handle all further requests from the client (such as
+building and running models).  When the client terminates, it sends a
+disconnect request to the server, which removes the client-specific server
+from the registry.</p>
+<p>    Each client-specific server runs as a separate process (not a thread)
+in a separate JVM.  The reasons for this are:</p>
+
+<ol>
+<li> Many native methods in the JSim numerical method library are not
+thread safe, so multiple concurrent runs cannot be supported within a
+single JVM.</li>
+<li> It simplifies client memory management,  preventing one renegade
+client from bringing down the entire server.</li>
+<li> It allows the administrator to manage processes individually using
+OS specific tools (e.g. ps on Linux/MacOS).</li>
+
+</ol>
+<h2>  <a name="manual">The jsserver Manual</a></h2>
+<p>    JSim server administration is done with the jsserver program 
+(jsserver.db for those of you using JSim source distributions).  Start
+a server using the "-start" switch.  Stop the server with the "-stop"
+switch.  A running server may be monitored with the -status switch
+or by examining the logfile created in the server's work directory.</p>
+<p>    Synopsis:
+<pre>
+      Usage: jsserver command [options]
+      Commands:
+        -start dir      start server in given work directory
+        -stop           stop server
+        -status         query server status
+        -connect ID     create client connection (debug only)
+        -disconnect ID  disconnect client
+      Startup Options:
+        -sandbox                run clients in safe sandbox  (default)
+        -nosandbox              run clients without safe sandbox
+        -purgeFreq number      specify uncommunicative client purge freq in secs (default 90)
+        -maxConnectTime number  specify max client connection time is secs (default 12*3600)
+        -clientMax number       specify max # concurrent clients (default 10)
+        -clientMemory number    specify max client memory in MB (default 600)
+        -maxBuildTime number    specify model build timeout in secs (default 120)
+        -maxRunTime number      specify mode run timeout in secs (default 3600))
+        -sharedJVM              clients share server's JVM (debug only)
+        -userPort number        specify user ports (default 0=RMI default ports)
+      General Options:
+        -name string    specify non-default server name
+        -port number    specify server port (default 1099)
+</pre>
+</p>
+<h3>    Commands</h3>
+<h4>      -start directory</h4>
+<p>        Start the server in the given work directory.  The work directory
+must already exist.  This option runs in the foreground,  so you must
+use operating-system appropriate methods to push it into the background
+if that is what you desire.</p>
+<h4>      -stop </h4>
+<p>        Stop the server.  This disconnects all current clients 
+immediately,  so be careful when you do it.</p>
+<h4>      -status</h4>
+<p>        Print status display of the server.</p>
+<h4>      -connect ID</h4>
+<p>        For developer debugging purposes only.</p>
+<h4>      -disconnect ID</h4>
+<p>        Disconnect a client.  May cause abrupt termination at
+the client end.</p>
+<h3>    Switches</h3>
+<h4>      -port</h4>
+<p>        Server port,  1099 by default.</p>
+<h4>      -name</h4>
+<p>        Server name, JSimServer by default.</p>
+<h4>      -sharedJVM</h4>
+<p>        For developer debugging purposes only. </p>
+<h4>      -sandbox</h4>
+<p>        Runs client models in the <a href="User_Sandbox.html">JSim Sandbox</a> .  This
+is on by default.</p>
+<h4>      -nosandbox</h4>
+<p>        Runs client models without the JSim sandbox.  Never
+do this unless you enable operating system level access control to 
+the appropriate port,  insuring that only trusted hosts may access it.
+Even then,  this may be a bad idea.</p>
+<h4>      -purgeFreq number</h4>
+<p>        Specifies how long (in seconds) a client connection is maintained
+in the absence of stay-alive requests.  The default is 90.  Values less
+than 60 are not allowed for performance reasons.</p>
+<h4>      -maxConnectTime number</h4>
+<p>        Specifies the maximum duration (in seconds) allowed for a client 
+connection.  The default is 12 hours.  </p>
+<h4>      -clientMax number</h4>
+<p>        Specify maximum # of concurrent clients allowed. The default is 10.</p>
+<h4>      -clientMemory number</h4>
+<p>        Specify maximum client JVM memory in MB. The default is 600.  
+This switch has no effect if -sharedJVM is also specified.</p>
+<h4>      -maxBuildTime number</h4>
+<p>        Specify timeout for model builds in seconds.  Model builds may sometimes
+take arbitrarily long times to complete if they are underspecified.  The default is
+120.</p>
+<h4>      -maxRunTime number</h4>
+<p>        Specify timeout of model runs in seconds.  The default is 3600 (1 hour).  
+This feature does not work properly yet,  but remains an option for the future.</p>
+<h4>      -userPort number</h4>
+<p>        Specifies the minimum in a range of <strong>clientMax</strong>+1 dynamic
+ports to be used by the server.  By default, arbitrary port numbers are
+used.  This switch become useful when traversing a <a href="#firewall">firewall (see
+below)</a> .</p>
+<h2>  <a name="limit">Cautions/Limitations</a></h2>
+
+<ol>
+<li> A JSim server may not share an RMI registry with other RMI 
+applications,  including other JSim servers.  One JSim server per port.
+You do not need to (and should not) run Sun's "rmiregistry" program
+on this same port.</li>
+<li> A JSim server has no built-in access control.  Connecting clients
+submit a username and password, but jsserver does not currently validate
+these in any way.  The server does not allow disabling of connection from
+potentially hostile internet sites.  Disabling such connections must be
+done using appropriate operating-system or firewall mechanisms.</li>
+<li> Make sure you understand the <a href="User_Sandbox.html">JSim sandbox</a> .
+jsserver runs client models in the sandbox by default.  This may have the
+unfortunate effect of disabling some valid models.  However,  running
+in without the sandbox can leave you open to attack.  See comments 
+regarding the -nosandbox switch above.</li>
+<li> "jsim -server localhost" is NOT the same as "jsim".  The former
+requires jsserver to be running on your local host.</li>
+<li> Connections to JSim server from jsim and jsbatch occasionally
+generate NullPointerExceptions on the initial model compile.  Work
+continues to reproduce and fix this bug.  JSim GUI users can usually
+continue work by simply pressing the model compile button.</li>
+
+</ol>
+<h2>  <a name="basic">Step-by-step Basic Server Administration</a></h2>
+<p>    Here's what to do:</p>
+
+<ol>
+<li> Read this document in its entirety.  If you don't understand the
+issues involved, maybe administrating a JSim server is not for you.  
+There is no shame in this (unless you're a full-time system
+administrator).</li>
+<li> Create a non-privileged account (e.g. jsserver) to run the jsserver
+program.  This can help protect you against jsserver bugs, security holes
+(if any) and yourself.  Note: Under Windows, "non-privileged account" is
+not really a functional concept, so this protection measure will be less
+effective than in more security-oriented operating systems.  But then if
+you were worried about security, you wouldn't be using Windows in the
+first place.</li>
+<li> Obtain a recent JSim distribution, and <a href="Admin_Custom.html">customize
+it</a> appropriately, taking special care to understand
+the JSim sandbox.  Install this under the jsserver user account.</li>
+<li> Decide on a port number to run the JSim service from.  The default
+(1099) usually best, since it simplifies user connections.  Make sure
+there are no conflicts in your system or network (especially firewalls)
+for this port.</li>
+<li> Decide on a name for the JSim server in the RMI registry.  The
+default (JSimServer) is almost always the right choice, since it
+simplifies user connections.</li>
+<li> Create a work directory for your server (e.g. ~jsserver/WORK).</li>
+<li> Launch the jsserver (make sure you're in your new jsserver
+account!).  For initial testing you might want to run it in the
+foreground.  Once you're comfortable with its operation, you'll probably
+want to run it in the background.  Using the default settings and the
+example work directory above the command would be:
+<pre>
+      jsserver -start ~/WORK
+</pre>
+</li>
+<li> Check on the status of the server periodically by examining 
+the logfile (e.g. ~/WORK/logfile) or by using the command:
+<pre>
+      jsserver -status
+</pre>
+</li>
+<li> Test a connection to your server (see below).</li>
+<li> When it is time to say good-bye:
+<pre>
+      jsserver -stop
+</pre>
+</li>
+<li> Depending upon server usage,  you may need to clean out the 
+jsserver work directory every so often.  If you're clever,  you might
+even figure out how to do this automatically.  Be sure the server
+is not running when you do this.</li>
+<li> Once you're happy with your server,  you'll need to inform 
+potential users of its location and availability.  Since they may be
+unfamiliar with connecting to a remote server,  you may need to help
+them out (see below).  </li>
+
+</ol>
+<h2>  <a name="connect">Connecting to a JSim Server</a></h2>
+<p>    You may connect to a JSim server using jsim, jsbatch, the JSim applet
+or any other customized JSim client developed using the JSim source
+distribution. jsim and jsbatch both recognize the switch:
+<pre>
+      -server [username@][scheme]hostname[:port][/servername]
+</pre>
+</p>
+<p>    All the elements in brackets (that is, all except the hostname) are 
+optional:</p>
+
+<ul>
+<li><strong>username</strong> defaults to the user's local login name;</li>
+<li><strong>scheme</strong> defaults to "rmi://" which is currently the
+only supported protocol. </li>
+<li><strong>port</strong> defaults to 1099;</li>
+<li><strong>servername</strong> defaults to "JSimServer".</li>
+
+</ul>
+<p>    When servers are running using the default port and servername the
+syntax reduces to something like:
+<pre>
+      jsim -server brainiac.mit.edu
+</pre>
+</p>
+<p>    For information on connecting to a server from the JSim applet,
+see <a href="Admin_WWW.html">Administering a JSim-enabled Web Site</a> .</p>
+<h2>  <a name="firewall">Traversing a Firewall</a></h2>
+<p>    A network firewall, sitting between a JSim server and its clients,
+induces complications for proper operation.  A connection between client
+and server uses 3 separate TCP ports, the main server port (specified via
+the -port switch) and two dynamically assigned ports.  By default, the
+dynamic ports are randomly assigned via Java RMI mechanisms.  This can be 
+problematic because firewalls often limit open ports.  In such
+situations, the -userPort switch (above) narrows the range of ports that
+must be open.  Note that all ports in the -userPort range must be 
+open for guaranteed connection success,  since the client may not specify
+which of the available ports will be used.</p>
+<p>    As an example, we'll consider a server "secret",  hidden behind a 
+firewall "firewall.paranoid.com",  being accessed by a trusted client
+"client.org".  The server will allow a maximum of 2
+simultaneous clients.  We'll use port 2099 for the main server and start
+the dynamic pool at 3010:
+<pre>
+      jsserver -port 2099 -userPort 3010 -maxClient 2 -start SERVERDIR
+</pre>
+</p>
+<p>    We'll use ssh to forward the needed ports across the firewall.  The 
+-userPort pool is of size maxClients+1=3,  so the needed ports are 2099,
+3010, 3011 and 3012.  From client.org:
+<pre>
+      ssh -L 2099:secret:2099 -L 3010:secret:3010 \
+        -L 3011:secret:3011 -L 3012:secret:3012 firewall.paranoid.com
+</pre>
+</p>
+<p>    Once the client has established the above connection,  jsim may
+then be lauched (in a separate window) via:
+<pre>
+      jsim -server localhost:2099
+</pre>
+</p>
+<p>    In the absence of ssh forwarding being available on the firewall,
+alternative security mechanisms accomplishing the same end should be
+discussed with the firewall administrator.  If you have circumstances
+that cannot be addressed by JSim's current mechanisms,  please contact
+the JSim development team.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

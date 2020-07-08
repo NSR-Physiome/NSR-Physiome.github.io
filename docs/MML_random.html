@@ -1,0 +1,81 @@
+
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>random() and randomg() pseudo-random number generators</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> This document describes the syntax and use of the <strong>random()</strong> and <strong>randomg()</strong> pseudo-random number generators.
+(MML).</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+<li><a href="User_Fgen.html">Using Function Generators in JSim</a> (recommended)</li>
+</ul>
+
+<p> Contents: </p>
+
+<ul>
+<li><a href="#syntax">random() syntax</a></li>
+<li><a href="#randomg_syn">randomg() syntax</a></li>
+<li><a href="#example">random() and randomg() examples</a></li>
+
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="syntax">random() syntax</a></h2>
+<p>    The <strong>random()</strong> function generates a pseudo-random number from a uniform distribution between 0 and 1 inclusive.</p>
+<p>   Syntax for generating a real number between 0 and 10:
+<pre>
+      real var, var2;
+      var=10; 
+      var2 = var*random(); 
+</pre>
+To set 'seed' value for random number generation:
+<ul>
+<li>Compile model and then go to 'Run Time' page.</li>
+<li>Then chose 'Pages' -> 'Solvers'. The page should have 'Random number generator' listed.</li>
+<li>A seed of '0' generates a different set of random numbers each time the model is run. A non-zero seed will generate the same 'random' numbers each time model is run.</li>
+</ul> 
+</p>
+<p>   </p>
+<h2>  <a name="randomg_syn">randomg() syntax</a></h2>
+<p>    The <strong>randomg()</strong> function generates a pseudo-random number  from a Gaussian (normal) distribution of mean 0 and standard deviation 1.</p>
+<p>   Syntax for generating a real number between 0 and 10:
+<pre>
+      real var, var2;
+      var=10; 
+      var2 = var*randomg(); 
+</pre>
+</p>
+
+<h2>  <a name="example">random() and randomg() examples:</a></h2>
+<p>
+
+<?php jsTextDownApp("examples/MML_random/MML_random.proj"); ?>
+</p>
+
+<p>   </p>
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

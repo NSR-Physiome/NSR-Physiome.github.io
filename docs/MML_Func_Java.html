@@ -1,0 +1,134 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Calling Java Code From MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+
+<p>    This document describes the process of defining and using Java
+procedural code within MML models. </p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Func_Intro.html">Using Functions and Procedures in
+MML</a>
+<li>Familiarity with the Java programming language</li>
+</ul>
+
+<p>    Java code can be called from MML via either class or java source F&P.
+Class F&P access pre-compiled Java classes and is recommended only for
+JSim internal developers.  This document will address java source F&P in
+which Java source code is embedded within MML and compiled at model build
+time.  This mechanism guarantees maximum compatibility with future JSim
+releases.</p>
+<p>Note: Variables and realDomain variables that are labeled 'private'  are not available to Java functions and procedures when run as a Java applet over the web from a remote server (By default all variables and domains are public). The JSim compiler will complain that the variable is 'unknown'. The same code will compile and run fine when run locally.
+</p>
+<p>    The remainder of this document shows several examples of calling Java 
+code from MML.  For the complete Application Programmer Interface 
+(API), see <a href="Devel_API.html">The JSim Public API</a> .  Examples are:</p>
+
+<ul>
+<li><a href="#example1">Example 1</a> - a scalar function;</li>
+<li><a href="#example2">Example 2</a> - a non-scalar function;</li>
+<li><a href="#example3">Example 3</a> - a procedure.</li>
+<li><a href="http://www.physiome.org/jsim/models/webmodel/NSR/BR77pkDetect/">Example 4</a> - a procedure used within an electrophysiology model to detect peaks.</li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="example1">Example 1</a></h2>
+<p>    In the following example, a java source function "gmean" is defined
+that accepts two scalar arguments and returns their geometric mean.  The
+main program defines a variable v(t) as the geometric mean of t and t^3,
+which should thus be equal to t^2:</p>
+
+<?php jsTextDownApp("examples/MML_Func_Java/jmean.mod"); ?>
+
+<p>    The first paragraph comprises the gmean function declaration. The
+keyword "real" indicates that the function returns a real number.
+(Currently, real is the only supported function data type.  Other data
+types may be supported in the future.)  The keyword "source" indicates
+that the function will be defined in terms on source code within MML.  
+The name "gmean" follows the keyword "function", giving a unique name to
+this function.  Function names must follow standard MML naming
+conventions.  The argument list following the function name indicates this
+function takes exactly two scalar arguments.  (Non-scalar arguments use
+the @ directive, described later in this document).</p>
+<p>    The "language" clause inside the function declaration indicates the
+procedural code will follow the <a href="Devel_API.html">JSim Java Model API</a> . The
+"maincode" clause contains the java procedural code.  Conventions for this
+code are fully described in <a href="Devel_API.html">The JSim Java API</a> .  In
+brief, the modeler specified maincode block is copied into a double
+returning dynamic Java method, whose calling arguments are RealNData
+objects named a and b.  RealNData has a method realVal() returning the
+value of a scalar variable.  The return statement is required for a real
+function.  It's omission will cause a compiler error.</p>
+<p>    The second paragraph comprises the main line of the MML model.  In
+this case, gmean will be called once for each t. Although only a single
+equation using gmean is present in this example, multiple uses of gmean,
+including nested uses, are supported. It should be noted that incautious
+use of static methods within maincode can break this nesting ability.</p>
+
+<h2>  <a name="example2">Example 2</a></h2>
+<p>    The first example is trivial because the desired functionality could
+more easily be obtained simply using MML.  This is the case for most
+situations involving scalar arguments.  Function and procedures become
+more useful when passing multi-dimensional arguments because the looping
+constructs within Java are more general than those available in MML.</p>
+<p>    In the following example, one-dimensional integration is implemented
+as a java source function:</p>
+
+<?php jsTextDownApp("examples/MML_Func_Java/jintegral.mod"); ?>
+
+<p>    The MML @ construct is used here twice.  In the function declaration,
+u@t indicates that the single function argument must be one-dimensional.  
+When the function is called u@t, which should be read "u for all t",
+indicates that u values for all t should be passed to integral.  If a
+function's declared argument dimensions do not match the arguments passed
+at call time, MML will alert the modeler at compile time.</p>
+<p>    RealNData have a method grid(int i), which provides access to the
+associated data grid(s) of a multidimensional variable.  Since the
+function argument is not scalar, realVal(int[]) replaces realVal()  as the
+method used to access argument values at various grid points. Again, see
+the <a href="Devel_API.html">JSim Public API</a> for further information.</p>
+<p>    Multiple @ constructs can be used for higher dimensional function
+arguments.</p>
+
+<h2>  <a name="example3">Example 3</a></h2>
+<p>    In the following example a procedure, rather than a function is 
+demonstrated.  The procedure "reverse" takes a one-dimensional input 
+argument,  reverses the order of the data,  and places the result in
+a one-dimensional output argument: </p>
+
+<?php jsTextDownApp("examples/MML_Func_Java/jreverse.mod"); ?>
+
+<p>    The keywords "java" and "procedure" indicate that the embedded code
+block(s) will follow the JSim Java Model API for procedures.  Most
+comments above regarding functions apply equally to procedures,  with 
+a few differences noted below.</p>
+<p>    The procedure argument list separates input arguments from output 
+arguments with a semi-colon,  with inputs listed first.  This example 
+has one input and one output argument.</p>
+<p>    The maincode block returns no value as is appropriate for
+a procedure.  The RealNData
+method set(int, double) provides a means to set the value of output
+arguments.  Again, see the <a href="Devel_API.html">JSim Public API</a> for further
+information.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

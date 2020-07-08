@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim GUI</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
+<h1>Introduction to the JSim GUI</h1>
+
+
+<p> This tutorial take a new user through the process of launching
+<a href="../index.html">JSim</a> , running a simple model,
+and plotting results.</p>
+
+
+<p> Contents:</p>
+<ul>
+<li><a href="#start">Starting JSim</a></li>
+<li><a href="#gui">The JSim GUI</a></li>
+<li><a href="#compile">Compiling the model</a></li>
+<li><a href="#runtime">Running the model</a></li>
+<li><a href="#plot">Plotting Model Data</a></li>
+<li><a href="#save">Saving your work</a></li>
+<li><a href="#next">Where to next?</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="start">Starting JSim and loading an example model</a></h2>
+<p> JSim may be run by either installing it on your computer, or by
+connecting to a JSim enabled WWW site (such as this one).  This
+tutorial works for either method.</p>
+
+<h3>To run JSim on your computer</h3>
+<ol>
+<li>If you have not already done so, <a 
+href="../download/index.html">download and install</a> JSim
+on your computer.</li>
+<li>Start JSim by double-clicking on the jsim icon
+(Windows or MacIntosh) or typing "jsim" on the command
+line (Linux).</li>
+<li><?php jsDown('examples/User/intro1.mod') ?> to your computer. This
+is the example model file you'll be using.</li>
+<li>Select "Import model file..." from the "Add" menu
+under the "Project" tab and select the intro1.mod you
+just downloaded.</li>
+</ol>
+
+<h3>To run JSim in your browser</h3>
+<ol>
+<li>Make sure your browser has a Sun-compatible
+Java 1.6 plugin installed <a href="User_WWW.html">
+(more info)</a></li>
+<li><?php jsApp("examples/User/intro1.mod") ?>. You may be asked to OK a 
+trust certificate so that the applet can function properly.</li>
+</ol>
+
+<h2> <a name="gui">The JSim GUI </a></h2>
+
+<p> Assuming all the above went well, you should now be looking at the
+JSim GUI (graphical user interface).  On the GUI left-hand side (LHS)
+are tabs labeled "Project" (the table of contents) and "intro1" (the
+model you just loaded).  On the right-hand side (RHS) are tabs labeled
+"Message" (progress and error messages) and "plotpage_1" (the first of
+perhaps multiple plot pages).  In general, the JSim GUI LHS configures
+the models and the RHS displays numeric results.</p>
+
+<p>Click on the LHS "intro1" tab.  The model source code should now be
+visible (as indicated by the highlighted "Source" tab at the bottom).  
+JSim model calculations are usually specified in MML (for Mathematical
+Modeling Language, <a href="overview.html">more info</a>), although the <a
+href="MML_SBML.html">SBML</a> and <a href="MML_CellML.html">CellML</a>
+formats are also supported. This model calculates tracer concentration in
+plasma(Cp) and interstitial fluid(Cisf) as driven by an inflow(Cin).  The
+code should be fairly easy to comprehend if you are familiar with ordinary
+differential equations (ODEs) and note that the colon (:) operator
+represents differentiation (e.g. Cp:t means dCp/dt).  The "extern"  
+clause in the "Cin" declaration indicates that "Cin" values are supplied
+externally by the JSim, rather that within MML.</p>
+
+<h2>  <a name="compile">Compiling the model</a></h2>
+
+<p> Before models can be run, they must be compiled, which means
+translating the MML source code into an executable java code.  Do this by
+clicking the "Compile" button. Compilation should take a few seconds,
+depending upon the speed of your computer.  Compilation checks the
+completeness and consistency of model calculations and will abort with an
+error message if there is a problem.  There should be no problem here
+unless you've inadvertently modified the MML source code or perhaps 
+loaded the wrong model.</p>
+
+<h2>  <a name="runtime">Running the model</a></h2>
+
+<p> When a model is successfully compiled, JSim switches from the model
+"Source"  subtab to the model "Run Time" subtab, which lets users adjust
+parameter values and run the model. The JSim compiler classifies MML
+variables as either inputs (settable by the user) or outputs (calculated
+during a model run).  JSim "parameters" refer collectively to MML input
+variables, numerical solver controls<a href="User_Solvers.html">(more
+info)</a> and function generator controls<a href="User_Fgen.html">(more
+info)</a>.  User-settable values are displayed with a light-colored
+background, immutable values with dark-colored one. Model "domains"  
+represent the independent variables of the system(e.g. time & space).  
+Here, domain "t" represents time. The sub-variables t.min and t.max
+represent the minimum and maximum values of time for a model run.  t.ct
+represents the number of points in the time grid, and t.delta represents
+the time grid point separation.</p>
+
+<p> A model run is initiated by pressing the "Run" button on the model 
+"Run Time" subtab menubar.  If you do that now, an error message will 
+tell you that the input variable Cin has not been given a value.  If you 
+examine the "Model Inputs" block you can verify this is the case because 
+the Cin(t) assignment box is blank.  This is because the MML specified 
+Cin as "extern", meaning its value would be assigned by JSim rather than 
+within the MML itself.  For this introduction, let's enter a constant 
+value for Cin (e.g. 1).  An alternate to a constant value here (as 
+elsewhere in JSim) is to use an algebraic expression of model variables. 
+However, since this model has "unit conversion on", getting the 
+algebraic expression unitarily correct is somewhat tricky, so we'll 
+avoid that complication for now (see <a href="MML_Units.html">Using 
+Physical Units in MML</a> for details). A second alternative is to 
+drive Cin with a function generaton (see <a href="User_Fgen.html">Using 
+Function Generators in JSim</a> for details). </p>
+
+<p> Now, press the "Run" button again, wait a few seconds, and a status
+message will be printed indicating the model run completed successfully.  
+Not much will have changed visually, because we have not set up to plot
+any results yet, but if you look carefully you'll notice the output
+variables now shows a numeric value from the completed run.  Variables
+Cp(t) and Cisf(t) vary over time. The value displayed for them is the one
+last calculated.  To view the entire time courses for Cp and Cisf, we will
+use JSim plot pages.</p>
+
+<h2>  <a name="plot">Plotting Model Data</a></h2>
+
+<p>    One plot page, named "plotpage_1", is created when you start a new
+JSim project.  More can be created, but one will serve for this
+introduction. Plot pages appear as tabs on the righthand side of the JSim
+project window. Select the plotpage_1 tab to take a look.  The upper
+half of a plot page contains the "Plot Configurator" which is a set of
+controls for what data will be plotted, and how it will be rendered. The
+lower portion of the page is currently blank, but will contain the plot
+graphics once we've set up the plot.  To make maximum area available for
+graphics, the plot configurator packs a large amount of functionality into
+a small screen area.  This currently results in a rather dense and cryptic
+arrangement of controls.  NSR continues to work on balancing clarity,
+functionality, and space considerations in the plot configurator.</p>
+
+<p> Let's plot some data.  The controls we'll discuss are all on the
+second line of the plot configurator, which starts with the label "Data".  
+The first box to the right of "Data" shows the source of the data to be
+plotted, which can be a model or a data set. Here, since we have a single
+model and no data sets, there is only one possibility, so "intro1" is
+automatically selected.  In more complex situations, with multiple models
+or data sets, you must select the data source manually. The blank box to
+the right of intro1 is the data from within intro1 to be plotted.  Let's
+type "Cin" (don't type the quote marks) into that box and hit the enter
+key.  The box should blacken (indicating that Cin is a valid expression
+within model intro1) and a graph of Cin should appear in the formerly
+blank graphics area.  If the box does not blacken, double check your
+typing.  If the box blackens, but no graph appears, it may be that the
+model run was not successfully completed.  In that case, try again
+pressing the "Run" button on the intro1 "Run Time" subtab menubar.</p>
+
+<h3> Log and Linear Scaling</h3>
+<p>    We now see a plot of Cin versus time, which should look like
+exponential decay.  We can verify it is, in fact, exponential decay by
+checking the "Log" checkbox which will set log scaling on the Y axis.  
+With log scaling on, Cin should appear as a straight line.  Now uncheck
+the "Log" checkbox so that Cin appears as a curve under linear scaling.</p>
+
+<h3> Selecting Data to Plot</h3>
+<p>    The interesting variables in intro1 are the outputs Cp and Cisf.  You
+can display them by either typing them into the data selection box that
+currently holds Cin, or selecting them from the menu that is attached to
+the down arrow button to the right of the data selection box. 
+You may also type algebraic expressions into the data
+selection box.  In intro1, Cp+Cisf, Cp-Cisf, 0.5*Cin might be 
+interesting possibilities.</p>
+
+<h3>  Plotting Multiple Data Curves</h3>
+<p>    It is often useful to see multiple data curves on a single plot.  
+Let's plot Cp and Cisf.  First, use what you've learned to get plain old Cp
+onto the current plot.  To add a 2nd curve to the plot, click the button
+to the right of the label "Curve" and select "2" from the menu that pops
+up.  The 2nd (and 3rd) lines of the plot configurator now reflect the
+second, rather than the first curve.  We can specify what we'd like to see
+in the second curve just as we did in the first: by selecting Cisf in the
+data selection box.  Now both Cp and Cisf should appear on your plot page.
+You can adjust the color, symbol, and line rendering characteristics
+for each curve with the 5 right-most controls on line 3. For instance,
+clicking on the solid colored button popups up a color menu.</p>
+
+<h2> <a name="save">Saving your work</a></h2>
+
+<p> At this point, we'll save our work.  A JSim project file saves the
+complete state of a JSim GUI window so it can be reestablished in a
+single operation at a later time.  To do this, activate the "Project" tab
+on the GUI LHS.  Select the "Save" option
+from the "File" menu there.  A standard file selection popup will appear
+allowing you to name your project file and save it in the directory of
+your choice.  The suffix ".proj" will be automatically appended to the
+file name.  If you select a directory that you don't have write permission
+for, an error message will alert you to this fact.  In that case, you'll
+need to find a directory you do have write permission for.  A message at
+the bottom of the project window will indicate a successful save.  
+Remember the location and name of the project file you've saved.</p>
+<p>JSim (version 2.19 and greater) also allows you to automatically save 
+the project file associated with the last successfully run simulation, 
+optimization, loops run, and sensitivity analysis. This backup can be useful when 
+working on a very complicated model and for whatever reason the model stops 
+working or JSim crashes unexpectedly during a long simulation. The backup file 
+will be called "ModelName_LastRun.proj", where "ModelName" was the original 
+project file name. To enable this feature go to the "Preferences" drop down 
+menu of the "Project" tab. Choose "Auto backup project file" and chose "Yes". 
+To make this change permanent, go back to the "Preferences" drop down menu 
+and chose "Save preferences" at the bottom. This will save your preferences 
+locally in the .jsim/local/preferences.xml file.
+</p>
+
+<h3> Reloading a project file </h2>
+
+<p>We'll now exit JSim and reload the project file you just created.</p>
+
+<p> <strong>If you're running JSim on your own computer</strong>: select  "Exit 
+program" from the Project tab's "File" menu, and then restart JSim.  
+Under the Project tab's File menu, select "Open project file".  A file
+selection box will appear in which you should select the project file you
+just created.  A new Project will open containing the project you just
+created.  JSim allows multiple projects to be open at one time and allows
+you to paste content between the projects in a natural way. That is not
+covered in this introduction, however.</p>
+
+<p> <strong>If you're using the JSim applet</strong>: exit the applet by closing the
+window or tab in which it is running.  You won't be able to restore your own
+personal work unless you install JSim on your own computer (see above).
+However, you can run the applet a demonstration project file instead.  
+<?php jsApp("examples/User/intro1.proj") ?> </p>
+
+<p> The 
+reloaded project should contain an intro1 model tab. Clicking on
+this tab, you will see that the project load has reestabished the model
+source code, the compile state, and the assigned value of Cin.  It does
+not reestablish the intro1 model run because, for large models, this might
+be unnecessary and very time consuming.  In our case, the model run is
+quick, so click the Run button and check that the model run has completed
+(do you remember how?  hint: Cp(t)).  Clicking on the plotpage_1 tab, you
+should now see the plot page data and rendering in the same state you left
+it when you saved the project file.</p> 
+
+<h2><a name="next">Where to next?</a></h2>
+
+<p>To see what else JSim can do, select topics from <a
+href="User.html">Running JSim</a>.</p>
+
+<p>To write your own JSim models, start with <a
+href="MML_Intro.html">Introductory Survey of MML</a> and then select
+topics from <a href="MML.html">Writing JSim models</a>.</p>
+
+<p>To find models of interest, visit the <a href="../models/index.html">
+JSim Models Page</a>.</p>
+
+
+</body>
+
+</html>
+

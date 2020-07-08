@@ -1,0 +1,156 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim and Antimony</h1>
+
+<h2>Introduction</h2>
+
+<p>Antimony is a simple text language for specifying SBML style models.
+This document describes how to write Antimony models within 
+JSim, and how to import and export Antimony files to and from JSim.  
+This is not a tutorial of the Antimony language.  For that,  see the <a 
+href="http://antimony.sourceforge.net/">Antimony Home Page</a>.</p>
+
+<p>Antimony support within JSim is available for JSim version 2.03 and 
+above.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<h2>  Contents:</h2>
+
+<ul>
+<li><a href="#what">What is Antimony?</a></li>
+<li><a href="#mml">Writing Antimony models in JSim</a></li>
+<li><a href="#import">Importing Antimony Files into JSim</a></li>
+<li><a href="#export">Exporting Antimony Files from JSim</a></li>
+<li><a href="#future">Future plans</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="what">What is Antimony?</a></h2>
+
+<p>Antimony is a human-readable computer language for describing SBML 
+style models developed by Lucian Smith.  A complete description of the 
+Antimony language, along with various Antimony software, is available on 
+the <a href="http://antimony.sourceforge.net/">Antimony Home Page</a>.  
+Antimony is designed to be "equivalent" to SBML in the sense that an 
+Antimony and its SBML translation describe exactly the same model.
+From JSim's perspective, Antimony provides a simple and concise language 
+for editing chemical network models.  Since it, unlike SBML, it can 
+be edited by hand,  it makes for a quick path to SBML-style chemical
+network modeling within JSim.</p>
+
+<h2>  <a name="mml">Writing Antimony models in JSim</a></h2>
+
+<p>Antimony code can be written within an MML model (or .mod file) by 
+surrounding the Antimony text with the keyword "antimony" and double 
+curly braces.  Consider the following Antimony model of enzyme-substrate 
+binding:</p>
+
+<?php jsTextDown("examples/MML_Antimony/es.txt"); ?>
+
+<p>Antimony code can be embedded in a JSim model by prepending the 
+keyword "antimony" and surrounding the code in double-curly braces:</p>
+
+<?php jsTextDown("examples/MML_Antimony/es.mod"); ?>
+
+<p>When the model above is compiled, JSim translates the embedded 
+Antimony code to flattened MML and then compiles that.  If you wish to 
+see the flattened MML version of an Antimony model, you may do so in the 
+JSim GUI by selecting "View flat MML text" from the View menu in the 
+model's Debug tab. Alternatively, jsbatch (command line) users should 
+use the "-oflat" switch:</p>
+
+<pre>
+jsbatch -f sb.mod -oflat &gt; sbflat.mod  // assumes sb.mod contains embedded Antimony
+</pre>
+
+<p>Note that, at present, a JSim model may be either standard MML or 
+embedded Antimony.  The two types of models cannot be mixed.  However, 
+mixing of models is planned for the <a href="#future">future</a>.</p>
+
+
+<h2>  <a name="import">Importing Antimony Files into JSim</a></h2>
+
+<p>To import an Antimony model into JSim, select "Import model file" 
+from the "Add" menu under the JSim GUI's "Project" tab.  Antimony files 
+have extension .txt.  (Note that .txt is used by many other files 
+besides Antimony, so be sure to pick a real Antimony file.)  
+Alternatively, you can load a Antimony file via the -f switch on the 
+command line of either jsim or jsbatch.</p>
+
+<p>When an Antimony file is read into JSim the keyword "antimony" and 
+surrounded double curly braces are added automatically.</p>
+
+<p>Batch translation of Antimony files to embedded MML may be 
+accomplished as follows:</p>
+ 
+<pre>
+jsbatch -f somemodel.txt -omml &gt; somemodel.mod
+</pre>
+
+<p>Windows users: If you are receiving errors from JSim concerning libSBML please see <a href="../download/win32.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
+</p>
+
+<h2><a name="export">Exporting Antimony Files from JSim</a></h2>
+
+<p>Any MML model may be exported to Antimony, not merely models 
+containing embedded Antimony.  However, since Antimony is equivalent to 
+SBML, the <a href="MML_SBML.html#export_tech">same export 
+limitations</a> apply.</p>
+
+<p>To export Antimony from the JSim GUI, compile it, click on the model 
+"Debug" tab and select "View Antimony" from the "View" menu.  Translated 
+Antimony will appear in the text area.  If any warnings are generated in 
+the translation, a button "Show N translator warnings" will appear. 
+Clicking this button will display the warnings in the JSim message
+area (right half of GUI).</p>
+
+<p>To export Antimony from the command line,  use the "-oantimony" 
+switch
+in <a href="Devel_Batch.html">jsbatch</a>:</p>
+
+<pre>
+jsbatch -f somemodel.mod -oantimony &gt; somemodel.xml
+   or
+jsbatch -f somemodel.proj -oantimony &gt; somemodel.xml
+</pre>
+
+<p>Windows users: If you are receiving errors from JSim concerning libSBML and antimony translation, please see <a href="../download/win32.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
+</p>
+
+
+<h2>  <a name="future">Future plans</a></h2>
+
+<p>The following improvements are planned for the future:</p>
+
+<ol>
+
+<li>Antimony support for physical units (currently missing).</li>
+
+<li>The ability to mix standard MML and embedded Antimony within the 
+same model.</li>
+
+</ol>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,87 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>JSim RealNData Interpolation Specification</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p>    This specification is preliminary and subject to change. Last revised: 06 Sep 
+2006.</p>
+<h2>  Implementation Specification</h2>
+<p>    The RealNData.realVal(double[] xvals) method implements N-dimensional
+interpolation based on grid values (not grid array indexes).  Various
+interpolation algorithms may be implemented,  subject to the following
+guidelines.</p>
+<p>    The method may be called concurrently by several threads,  (even on the
+same RealNData),  and so must be reentrant.  </p>
+<p>    Interpolation must efficiently support both regular and irregular grids.  
+Currently all model data is defined on regular grids, but this may change
+in the future.  Data curves in project datasets is often defined on
+irregular grids.  GridData.nearestInx(double xval) should be used to find
+the surrounding grid indexes for an xval in an efficient manner.  Note
+that IrregularGridData.nearestInx() currently (Sep 06) uses an inefficient
+low-to-high search strategy.  This should be replaced by an efficient
+binary search at some point in the future.</p>
+<p>    Interpolation algorithms may use as many or as few nearby grid points as
+is appropriate.  A linear algorithm may use as few as 2, or as many as 2^N
+nearest neighbors.  A spline or other smooth algorithm may use even more
+by drawing on non-nearest neighbors.  This specification is silent on the
+number of neighbors used for interpolation. However, in does require
+robustness when NaN's are encountered in one or more neighbors. All model
+data arrays (RealNData) in initialized to NaNs at the start of a run.  
+Values are calculated in an unpredictable order, depending upon the
+planner/compiler.  When interpolation is requested, data values for some
+neighbor grid points may be NaNs.  Currently (due to compiler limitations) all JSim 
+model loops move from low index to high index,  but this should not be assumed
+by interpolation algorithms as other calculation orders will, no doubt,  be
+implemented in the future.</p>
+<p>    Linear algorithms assign weight factors for each of the 2^N nearest neighbors
+based on distance to the query xvals[],  with the returned value being a summation
+of data values times weights.  Algorithms should not add zero weights
+to summation in case the associated data value is NaN (IEEE spec says 0*NaN gives
+NaN).  Furthermore, weights that are very nearly zero should be set to zero.
+Here "very nearly zero" mean abs(x) < THRESH where THRESH is a static parameter
+currently recommended to have value 1e-7.</p>
+<p>    Note: As AS points out,  the current THRESH is 1e-7 times the 
+minimum grid delta,  which is unit incompatible with the dimensionless weights.
+Therefore,  the current threshold is non-sensical.  </p>
+<p>    How to extend this NaN-protection policy to non-linear algorithms that sample
+non-nearest neighbors has yet to be defined.</p>
+<p>    It may be assumed that the GridData's overwhich the queried RealNData 
+assumes values have non-NaN values.</p>
+<p>    xvals[] query outside grid bounds but within one grid delta should return values
+at grid bounds.  When the query is more than one delta outside grid bounds, this the
+value returned may be either NaN or the value at grid bounds.  Future versions of this
+spec will probably pick one or the other but, as of this writing, it is not completely
+clear which is best.</p>
+<h3>  Verification Specification</h3>
+<p>    There are 3 types of verification required: accuraccy, robustness and performance.</p>
+<h4>    Accuraccy verification</h4>
+<p>      AS will provide model/project files that demonstrate smooth and correct
+interpolation behaviour for NaN-less RealNData objects.  These files will be
+incorporated into the JSIMSRC/VERIFY/interp suite.</p>
+<h4>    Robustness</h4>
+<p>      EB will provide model files that check for undesirable NaNs generated at
+run-time.  These files will be incorporated into the JSIMSRC/VERIFY/interp suite.
+AS should feel free to contribute any additional NaN problem models he discovers
+during testing.</p>
+<h4>    Performance</h4>
+<p>      EB will provide a JSim/data/InterpTest.java for assessing algorithm 
+performance.  Run via $JSIMSRC/build/jsinterpperf</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

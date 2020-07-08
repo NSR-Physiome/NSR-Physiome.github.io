@@ -1,0 +1,159 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>Administering a JSim-enabled Web Site</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p> This document gives describes how to write and serve JSim-enabled Web 
+pages which allow you to demonstrate JSim, or particular models, to the 
+public. This document assumes you are familiar with HTML, Web server 
+administration and <a href="Admin_Server.html">JSim remote server 
+administration</a> .</p>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#trust">Trusted and Untrusted Applets</a></li>
+<li><a href="#server">Remote Model Computation</a></li>
+<li><a href="#html">HTML Usage</a></li>
+<li><a href="#browser">Browser Requirements</a></li>
+<li><a href="#nsr">Applet Trust Implementation at NSR</a></li>
+<?php jscoqli() ?>
+</ul>
+<h2>  <a name="trust">Trusted and Untrusted Applets</a></h2>
+<p>    JSim can run as a java applet within an HTML Web page.  It may operate
+in either trusted or untrusted mode. In either mode, the JSim applet can
+load demonstration projects, run models and plot results.  However, when
+operating in untrusted mode the applet may not:</p>
+
+<ul>
+<li>read or write files <strong>in the user's local file system</strong>.  In
+JSim's case, this means loading or saving project, model, data and
+preferences files.  (However, demostration project, model and data files
+can be loaded at program launch from accessible Web sites.)</li>
+<li>establish network connections any host other than the one that
+serves the applet jar file (JSimClient.jar).  In JSim's case, this affects
+the JSim remote server connection and any files loaded on the command
+line.</li>
+
+</ul>
+<p>    When an untrusted applet attempts an unpermitted operation, an error
+message will be generated, and the program will exit or continue as is
+appropriate.</p>
+<p>    Establishing an applet as trusted is a complex subject,  and 
+will not be dealt with here in great detail.  The method used at 
+the NSR website to establish trust is described at the <a href="#nsr">end of this
+document</a> .</p>
+<h2>  <a name="server">Remote Model Computation</a></h2>
+<p>    Since JSim's numerical library relies on native libraries, which are
+not allowed in applets (trusted or not), JSim applets perform model
+calculations on a host running the <a href="Admin_Server.html">JSim server</a> .  
+Untrusted applet network connections are restricted to the host that
+serves the applet jar file (JSimClient.jar), meaning a JSim server must be
+running there.  Trusted applets may connect to any network host (see the
+-server switch below).</p>
+<h2>  <a name="html">HTML Usage</a></h2>
+<p>    A comprehensive HTML and WWW server administration tutorial is 
+beyond the scope of this document,  which offers only a few simple
+examples of JSim applet usage within HTML.  HTML authors interested
+in the JSim applet should consult HTML standard documentation for 
+complete details and work with their local WWW server administrator.</p>
+<p>    An JSim applet is embedded in HTML via the object or applet tags
+using the java archive JSIMHOME/lib/JSimClient.jar from your JSim 
+distribution.  For example:
+<pre>
+      &lt;object
+        type="application/x-java-applet"
+        classid="java:JSim.gui.GLaunch"
+        archive="JSimClient.jar"
+        width="1000"
+        height="600"
+        args="-f demo.proj"
+      &gt;
+      &lt;/object&gt;
+</pre>
+</p>
+<p>    or alternatively:
+<pre>
+      &lt;applet
+        code="JSim.gui.GLaunch"
+        archive="JSimClient.jar"
+        width="1000"
+        height="600"
+      &gt;
+      &lt;param name=args value="-f demo.proj"&gt;
+      &lt;/applet&gt;
+</pre>
+</p>
+<p>    These examples assume the file demo.proj is served (via HTTP) from
+the same directory as JSimClient.jar.</p>
+<p>    All the normal <a href="User_Ref.html#switch">command-line switches</a> are
+available via the <strong>args</strong> tag above,  however some switches have 
+slightly altered meanings in the applet context:</p>
+
+<ul>
+<li><strong>-f</strong> refers not to files in the client's local file system, but
+to files served via HTTP. The default directory for these files is the
+host and directory from the calling URL (e.g. an HTML file).  Applets may
+override the directory via the <strong>-userurl</strong> switch.  An untrusted
+applet will generate an error if <strong>-userurl</strong> is not on the same host
+from which JSimClient.jar is served.</li>
+<li><strong>-server</strong> defaults to the host from which JSimClient.jar is 
+served.  The other connect parameters (user name, 
+port and server name) take on default values.  An untrusted applet
+will generate an error if <strong>-server</strong> is not on the same host 
+from which JSimClient.jar is served.</li>
+
+</ul>
+<p>    <strong>Note for advanced administrators:</strong> It has been noted that
+untrusted applets may have permission difficulties accessing a JSim server
+on a computer with multiple IP addresses, depending on how the host OS
+directs traffic between those addresses. In such cases, the applet/object
+codebase attribute and the -server and -userurl JSim switches may need to
+all point to the primary IP address of the server.</p>
+<h2>  <a name="browser">Browser Requirements</a></h2>
+<p>    The JSim applet requires the user's browser have a Sun Java 1.6 
+compatible plug-in installed.  See <a href="User_WWW.html">Running JSim inside a Web 
+Browser</a> for complete information.</p>
+<h2>  <a name="nsr">Applet Trust Implementation at NSR</a></h2>
+<p>    On the NSR web site, various pages use the JSim applet in both 
+trusted and untrusted mode.  Those that use trusted mode,  implement
+trust via a signed jar file.  Sun's keytool and jarsigner programs
+are used to digitally sign JSimClient.jar.  For example:
+<pre>
+      keytool -genkey -alias JSimApplet
+
+      jarsigner JSimClient.jar JSimApplet
+</pre>
+</p>
+<p>    When the signed jar file is downloaded by a Java 2 compliant browser,
+the user is presented with a dialog box asking if s/he wishes to trust the
+applet.  If s/he agrees, the applet will run in trusted mode.  If not, the
+applet will run in untrusted mode.</p>
+<p>    Please note that the JSimClient.jar distributed with JSim is not
+signed.  If you wish to follow NSR's trust scheme at your web-site, you
+will need to sign the jar file locally.</p>
+<p>    Applet security is a very complex topic and there are numerous
+alternative approaches to the one taken at NSR.  It is possible that we
+will change or refine our approach in the future to meet new security 
+concerns.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

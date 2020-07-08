@@ -1,0 +1,138 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>Coming Features of JSim</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+<p>    JSim's architecture has been designed with placeholders for many
+features we wish to provide eventually, but have not yet gotten around to
+implementing.  This document describes those features.  NSR seeks
+collaborators interested in helping to develop these features so they can
+be incorporated into the standard JSim distribution.  Some features are
+more amenable to collaborative development than others.  If you are
+interested in discussing such collaboration, please <a
+href="/Contact">contact us</a>:</p>
+<p>    <a href="#gui">GUI Issues</a></p>
+<p>    <a href="#doc">Tutorials and Other Documentation</a></p>
+<p>    <a href="#os">Operating Systems Support</a></p>
+<p>    <a href="#analysis">Model Analysis Tools</a></p>
+<p>    <a href="#custom">Model Runtime Customization</a></p>
+<p>    <a href="#graphics">Plot Graphics</a></p>
+<p>    <a href="#engine">Computational Engine</a></p>
+<p>    <a href="#lang">Alternative Modeling Languages</a></p>
+<p>    <a href="User_MP.html">Multiprocessing</a></p>
+<p>    <a href="#macos">Macintosh-specific issues</a></p>
+<h2>  <a name="gui">GUI Issues</a></h2>
+<p>     The JSim GUI is still being refined to best balance  
+simplicity for new users,  effiency for frequent users and feature
+richness for power users.  These needs are often in conflict,  so
+the tinkering continues.</p>
+<h3>     Some other worthwhile projects include:</h3>
+
+<ul>
+<li>improved printing support (currently marginal);</li>
+<li>improvements in built-in text editor;</li>
+<li>integrated use of an external text editor program (e.g. vi, 
+emacs);</li>
+<li>more informative error messages and access to appropriate help;</li>
+
+</ul>
+<h2>  <a name="doc">Tutorials and Other Documentation</a></h2>
+<p>    JSim program documentation is still incomplete, but improves
+with time.  Scientific tutorials, for use with JSim, are under
+development in areas for which NSR staff have expertise.  Tutorials in
+other areas will, hopefully, be contributed by collaborators.</p>
+<h2>  <a name="os">Operating Systems Support</a></h2>
+<p>    JSim is currently available for Linux(amd64), Windows and Macintosh.  
+An WWW applet version, for running in a WWW browser is also available.  
+ Collaborators will access to other OS platforms may contribute
+to the JSim effort with builds for their systems.  With the advent of
+remote server implementation (above), there is interest in porting to
+supercomputer platforms.</p>
+<h2>  <a name="analysis">Model Analysis Tools</a></h2>
+None on the list currently.
+
+
+<h2>  <a name="custom">Model Run-time Customization</a></h2>
+<p>    This feature allows user to modify the default run-time appearance 
+of the model to include diagrams and/or simplify navigation of parameter 
+space.  The end-result will be similar to that of the .cf file in NSR's 
+XSIM simulator,  although RTML (Run-Time Markup Language) has the 
+following advantages:
+<ul>
+<li>XML dialect improves robustness, openness and expandability;</li>
+<li>all pages are rescalable,  depending upon screen real-estate;</li>
+<li>format supports eventual development of drag-and-drop editor.</li>
+
+</ul>
+</p>
+<p>    Currently,  model developers may customize models by writing RTML in
+the text editor pane of the Model Customization sub-tab.  However,  this
+is still experimental,  and RTML tags are not yet documented.</p>
+<h2>  <a name="graphics">Plot Graphics</a></h2>
+<p>    Currently,  XY plot, coutour and colormap plots are available.  
+Future plans include surface plots and animated plots.</p>
+<h2>  <a name="engine">Computational Engine</a></h2>
+<p>     JSim's MML (Mathematical Modeling Language) is quite
+general allowing continuing introduction of new capabilities
+without required changes to existing models. Some planned and possible 
+features are:
+<ul>
+<li>Non-linear zero finder implementation. This is mostly done, and
+is just waiting on the numeric method implementation and/or interfacing
+which should be fairly quick if someone finds this interesting;</li>
+
+</ul>
+</p>
+
+<ul>
+<li>Support for C++, Fortran, Matlab and/or Mathematica language 
+functions and procedures (F&P) in MML;</li>
+<li>Safety mechanisms for insuring F&P written in other languages are
+not malicious;</li>
+<li>Improved unit support in F&P;</li>
+<li>Improved F&P, data interpolation, multiblock and relation
+sequencing in the JSim planner.</li>
+<li>2D and 3D PDE support (currently only 1D supported);</li>
+<li>2nd and higher order ODE and PDE support;</li>
+<li>Expanded MML template support;</li>
+<li>More domain-specific template libraries and BCLs (e.g.  membrane
+transporters, LRC circuits, flux-balance analysis);</li>
+<li>Structures equivalent to variable indexing;</li>
+<li>An expanded stable of ODE solvers;       </li>
+<li>markov model support.</li>
+
+</ul>
+
+<h2>  <a name="macos">Macintosh-specific issues</a></h2>
+<p>    Macintosh users should take notice that some standard Macintosh
+features have not yet been implemented into JSim. The JSim development
+team hoped to eventually address the following limitations:</p>
+
+<ul>
+<li>JSim will quit when all windows are closed.</li>
+<li>There is no Window menu. If there are several project windows open,
+they usually hide each other.  Press and hold or right-click on the
+JSim icon on the Dock to switch between projects.
+</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

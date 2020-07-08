@@ -1,0 +1,158 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>MML Debugging Guide</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+<p>    This document suggests approaches for reasonably advanced MML model
+writers to debugging some common problems with model compilation and run
+results.  It is a rough guide that is expected to grow over time. It is
+not meant to be encyclopedic. </p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p> Contents: </p>
+
+<ul>
+
+<li>    Common problems during model compilation: </li>
+<ul>
+<li><a href="#units">Compiler aborts with unit compatibility errors</a></li>
+<li><a href="#fzero">Compilation takes a very long time</a></li>
+</ul>
+
+<li>    Common problems during model runs:</li>
+<ul>
+<li><a href="#nans">Mysterious NaNs appear in output results</a></li>
+<li><a href="#solvers">ODE/PDE solvers abort during run</a></li>
+<li><a href="#memory">Model run aborts with OutOfMemoryError</a></li>
+</ul>
+
+<li>    Tools for model diagnosis:</li>
+<ul>
+<li><a href="#planner">Planner output</a></li>
+<li><a href="#trace">Trace switches</a></li>
+</ul>
+
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="units">Compiler aborts with unit compatibility errors</a></h2>
+<p>    Such error messages are usually fairly specific about the offending
+construct.  If there are questions about common standard unit definitions,
+you may examine the common units file in $JSIMHOME/common/nsrunit.mod.  
+Alternatively, this file may be viewed in a model's "Debug" tab in the
+JSim GUI by selecting "View system units file" from the "View" menu. The
+following facts about JSim unit correction are often a source of
+confusion:</p>
+
+<ol>
+<li> Variables not explicitly assigned units at declaration time will be
+assigned units based on equation context.  This is not the same as
+declaring a variable dimensionless.  An error will result if the variable
+is used in conflicting contexts, although the resulting cascade of
+assignments may make the original error difficult to trace.  Assigning
+units to some variables explicitly may help in diagnosis.</li>
+<li> Transcendental functions (e.g. exp(), sin()) must take
+dimensionless arguments and return dimensionless results.</li>
+<li> The exponent of the power function must be dimensionless.</li>
+<li> United variables may only be raised to constant powers.</li>
+<li> integral() has units that are the product of the expression 
+being integrated and the variable of integration.  sum() has the same
+units as the expression being summed.</li>
+
+</ol>
+<h2>  <a name="fzero">Compilation takes a very long time</a></h2>
+<p>    Model compilation times over about 30 seconds usually
+result from the compiler attempting to solve a large number of 
+simultaneous <a href="MML_Implicit.html">implicit equations</a> .  This may occur
+because your model actually has such equations,  but more ofter occurs
+because there are missing equations in your model.  One common cause
+is missing initial conditions for ODE/PDE state variables.</p>
+<h2>  <a name="nans">Mysterious NaNs appear in output results</a></h2>
+<p>    NaN (Not A Number) is an IEEE standard for non-sensical numbers,
+e.g. 0/0.  Some causes of NaN calculations include:</p>
+
+<ol>
+<li> MML code not protected from zero divides,  negative sqrt() 
+arguments and the like.</li>
+<li> Numerically unstable ODE/PDE equations being fed into adaptive
+time-step solvers (e.g. radau).</li>
+<li> Planning errors caused by unsupported use of <a 
+href="MML_VarFunc.html">variable 
+functions </a> .</li>
+<li> Cancelled or aborted runs will leave NaNs in all variables
+that had not yet been calculated.</li>
+
+</ol>
+<p>    Use the <a href="#planner">planner output</a> and/or <a href="#trace">trace switches</a>
+can sometimes facilitate the diagnosis of such problems.</p>
+<h2>  <a name="solvers">ODE/PDE solvers abort during run</a></h2>
+<p>    If these aborts relate to NaNs,  see the item above.  If not,
+the equations may be too sophisticated for the solvers and/or settings
+you are using.  See the model "Solvers" page to see the various options
+for which solvers are available.  The default solver settings are 
+appropriate for many problems,  but not all.  Try different solvers
+as see if they improve your results.</p>
+<h2>  <a name="memory">Model run aborts with OutOfMemoryError</a></h2>
+<p>    This problem may occur when running models that have very large 
+numbers of variables,  or use very large time or spatial grids.  For
+a more complete guide to dealing with such problems see 
+<a href="User_Memory.html">here</a> .</p>
+<h2>  <a name="planner">Planner Output</a></h2>
+<p>    The JSim planner is that part of the JSim compiler that turns MML 
+mathematical constructs into a specific sequence of calculations.  A
+simple text representation of this sequence may be viewed in a model's
+"Debug" tab in the JSim GUI by selecting "View plan text" within the 
+"View" menu.  Examining this text can give the modeler insight into how
+JSim is attempting to calculate the model and suggesting what the problem
+is.</p>
+<p>    In theory, the planner sequence is internally checked so that each
+variable is calculated from previously calculated variables. In practice,
+<a href="MML_VarFunc.html">variable functions</a> sometimes poses 
+difficult
+sequencing problems which the planner doesn't correctly solve.  This
+results in NaN calculations, since variables are initialized to NaNs
+before each model run.</p>
+
+<h2>  <a name="trace">Trace Switches</a></h2>
+
+<p>Debugging switches -trace, -traceNaN and -abortNaN are described in 
+the <a href="Devel_Batch.html">Batch Processing Manual</a> .  The 
+example below suggests an approach to tracing the appearance of NaNs in 
+JSim output.</p>
+
+<p>    Run jsbatch on your model/project using the -abortNaN switch.  This
+will cause the model run to abort the first time a NaN is calculated,  
+with an error text on the offending variable.  Use the JSim planner output
+(above) to figure out which variables are used in calculating the NaN
+occurance.  If it is still unclear what the problem is,  use the -trace
+switch to trace those variables.  Repeat process until the problem is
+found.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

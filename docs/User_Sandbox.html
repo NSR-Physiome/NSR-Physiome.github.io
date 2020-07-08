@@ -1,0 +1,130 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>The JSim Sandbox</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+<p>    JSim models allow for embedding of source code in Java, C and (eventually)
+other languages using a feature called <a href="MML_Func_Intro.html">Functions and
+Procedures</a> (F&P).  F&P give modelers great flexibility in
+how they formulate model calculations, at the cost of opening a potential
+security hole.  Using these same constructs, an unscrupulous person could
+embed malicious code into a JSim model or project file and pass it on to an
+unsuspecting JSim user.  The user's account and/or computer system might then
+be harmed by running such a model under JSim.  The JSim sandbox is a 
+mechanism for safely running untrusted model code.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim GUI 
+</a> (required)</li>
+<li><a href="MML_Func_Intro.html">Using Functions and Procedures in MML
+</a> (recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#over">Sandbox Overview</a></li>
+<li><a href="#active">Activating the Sandbox</a></li>
+<li><a href="#usage">Usage Recommendations</a></li>
+<li><a href="#tech">Technical Details</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="over">Sandbox Overview</a></h2>
+<p>The JSim sandbox is a protected
+environment for running Java F&P that prevents potentially dangerous
+operations (such as deleting arbitrary files).  Complete details on
+prohibited operations are found in the <a href="#tech">technical details</a> 
+secion of this document.</p>
+<p>    The sandbox has two user-configurable parameters:</p>
+
+<ol>
+<li> READPATH - readable directories available to the application;</li>
+<li> WRITEPATH - writeable/deletable directories available to the 
+application.</li>
+
+</ol>
+<p>    The default sandbox is very restrictive,  prohibiting, for instance, 
+saving project files in their normal locations.  The user may augment
+the default READPATH and WRITEPATH on the command line in jsim or jsbatch.</p>
+<h2>  <a name="active">Activating the Sandbox</a></h2>
+<p>    The sandbox is activated in the <strong>-sandbox</strong> switch::</p>
+<p>    -sandbox [ WRITEPATH [ READPATH ] ]</p>
+<p>    Each PATH is a list of files or directories separated by your 
+operating system's path separation character (colon on MacOS and Linux,
+semi-colon on Windows).  User may specify no paths,  the WRITEPATH only or
+both paths.  READPATH automatically contains WRITEPATH so path elements
+need not be entered twice.</p>
+<p>    The sandbox switch is available in the jsim, jsbatch and jsserver
+programs.  jsserver behaves slightly differently that the others in that:</p>
+
+<ul>
+<li>the sandbox is active by default.  It may be disabled (<strong>NOT 
+RECOMMENDED</strong>) via the <strong>-nosandbox</strong> switch;</li>
+<li>READPATH and WRITEPATH may not be specified on the command line.</li>
+
+</ul>
+<h2>  <a name="usage">Usage Recommendations</a></h2>
+<p>    NSR recommends the following safety practices as standard:</p>
+
+<ol>
+<li> Running models developed by yourself or trusted collaborators does
+not require the sandbox.</li>
+<li> If you receive a model or project file from an untrusted source, it
+should be run in the sandbox.  If working in the sandbox is inconvenient,
+you should examine the code to make sure there is nothing malicious in it
+before running it outside the sandbox.</li>
+<li> It is always a poor idea to run JSim (or any other complex user
+program) from a privileged account (that is, Administrator or root).</li>
+
+</ol>
+<h2>  <a name="tech">Technical Details</a></h2>
+<p>    Activating the sandbox causes the following changes in program 
+behaviour:</p>
+
+<ul>
+<li>The default JSIMPATH does not contains the program launch directory 
+(.);</li>
+<li>The default READPATH in command-line applications (jsbatch,
+jsserver) contains JAVAHOME, JSIMHOME and JSIMPATH;</li>
+<li>The default READPATH in GUI applications (jsim) contains all files;</li>
+<li>The default WRITEPATH is the work directory for the session;</li>
+<li>The default READPATH and WRITEPATH may be augmented via the -sandbox
+switch in jsim and jsbatch;</li>
+<li>reading files outside READPATH is prohibited;</li>
+<li>writing or deleting files outside WRITEPATH is prohibited;</li>
+<li>C language source F&P is prohibited;</li>
+<li>Loading native libraries from the session work directory is 
+prohibited;</li>
+<li>Executing system commands (such as "rm -Rf /") is prohibited;</li>
+<li>Opening network connections is allowed only to the local host,
+a remote RMI server/client host (if any), and the <strong>-userurl</strong> host
+(if any).</li>
+
+</ul>
+<p>    If you have particular concerns about JSim security issues,  
+<a href="/Contact">contact
+us</a>.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

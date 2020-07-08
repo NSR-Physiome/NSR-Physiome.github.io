@@ -1,0 +1,405 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Running CellML Models under JSim</h1>
+
+<p><em>This page describes CellML support in JSim version 2.05 and
+above.  See <a href="MML_CellML_04.html">here</a> for infomation on
+CellML support in JSim version 2.04 and below.</em></p>
+
+<p> CellML is an XML based open standard for exchange of computer based
+mathematical models.  JSim currently support importing most CellML models.  
+Extended import and export support is currently under development.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+<li>Familiarity with <a href="http://www.cellml.org/">CellML</a> 
+(recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#imp">Importing CellML Files into JSim</a></li>
+<li><a href="#exporting">Exporting CellML Files from JSim</a></li>
+<li><a href="#curation">Curating a CellML model with JSim</a></li>
+<li><a href="#stat">Project Status</a></li>
+<li><a href="#features">Features of the Translator</a></li>
+<li><a href="#bugs">Bugs and Limitations</a></li>
+<li><a href="../models/cellml">The JSim CellML Models page</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="imp">Importing CellML Files into JSim</a></h2>
+<p>    Assuming no translation problems, importing CellML into JSim is quite
+easy.  Select "Import model file" from the "Add" menu under the JSim
+GUI's "Project" tab, which allows you to select a model file to import.  
+CellML files have the extension .cellml or .xml.  (Note that .xml is used by 
+many
+XML-based files besides CellML, so be sure to pick a real CellML file).  
+Alternatively, you can load a CellML file via the -f switch on the command
+line of either jsim or jsbatch.</p>
+<p>    If translation is successful, a new model tab will appear in the
+project containing the translated MML source code.  If the translator
+has a problem, an appropriate error message will be generated.  No partial
+translation will appear in the event of a translation error.  Errors at
+this stage are most likely because the model tried to import a component, or 
+used an unsupported MathML tag (see <a href="#bugs">Bugs and Limitations</a> below).</p>
+
+<p>The model will by default have the statement 'unit conversion on' if
+the models units are consistent.  If they are not correct, the model will
+have the statement 'unit conversion off'.  Having unit conversion off means
+that there are unit errors in the model; these errors can be discovered by
+turning unit conversion back on and attempting to compile the model.
+</p>
+
+<p>    Now push the "Compile" button to compile the model.  Errors at
+this stage are rare, and were seen in only four unvalidated models in our
+1055-model test bed.</p>
+
+
+</ol>
+<p>    CellML to MML translation on the command line may be accomplished
+using jsbatch:
+<pre>
+      jsbatch -f somemodel.xml -omml &gt; somemodel.mod
+</pre>
+</p>
+
+<p>At run-time users should be advised that:</p>
+<ol>
+<li>Time stepping parameters are not defined in CellML files, and must
+be entered by the user.</li>
+<li>Many CellML archive models (71 of our 1055-model test bed) do not 
+    have valid initial conditions. 
+    Initial conditions of '0' are automatically set when the initial
+    conditions are underspecified, and existing initial conditions
+    are suppressed when the initial conditions are overspecified.  In
+    both cases, a comment is written indicating what has been changed.
+</LI>
+</ol>
+
+<h2>  <a name="exporting">Exporting CellML Files from JSim</a></h2>
+<p>To export CellML from the JSim GUI (version 2.06 or greater), compile it, click on the model 
+"Debug" tab and select "View CellML" from the "View" menu.  Translated 
+CellML will appear in the text area.  If any warnings are generated in 
+the translation, a button "Show N translator warnings" will appear. 
+Clicking this button will display the warnings in the JSim message
+area (right half of GUI).</p>
+
+<p>To export CellML from the command line,  use the "-ocellml" switch
+in <a href="Devel_Batch.html">jsbatch</a>:</p>
+
+<pre>
+jsbatch -f somemodel.mod -ocellml &gt; somemodel.cellml
+   or
+jsbatch -f somemodel.proj -ocellml &gt; somemodel.cellml
+</pre>
+
+<p>The produced CellML model will not be modular:  all the variables and
+equations will be created inside a single CellML component.  If future
+versions of JSim allow the creation of modular models, that modularity
+may be able to be translated to CellML's component structure.  Note also
+that any domain-specific variables (time.max, time.min, etc.) will not 
+be translated to CellML, as those concepts are not present in CellML
+models, but instead are only present in the simulator itself.
+
+<p><b>Known bugs:</b> If constants are used in the JSim model without
+declared units, but whose units are implied, the implied units are
+not translated to CellML.  To properly format a JSim model for export 
+to CellML, therefore, all lines like: <pre>S1 = 10+y;</pre> should be
+changed to: <pre>S1 = (10 mM)+y;</pre>  Future versions of JSim will
+relax this restriction.
+</p>
+
+<h2> <a name="curation" /></a>Curating a CellML model with JSim</h2>
+
+<ol>
+<li> <p>Run jsbatch with the command:
+     <pre>jsbatch -f somemodel.cellml -omml > somemodel.mod</pre>
+     If this command completes successfully, it will create a JSim
+     version of the CellML model.  </p></li>
+
+<LI> <p>Next, examine the model for warnings.  These usually
+     mean that JSim had to change something from the original model to 
+     create a working model.  Warning messages that indicate something
+     awry in the CellML model are:
+     <ul>
+       <li><pre>//Warning:  the following variables were set 'extern' or given
+//  an initial value of '0' because the model would otherwise be
+//  underdetermined:  [List of variables]</pre>
+	   This warning is put at the top of a model when the translator had 
+	   to fix what it saw as an underdetermined model.  You can find the
+	   variables in question by searching for for the warning message:
+	   <pre>//Warning:  Assuming zero initial condition; nothing provided in original CellML model.</pre>
+	   and for the 'extern' keyword.</li>
+       <li><pre>//Warning:  the following variables had initial values which were
+//  suppressed because the model would otherwise be overdetermined: [List of variables]</pre>
+           This warning is put at the top of a model where the translator had
+           to fix what it saw as an overdetermined model.  You can find the
+           variables in question by searching for the warning message:
+           <pre>//Warning: CellML initial value suppressed to prevent overdetermining model.  Original initial value: [value]</pre>
+           The model can be fixed by removing the initial value for this variable, or 
+           by removing some equation from the model.  NOTE:  it is possible,
+           though not likely, that a model may be flagged as being both over-
+           and under-determined.  This happens when sets of equations do not 
+           overlap in terms of what variables can be determined from them, and 
+           one set is overdetermined and a different set is underdetermined.
+           Ten models in our test bed had this feature, all of which were marked
+           as either being unchecked or as being unable to run in OpenCell.
+       <li><pre>// Warning: unit conversion turned off due to unit errors in [number] equation(s).</pre>
+           The units are not consistent in the model, perhaps due to units not being 
+           properly imported, or perhaps due to actual mistakes in the model.  If there
+           are any other warnings in the unit section of the model (see below) try fixing
+           them first.  If unit conversion is still off, the next step is to
+           find out what the model errors actually are:  change the 
+           <code>unit conversion off;</code> line to 'on', then run jsbatch 
+           in verbose mode on the translated model:
+           <pre>jsbatch -v -f somemodel.mod -oplan</pre>
+           Note that loading the original CellML file will not work, as 
+           the translator will turn off unit conversion automatically.  After
+           fixing the CellML model, re-create 'somemodel.mod'.  If this warning
+           goes away and unit conversion is now on, you now have consistent units!
+       <li><pre>//Warning:  unit [unit_] renamed from [unit], as the latter is predefined in JSim with different fundamental units.</pre>
+           The common meaning of a particular unit was overridden by this
+           CellML model.  The single most common error of this type
+           is getting the order of magnitude wrong:  for example, when
+           warned about 'picoA' being redefined, you'll then see:
+           <pre>unit picoA_=1E-9 ampere^1;</pre>
+           which is of course nanoamperes, not picoamperes.  Looking at the 
+           original model, you'll find something like this (from butera_rinzel_smith_1999_model2):
+<pre>  &lt;units name="picoA"&gt;
+    &lt;unit units="ampere" prefix="nano"/&gt;
+  &lt;/units&gt;</pre>
+           which is easily fixed by changing the name of the unit.</li>
+       <li><pre>//Warning:  unit [unit] unknown; assuming it is equivalent to the JSim predefined unit of the same name.</pre>
+           and
+           <pre>//Warning:  unit [unit] unknown; assuming it is a fundamental unit.</pre>
+           
+
+           The unit in question was used without being defined.  The difference
+           in the two messages is that JSim is making different assumptions to
+           try to fix the problem, but the problem in the original CellML model
+           is the same.  If the unit was imported, you get this warning because
+           JSim cannot yet handle imported elements.  Otherwise, a unit definition
+           needs to be added to the model.
+       </li>
+
+       <li><pre>//Warning:  the unit 'celsius' is not well defined.
+//  It may mean 'distance from 0 degrees C' in some contexts,  and 'distance in C degrees' in others.
+//  We assume this model meant the latter, and have converted the unit to the equivalent but better-defined 'kelvin' instead.</pre>
+            Although 'celsius' is a predefined unit in CellML, JSim does not
+            like it, for the reasons stated.  It is indeed probably a 
+            better idea to go with kelvin units instead.
+       </li>
+    </ul></p>
+  </li>
+  <li>Finally, run jsbatch again with the command
+     <pre>jsbatch -f somemodel.cellml -oplan</pre>
+     If this command completes successfully, it will create a JSim
+     version of the CellML model together with an outline of how to perform
+     a simulation using the model.  Once the time parameters are set, the model
+     can be simulated in JSim.  If this command produces errors (but running 
+     jsbatch with '<code>-omml</code>' did not) it means that JSim was not able
+     to determine how to solve the model.  Of our test bed of 1055 models, there
+     are four models of this type, and it is unclear whether JSim's inability
+     to simulate the model is a fault of JSim or of the model itself--none of 
+     the four models have been fully validated.</p></li>
+  </li>
+</ol>
+<p>      You may also wish to refer to the <a href="Devel_Batch.html">jsbatch manual</a> .</p>
+
+
+<h2>  <a name="stat"></a>Project Status</h2>
+<p>    JSim's CellML translator is quite robust, lacking mostly the ability to 
+handle importing components and units from other files.  It was developed 
+based the CellML 1.1 specification with the intent of providing a simulatable
+translation of the majority of the models in the CellML repository.  As of 1 Dec
+2011, of the 1055 models used as a test bed, 884 translate to MML without error, and 
+can be compiled to a working simulatable model, 141 cannot be translated due to 
+those models attempting to import a component from a separate file, 3 fail due to
+errors in the CellML model itself, and only 27 fail 
+due to some other reason, mostly use of unsupported MathML elements.</p>
+
+<h2> <a name="features">Features of the translator</a></h2>
+
+<p>In the interest of creating workable JSim models from CellML files, the following 
+transformations are performed:</p>
+<UL>
+<LI>CellML models do not indicate which variables are intended to vary over a domain 
+    (like time), so JSim uses a series of heuristics to determine which variables are
+    domains, which variables vary over those domains, and which variables are constant.
+<LI>When a underdetermined CellML model is found, one or more of its variables are either set
+    'extern' or are given an initial condition of '0' (if that variable is determined to vary
+    over time).  In the latter case, a warning is added.</LI>
+<LI>When a overdetermined CellML model is found, one or more of its variable definitions 
+    are suppressed, and a comment is written out with the original value of the variable.</LI>
+<LI>Documentation from the &lt;documentation&gt; tag is imported into JSim as a comment
+    block at the beginning of the model.</LI>
+<LI>Unit correction is turned on or off based on whether the units are consistent in 
+    the CellML model.  As of December 2011, 729 models have consistent units, and 
+    159 do not.  See <A HREF="#curation">above</a> for how to use JSim to find and
+    correct models with inconsistent units.</LI>
+<LI>Units which don't match JSim's predefined unit set are renamed.  CellML models that claim
+    '1 picoA = 10^-9 amperes' are allowed, but are translated to JSim models that claim 
+    '1 picoA_ = 10^-9 amperes' (note the added underscore) along with a warning.</LI>
+<LI>The CellML pre-defined unit 'celsius' is translated to JSim as 'kelvin' along with the warning:
+    <blockquote>"Warning:  the unit 'celsius' is not well defined, and may mean 'distance from 
+                 0 degrees C' in some contexts, and 'distance in C degrees' in others.  We assume 
+                 this model meant the latter, and have converted the unit to the equivalent but 
+                 better-defined 'kelvin' instead."</blockquote></LI>
+<LI>If a MathML &lt;piecewise&gt; element is found without a child &lt;otherwise&gt;, this is
+    translated to JSim as if a final 'otherwise 0' was present.  In all examined cases, this
+    condition is impossible to reach, as all logical possibilities were already covered by
+    explicit 'piecewise' construct (like '<code>if x>3, 0; if x<=3, 5.5</code>').  This was considered 
+    preferable to simply removing the final explicit case to make model errors more obvious, 
+    and to include as much as possible of the original model.</LI>
+<LI>CellML models with no equations or variables (such as those models that only define units) are translated to
+    JSim models with a single defined variable:  '<code>extern real all;</code>'</LI>
+<LI>CellML model variables that are JSim reserved words or constructs (such as those containing 
+    double underscores) are renamed.</LI>
+</UL>
+
+
+<h2>  <a name="bugs">Bugs and Limitations</a></h2>
+
+<p>The following limitations are based on experience with the 1055 model test bed
+(see above).</p>
+
+<UL>    
+<LI> The current translator does not translate CellML models that attempt to import components
+     using the CellML 1.1 <code>&lt;import&gt;</code></li> construct.  This is the single 
+     largest limitation as far as impacted models:  141 models of our 1055-model test bed
+     use this construct, and are untranslatable as a result.</LI>
+     
+<LI> A lesser limitation is that the translator does not import units.  It works around
+     this limitation by declaring that unknown units are new fundamental units.  This can be
+     fixed by editing the unit section of the generated JSim model, and all such units
+     are clearly marked</LI>
+     
+<LI> The following MathML tags are not yet supported:
+<ul>
+<li><code>      &lt;partialdiff&gt;</code></li>
+<li><code>      &lt;degree&gt;</code></li>
+<li><code>      &lt;sum&gt;</code></li>
+<li><code>      &lt;domainofapplication&gt;</code></li>
+<li><code>      &lt;lowlimit&gt;</code></li>
+<li><code>      &lt;uplimit&gt;</code></li>
+</ul>
+
+<LI> JSim will not attempt to translate a CellML model that uses the deprecated <code>&lt;reaction&gt;</code> tag.
+     Only one such model exists in the current (December 2011) CellML repository.</LI>
+
+<LI> The algorithm that attempts to discover a simulatable set of initial conditions 
+     fails for four of the 1055 models in the test bed.  All four models have not been
+     validated, so it is unclear whether the error lies in the translator or in the original
+     model.</LI>
+     
+<LI> When checking unit correctness, the current JSim compiler is unable to handle variables 
+     being used as exponents of non-dimensionless functions.  Variables used in these exponents
+     are removed from the translated model entirely, and replaced with the number they represented:  
+     "Ca^n" is translated to "Ca^4".  In the future, we hope to better translate these models
+     by flagging the 'n' variable as 'static'.
+
+<LI> Conditional equations, that is, equations that hold true only under certain circumstances,
+     are not currently translated into JSim.  This affects two models from our test bed.</LI>
+
+<LI> No attempt is currently made to import CellML RDF metadata.</LI>
+</ul>
+
+<h2>  <a name="changelog" />Change Log</h2>
+<p>      See <a href="news.html">What's New with JSim</a> for a complete list of
+all changes made to JSim, by version number.  The following changes are specific to the 
+CellML-to-JSim translator:</p>
+
+<h3>Changes in v2.05</h3>
+
+<P>Overall, of all the .cellml files from the repository that we could download (1055 models), the old algorithm could translate, parse, and compile 660 models (with unit checking off), and failed at one of those stages for 395 models.  The new algorithm translates, parses, and comes up with a solution plan for 884 models, setting unit checking on or off automatically, and fails for 171 models.  Of those 171 models, 141 of them fail because they use the CellML 1.1 'import component' construct, 3 fail due to obvious errors in the CellML model itself, and most of the rest fail because they use MathML constructs we don't support.  This was accomplished with the following changes:</P>
+
+<UL>
+
+<LI>A new algorithm was written to determine what variables to set 'extern', which 
+    values to use declared initial values, and which variables varied over time.  This
+    resulted in many models now compiling in JSim that did not use to compile at all,
+    and several models that are now more in sync with original CellML intent (fewer
+    variables set 'extern' and more variables which use their declared initial values).</li>
+
+<LI>The translator is now more generous with what units it accepts:  it will now
+    rename or redefine erroneous units and give a warning rather than simply
+    refusing to translate the model. (See the <a href="#features">features</a> section
+    for more detail.)</LI>
+    
+<LI>Unit checking is now set automatically by examining the individual equations for unit
+    errors, and turning unit checking off if any errors are found.
+
+<LI>There was an error in some translated models where domains could be used before they were 
+    defined in the produced model.  All domains are now written out first.</LI>
+
+<LI>There was an error in some translated models where a variable could have its 
+    initial condition set to be equal to another variable that was not yet defined.  
+    This is now fixed in all existing CellML models through the simple expedient of 
+    writing out all models whose initial value is not a double last.  (It is still 
+    possible to run into problems if you have a chain of variables, each one's initial 
+    value set to the next.  No existing CellML model has this problem, however.)</LI>
+
+<LI>The 'piecewise' MathML parser used to require an 'otherwise' construct.  This 
+    restriction has been relaxed, by adding an 'otherwise 0' to all constructs that 
+    lack one.  60 models that were affected by this are now translatable.  (In all examined 
+    cases, all logical possibilities were actually covered by the set of listed explicit 
+    conditions, so the 'otherwise 0' will never be reached.)</LI>
+
+<LI>If the CellML model had no math in it, the JSim model that was created used to 
+    not be parseable.  This was fixed through the expedient of creating a single variable 
+    in the otherwise empty model defined as 'extern real all'.</LI>
+
+<LI>Some CellML models used JSim reserved words or constructs, which would cause the 
+    produced .mod file to fail when being read back in by JSim.  Those variables are 
+    now renamed, and a comment added to that effect.</LI>
+
+<LI>Parsing of MathML constructs 'plus' and 'times' with only one argument used to 
+    fail.  JSim parsing is now in line with the MathML standard for these functions, 
+    and correctly parses 'plus', 'times', 'and', and 'or' elements with 0 or 1 arguments.</LI>
+</UL>
+
+<P>In addition, the following features were changed or added:</P>
+
+<UL>
+<LI>The curation comments in the 'documentation' section of a CellML model are now 
+    exported as comments at the beginning of the JSim model.</LI>
+
+<LI>CellML models that used the CellML 1.1 'import' construct for components used 
+    to produce mysterious errors when translated to JSim.  The error message now 
+    reads "Unable to interpret CellML 1.1 files that import components."</LI>
+
+<LI>The single CellML model that still used the deprecated 'reaction' construct used 
+    to fail because the translated model did not have its initial conditions set 
+    properly.  JSim now simply claims that it is unable to translate models that use 
+    the 'reaction' construct.</LI>
+
+<!-- Unit conversion is now off for all automatically-generated models. -->
+
+<LI>Models that have to introduce an otherwise undefined initial condition for some
+    variables used to silently set those initial conditions to zero.  This still 
+    happens, but a comment is written to the model as well.</LI>
+
+</UL>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

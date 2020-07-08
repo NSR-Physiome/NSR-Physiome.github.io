@@ -1,0 +1,100 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Introduction to JSim RTML</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  <a name="intro">Preface</a></h2>
+
+<p> JSim Run-Time Markup Language (RTML) is an XML dialect that 
+specifies the run-time appearance of a compiled model in terms of pages 
+and menus. There are two RTML documents associated with any JSim model: 
+the default RTML and the custom RTML.  The default RTML is generated 
+internally and produces the familiar "Inputs", "Outputs", "Solvers" and 
+"Function generator" pages in a model's "Run time" tab.  The optional 
+custom RTML may be created by a model writer to improve the JSim user's 
+run-time experience by providing a nested set of pages, tables, diagrams 
+and menus that make the model easier to navigate and understand.  This 
+document provides a starting point for adding RTML to a JSim model.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a></li>
+<li><a href="User_Projects.html">JSim Projects </a></li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#start">Getting Started</a></li>
+<li><a href="#image">Model Images</a></li>
+<li><a href="MML_RTML_Ref.html">Complete RTML Specification</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2> <a name="start">Getting Started</a></h2>
+
+<p> Most RTML writers will find it useful to look at some examples 
+before seriously examining at the RTML specification.  You may view the 
+default RTML for a model via the "Export default RTML..." item in the 
+"Pages" menu of a model's "Run Time" tab (the model must be compiled to 
+do this).  More complex examples of custom RTML may found in the project 
+files distributed with the <a href="User_Fpack.html">JSim Fortran 
+Package (fpack)</a> . For such models, the "Export custom RTML..." item 
+in the "Pages" menu above will allow you to view the custom RTML.</p>
+
+<p> Custom RTML, created is accordance with the <a 
+href="MML_RTML_Ref.html">RTML Reference Manual</a> , may be associated 
+with a JSim model via the "Import custom RTML..." item in the "Pages" 
+menu above.</p>
+
+<p> Alternatively, <a href="Devel_Batch.html">jsbatch</a> users may use 
+the "-rtml" switch.  In the following example, the custom RTML 
+"spiffy.rtml" is loaded into the model "axon" within old.proj, and saved 
+in new.proj:</p>
+
+<pre>
+      jsbatch -f old.proj -rtml axon:spiffy.rtml -oproj &gt; new.proj
+</pre>
+
+<h2>  <a name="image">Model Images</a></h2>
+
+<p> Custom RTML often uses <strong>image</strong> elements to provide 
+graphic images within pages.  <strong>image</strong> elements contain 
+the name of the image rather than the actual image data.  Image data is 
+stored in a model's image set, which may be viewed and edited within a 
+model's "Images" tab.  Each image must be assigned a name by which it is 
+known in RTML.  That name may not contain spaces or punctuation.  Image 
+formats GIF, JPEG and PNG are currently supported.  Other formats may be 
+available in the future.  The JSim GUI supports standard 
+import/export/rename/delete functions for images within the image 
+set.</p>
+
+<p> Alternatively, jsbatch users may load images into a project file via 
+the -img switch.  In the following example, the image leg.gif are loaded 
+into the example1 axon model with name Leg:</p>
+
+<pre>
+      jsbatch -f old.proj -img axon.images.Leg:leg.gif -oproj &gt; new.proj
+</pre>
+
+<p> The -rtml and multiple -img switches may be used to load externally 
+generated custom RTML and associated images with a single jsbatch 
+command.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,276 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Connecting JSim and Matlab</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p><a href="http://www.mathworks.com/">Matlab</a> is a matrix-based
+computational system distributed by The MathWorks(Natick, MA) and widely
+used for scientific computation.  This document discusses several ways to
+use <a href="/jsim/">JSim</a> and Matlab in conjunction to solve
+scientific problems.  Both JSim and Matlab offer possibilities for graphic
+data display, however this document will focus on combining the
+computational power of the two products.</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim GUI</a></li>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a></li>
+<li><a href="User_DataSets.html">Data Files and Project Data 
+Sets</a></li>
+<li><a href="Devel_Batch.html">JSim Batch Processing Manual</a></li>
+<li>Familiarity with Matlab</li>
+</ul>
+
+<h2>Contents</h2>
+
+<ul>
+<li><a href="#model">Exporting JSim models to Matlab</a> <img src=/jsim/pics/new.png /></li>
+<li><a href="#data">Exporting JSim data to Matlab</a></li>
+<li><a href="#prog">Programatic interaction between JSim and Matlab</a></li>
+<ul>
+  <li><a href="#extern_master">External master, JSim and Matlab slaves</a></li>
+  <li><a href="MML_Func_Matlab.html">JSim master, Matlab slave</a></li>
+  <li><a href="#matlab_master">Matlab Master, JSim slave</a></li>
+</ul>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="model">Exporting JSim models to Matlab</a></h2>
+
+<p>JSim (version 2.07 and above) allows you to export JSim models to Matlab .m
+files. In the JSim GUI,  select the model "Debug" tab and then select 
+"View Matlab" from the "View" menu.  Select "Export text..."  from the "File"
+menu to write the Matlab text to a file, which should have extension ".m".
+For command-line translation,  use the
+<a href="Devel_Batch.html">jsbatch</a> -omatlab switch, for example:</p>
+
+<pre>
+jsbatch -f input.proj -omatlab &gt; output.m
+jsbatch -f input.mod -omatlab &gt; output.m
+jsbatch -f input.sbml -omatlab &gt; output.m
+</pre>
+
+<p>Here is an example of how to use the Matlab model export.  Consider 
+the following model:</p>
+
+<?php jsTextDownApp("examples/MML_Matlab/mml2matlab.mod"); ?>
+
+<p>Launch the applet above, or download the model and, using either JSim or jsbatch
+(version 2.07 and above),  follow the instructions above to generate Matlab
+output in file "mytest.m".</p>
+
+<p>To run the model in Matlab, you must write Matlab code that calls "mytest.m"
+with parameters for  the time span you want the model to run, the name of the
+ODE solver, and options for the ODE solver. Choices for the ODE solver are
+ode45, ode23, ode13 for non-stiff problems and ode15s, ode23s, ode23t, and
+ode23tb for stiff problems. If you wish to plot the results,  you must write
+explicit Matlab commands to do so.  See Matlab help for details. For
+example:</p>
+
+<pre>
+options = odeset('RelTol',1e-12,'AbsTol',1e-9);
+[t x rInfo] = mytest( linspace(0,1,101),@ode23,options);
+clf;
+plot(t,x,'k')
+title('Exponential Decay')
+xlabel('Time, sec')
+ylabel('Concentration, mM')
+</pre>
+
+
+<p><b>Limitations:</b> JSim Matlab export is currently implemented by
+translating JSim model code first to SBML, and then using the <a
+href="http://code.google.com/p/sbml2matlab/"> sbml2matlab</a> tool to translate
+SBML to Matlab.  There is potential for information loss in both translation
+stages.  Limitations of the JSim to SBML translation process are described <a
+href="MML_SBML.html#export_bugs">here</a>,  while limitations of sbml2matlab
+are described <a
+href="http://code.google.com/p/sbml2matlab/wiki/Usage">here</a>. At present,
+JSim Matlab output works best for single-domain ODE models with no events or
+implicit equations.  Note that only the default values of model parameters are
+exported.</p>
+
+<p>Windows users: If you are receiving errors from JSim concerning libSBML and Matlab code generation, please see <a href="../download/win32.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
+</p>
+
+<h2><a name="data">Exporting JSim data to Matlab</a></h2>
+
+<p>JSim model numeric data may be exported as Matlab .m format.  See details
+in <a href="User_DataSets.html">Data Files and Project Data Sets</a>.</p>
+
+<h2><a name="prog">Programatic interaction between JSim and Matlab</a></h2>
+
+<p>There is no single "best" way to connect two software products, such 
+as JSim and Matlab, that is best in all circumstances.  Different 
+approaches have different strengths and weaknesses in terms of 
+simplicity, flexibility, performance and long-term viability.  The 
+importance of such tradeoffs will vary depending upon the problem at 
+hand and the resources (time, compute power, personnel) available. This 
+document will examine several approaches to JSim/Matlab connectivity, 
+their strengths and weaknesses, and illustrate each approach with 
+working examples.  All the examples here require you have both JSim and 
+Matlab installed on your computer.  The examples do not work via JSim 
+WWW applets.</p>
+
+<p>Understanding numeric data file formats is vital to making many 
+JSim/Matlab connections.  JSim supports a variety of data formats. It is 
+often simplest to write "columnar data format" (AKA tab-separated text) 
+from Matlab for import into JSim, and write either "columnar data 
+format" or "Matlab (.m) format" from JSim for import into Matlab.  See 
+<a href="User_DataSets.html">Data Files and Project Data Sets</a> for 
+further information on supported data formats.</p>
+
+<p>For long automated analyses, it is usually best to dispense with the 
+engine's graphic user interface(GUI), which can take a signficant time 
+to initialize.  The <a href="Devel_Batch.html">jsbatch</a> program 
+provides command-line access to the JSim engine.  The user should study 
+the various jsbatch switches to understand the available options. The 
+-nosplash and -nodesktop switches provide access to Matlab without 
+starting the GUI.  For further details,  see the Matlab user 
+documentation.</p>
+
+<p>Computational analyses utilizing JSim and Matlab may be classified 
+based upon who is the master, and who is the slave.  The master may be 
+either JSim, Matlab or an external agent (for example, the user).  For 
+further information,  see the design of interest:</p>
+
+<ul>
+<li><a href="#extern_master">External master, JSim and Matlab slaves</a></li>
+<li><a href="#jsim_master">JSim master, Matlab slave</a></li>
+<li><a href="#matlab_master">Matlab Master, JSim slave</a></li>
+</ul>
+
+<h2><a name="extern_master">External master, JSim and Matlab 
+slaves</a></h2>
+
+<p>In this design,  the user (or some program acting as his/her agent)
+launches JSim and Matlab alternately,  passing the output files of
+one program to the input of the other.  This design is 
+is very simple and quick to implement,  although performance may not
+be ideal due to the multiple launches of the two engines.</p>
+
+<h3>Example using bash script as master</h3>
+
+<p>This example models a cell with two genes (gene1 and gene2) and two 
+chemical species (A and B).  Gene1 controls the concentration of B,
+given the concentration of A.  Gene2 control the concentration of A,
+given the concentration of B.  The problem is to find the equilibrium
+concentration when both genes are active.</p>
+
+<p>The bash script below alternately calls the gene1 and gene2 to 
+models, passing the results back and forth,  until the concentrations
+stabilize.</p>
+
+<?php jsTextDown("examples/MML_Matlab/example1.sh"); ?>
+
+<p>Gene1 is a JSim model,  calculating B from A.</p>
+
+<?php jsTextDown("examples/MML_Matlab/gene1.mod"); ?>
+
+<p>Gene2 is a Matlab model,  calculating A from B.</p>
+
+<?php jsTextDown("examples/MML_Matlab/gene2.m"); ?>
+
+<p>Notes:</p>
+
+<ul>
+<li>While gene1 and gene2 are very simple in this case,  this same 
+approach would work just as well for arbitrarily complex models.</li>
+<li>The numerical approach used by the bash script is simplistic and
+may be numerically unstable for some models.  Users should use numerical
+approaches appropriate to the models they are attempting to 
+connect.</li>
+<li>There is significant overhead of launching JSim and Matlab for each 
+iteration.  Whether this overhead is "acceptable",  depends on the 
+details of the analysis being done.</li>
+</ul>
+
+<h2><a name="jsim_master">JSim master, Matlab slave</a></h2>
+
+<p>In this design, a JSim MML model embeds procedural code to call a
+Matlab process to solve some model variables.  The MML constructs for this
+embedding are called functions and
+procedures.  For information on writing Matlab-specific functions and
+procedures see <a href="MML_Func_Matlab.html">here</a>.</p>
+
+<h2><a name="matlab_master">Matlab Master, JSim slave</a></h2>
+
+<p>In this design, Matlab will control the JSim computational engine be 
+using
+either the jsbatch program or JSim's external API.</p>
+
+<p>In the jsbatch scenario, Matlab will generate JSim readable model
+and/or numeric data files and pass them, via switch setting to a jsbatch
+run.  When jsbatch terminates, the Matlab then reads the appropriate
+jsbatch output files for further processing.</p>
+
+<p>The JSim external API scenario is more complex, but (potentially) 
+more computationally efficient.  In this scenario a JSim engine in 
+instantiated via a Matlab Java or C API, and is then called multiple 
+times by subsequent Matlab processing.  This approach saves the overhead 
+of loading Java, jsbatch and compiling the model before each model run. 
+The JSim API for doing this is undergoing an overhaul at present, due to 
+the desire to make additional JSim functionality to various external 
+software systems (especially finite-element and CFD modeling).  A 
+complete working example of the JSim API scenario will be provided once 
+this overhaul is complete (expected fall 2008).</p>
+
+<h3>Example calling jsbatch from Matlab for Monte Carlo analysis</h3>
+
+<p>This example performs a simple Monte Carlo analysis. A Matlab mfile 
+generates a set of sinusoidal data curves containing a small amount of 
+random noise.  Each curve is sent to jsbatch, which optimizes a 
+model(monte1.proj) to best fit the data curve by varying the sinusoidal 
+amplitude (parameter amp).  After each optimization, Matlab collects the 
+optimized values into an array and performs simple statistical analyses 
+on them (calculating mean and variance).</p>
+
+<p>The Matlab control script is as follows:</p>
+
+<?php jsTextDown("examples/MML_Matlab/monte1.m"); ?>
+
+<p>The JSim project,  containing the model and optimization 
+configuration my be downloaded below.</p>
+
+<?php jsDown("examples/MML_Matlab/monte1.proj"); ?>
+
+<p>Notes:</p>
+
+<ul>
+<li>This example presents only the simplest of possible Monte Carlo 
+techniques.  A thorough discussion of Monte Carlo techniques is
+beyond the scope of this document.</li>
+<li>While the example model is small and fast, optimization of complex
+models can take a fair amount of time.  In such cases,  the overhead for
+reloading JSim for each optimization run may be insignificant.</li>
+<li>The jsbatch command uses the -rm switch to remove the existing 
+data set, before inserting the new noisy data set for optimization.</li>
+<li>The jsbatch command uses the -ofmt switch to select an output
+data format that is easy for Matlab to parse.</li>
+<li>The example above has been tested only on under Linux.</li>
+</ul>
+
+<h3>Example calling JSim engine API from Matlab</h3>
+<p><em>This example will be provided once revisions to the JSim API
+are complete (expected Fall 2008).
+</em></p>
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

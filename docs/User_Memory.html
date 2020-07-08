@@ -1,0 +1,203 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Memory Usage</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p>JSim allows users to create arbitrarily large models, which can tax a 
+computer's memory and cause various problems.  There are two methods for dealing
+with these problems - either by increasing the total memory available to 
+JSim or by reducing the memory needed during a model run via 
+<em>every Nth point storage</em>. This document provides information about these two
+approaches.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a>(required)</li>
+</ul>
+
+<p> Contents: </p>
+<ul>
+<li>  <a href="#over">General Memory Considerations</a></li>
+<li>  <a href="#ceiling">Setting JSim's Memory Ceiling</a></li>
+<li>  <a href="#nth">Using Every Nth Point Storage</a></li>
+<?php jscoqli() ?>
+</ul>
+
+
+
+<h2>  <a name="over">General Memory Considerations</a></h2>
+
+<p>    Writers of large JSim models may need to be aware of system memory 
+limitations.  Real data in JSim models occupy 8 bytes per grid point,
+thus a model with 3 variables u(t), v(t), w(t) where t has 1000 grid 
+points will occupy 3 x 8 x 100 = 24KB of storage.  Variables with 
+multiple dimensions quickly eat up memory.  A variable u(x,t),  where
+x and t both have 1000 grid points will occupy 8 x 1000 x 1000 = 8MB.
+Model runs with multiple inner and outer loops cause storage requirements
+to grow with the number of model runs.</p>
+
+<p>    Running a JSim model when insufficient memory is available will result
+in various failures.  Often failures will occur during a model run, or
+when attempting to display large amounts of tabular data text.  In these
+common cases, JSim should give a coherent error message, allowing you to
+save your work and restart JSim with more memory.  However, memory
+overflow in a severely taxed system may occur in any part of the program,
+causing inexplicable crashes and/or freezes, so if you have reason to
+believe you are bumping your head on the memory ceiling, it is a good idea
+to restart with more memory to give JSim ample work space.</p>
+
+<h2>  <a name="ceiling">Setting JSim's Memory Ceiling</a></h2>
+
+<p> JSim runs inside the Java Virtual Machine(JVM), which defines at 
+startup the maximum amount of memory that may be used.  JSim, by default, 
+starts the JVM with enough memory to run most models.  This amount is a 
+maximum of 1500MB on Linux and Macintosh and 1200MB on Windows.  (Most 
+Windows installations can run successfully with 1500MB, but at least one 
+machine tested failed when more that 1200MB were requested). Memory is 
+dynamically assigned, so having a large maximum will not necessarily 
+monopolize system resources.  However, if the memory assigned exceeds the 
+system's physical memory, thus requiring paging to virtual memory, JSim 
+performance can sag noticably.  Also, placing an unrealistically large 
+limit can allow renegade models to monopolize system resources.  In severe 
+cases, this can crash or freeze your operating system.  Therefore, you 
+should be cautious changing JSim's memory allocation.</p>
+
+<p>The mechanisms for setting JSim's memory ceiling are different for each
+operating system:</p>
+
+<ul>
+<li>  <a href="#linux">Information for Linux Systems</a></li>
+<li>  <a href="#macos">Information for MacIntosh Systems</a></li>
+<li>  <a href="#win32">Information for Windows Systems</a></li>
+</ul>
+
+<h3>  <a name="linux">Setting JSim' Memory Ceiling on Linux Systems</a></h3>
+
+<p> JSim memory usage is controlled by the JSIMMEM environment variable, 
+which represents the maximum number of megabytes of memory allowed.  The 
+default value is 1500 (600 in JSim 2.06 and earlier).  Here is an 
+example for the C-shell setting JSim's memory allocation to 3GB: 
+<pre>
+      setenv JSIMMEM 3000
+      jsim
+</pre>
+</p>
+
+<p>    <a href="User_Ref.html#setenv">Further information on Unix environment variables</a> . </p>
+
+<h3>  <a name="macos">Setting JSim's Memory Ceiling on MacIntosh Systems</a></h3>
+
+<p>When running from the command line, the above comments for Linux 
+apply.  Memory for the double-click JSim application is set via the Java 
+"VMOptions" directive in Info.plist.  Info.plist may be found in the 
+Contents subdirectory of the JSim application directory.  To change the 
+default allocation, exit JSim, open the command-line tool, cd to the 
+JSim application directory (it will have suffix .app), cd to Contents 
+and use your favorite text editor to change the default value of 
+"-Xmx1500m" (1500 MB) to a more appropriate value.</p>
+
+<h3>  <a name="win32">Setting JSim's Memory Ceiling on Windows Systems</a></h3>
+
+<p>    JSim memory usage is set by JSIMMEM variable inside your jsim.bat or
+jsbatch.bat executables.  These files are located in the win32\bin (or win64\bin)
+directory in your JSim installation directory. If you are not sure where
+JSim is installed on your system, consult your system administrator.  You
+may edit these batch files in a text editor, changing the following line, as is
+appropriate:
+<pre>
+      set JSIMMEM=1200  
+</pre>
+</p>
+
+<h2>  <a name="nth">Using Every Nth Point Storage</a></h2>
+
+<p>Every Nth Point Storage (ENPS) may be selected in a model's "Memory" tab, which 
+available in JSim version 2.09 and above.  The "Data storage" switch is set to 
+"all points" by default.  When the user changes the switch to "every Nth point", 
+an integer control becomes visible for every realDomain in the model.  This 
+control has a default value of 1, meaning that all points for the domain are 
+returned.  If the value for domain x is set to N, then only every Nth point of 
+that domain is stored, thus reducing the needed memory for variables with domain x 
+by a factor of N.</p>
+
+<p>ENPS implementation has changed over recent JSim versions.  While the ideal is 
+to only store every Nth point (thus reducing run-time memory requirements) some 
+MML constructs (described below) are, as present, incompletely supported.  To 
+ensure uniform user operation, JSim currently switches automatically between 
+run-time ENPS and query-time ENPS.  Run-time ENPS store only every Nth point 
+during run-time, while query-time ENPS stores all points internally, but only 
+returns every Nth point to the user (e.g. for graphing).  Implementation of 
+run-time vs. query-time ENPS varies across recent JSim versions:</p>
+
+<ul>
+
+<li><b>JSim version 2.15 and above:</b> JSim detects the presence of MML 
+constructs problematic for ENPS (see below), and uses an appropriate combination 
+of run-time and query-time ENPS to ensure returned results are identical to those 
+created without ENPS. JSim's switching between run-time and query-time ENPS is 
+currently implemented on a "by domain" basis.  That is, each realDomain in a model 
+is tagged to use either run-time or query-time ENPS depending upon model
+calculations.</li>
+
+<li><b>JSim version 2.14:</b> JSim uses query-time ENPS in all cases.  This 
+approach ensures identical results to those created without ENPS,  but with no
+memory savings.</li>
+
+<li><b>JSim version 2.09 to 2.13:</b> JSim uses run-time ENPS in all cases.
+The approach consitently reduced run-time memory requirements,  but the results
+are not guaranteed to be identical to those created without ENPS.</li>
+
+</ul>
+
+<p>The following MML constructs are currently problematic for run-time ENPS:</p>
+
+<ul>
+
+<li>PDE spatial domains;</li>
+
+<li>Domains of dynamic inputs (e.g. function generators);</li>
+
+<li>Domains of ODE variables if #dimension > 1;</li>
+
+<li>Domains of PDE variables if #dimension > 2;</li>
+
+<li>Domains of any variable queried at any time other than the current 
+value or t.min.  Examples include, integral(),  sum(), delay lines, variable
+function calls, MML procedures with use the @ operator.</li>
+
+</ul>
+
+<p>We continue to work on the JSim run-time engine.  It is our hope that, with 
+further improvement, some or all the above problematic constructs can be rendered 
+unproblematic. Note: We have found one model that shows very minor differences (at 
+the 8th digit of significance) in results when ENPS is activated.  It is possible 
+this points to a larger problem.  We continue to examine this issue.</p>
+
+<p>ENPS controls are part of a JSim Parameter Set.  The name for the "Data storage"
+switch is "memory.storeGrids" and the name for the Nth control for domain "t" is
+"memory.t.nth".  These values may be viewed in any parameter set tab saved in 
+release 2.09 or above.  If you wish to loop over the Nth value,  it is recommended
+you first use the GUI to set the "Data storage" switch to "every Nth point", and
+then loop over the parameter "memory.t.nth" (adjusted for the name of the domain).</p>
+
+<?php jscoqfoot(); ?>
+
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim Overview</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<!-- link rel="stylesheet" href="css/physiome.css"> -->
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
+<h1>JSim Overview</h1>
+
+<?php include "topmsg.php"; ?>
+<p>Below is quick overview of JSim, for a detailed overview please download:
+ <a href="https://f1000research.com/articles/2-288/v3">"JSim, an open-source modeling system for data analysis" (f1000 article).</a>
+
+</p>
+<p>    Diagrams:</p>
+
+<ul>
+<li><a href="JSim_Arch.html">JSim Architecture</a></li>
+<li><a href="JSim_Science.html">JSim and the Scientific Process</a></li>
+
+</ul>
+<p>    JSim model calculations are specified in JSim's own <a href="MML_Intro.html">Mathematical
+Modeling Language (MML)</a> an easy-to-read text-based
+language. MML is a declarative language, not a procedural one. MML models primarily consist of declaration of physical units, declaration of variables, and declaration of constraints on those variables. MML models are most often expressed in terms of mathematical
+equations (for example, <a href="MML_Intro.html#ode">ordinary</a> and
+<a href="MML_PDE.html">partial</a> differential equations, 
+<a href="MML_Implicit.html">implicit</a> equations), but formulation via
+<a href="MML_Events.html">discrete events</a> and <a href="MML_Func_Intro.html">function calls</a>
+to <a href="MML_Func_Java.html">Java</a>, <a href="MML_Func_C.html">C</a> and
+<a href="MML_Func_Fortran.html">Fortran</a> are also available. MML is constructed so
+that model writers may intermix mathematics, events and procedural code as
+needed.  JSim supports multiple "domains" or independent variables (e.g.  
+time, space). MML variables may vary over any combination of the declared
+domains.</p>
+<p>    JSim's MML compiler does extensive cross-checks to insure that models
+are neither over-specified or under-specified and that a variable's
+declared domains are consistent with its usage. MML models are aware of
+<a href="MML_Units.html">physical units</a> , and the model compiler contains a unit
+balancer that automatically adjusts run-time calculations with appropriate
+converion factors, while rejecting non-sensical equations (such as kg =
+kg/sec).  JSim's extensive cross-checking catches many common mistakes and
+so facilitates creation of valid models more quickly and easily than with
+standard procedural languages.</p>
+<p>    The <a href="User_Intro.html">JSim graphical user interface (GUI)</a> allows
+modelers to edit and compile multiple MML models, manipulate model
+parameters, run models and graph results. <a href="User_DataSets.html">Experimental
+data</a> and/or built-in <a href="User_Fgen.html">function
+generators</a> may be used to drive model inputs.  <a href="User_DataSets.html">Numeric
+data</a> may be fed into and retrieved from JSim in a
+variety of formats allowing interconnection with other programs.  JSim's
+built-in model analysis tools include <a href="User_Loops.html">loops</a> (multiple
+model runs with varying parameters), <a href="User_Sens.html">sensitivity analysis</a>
+and <a href="User_Optim.html">automated parameter optimization</a> .</p>
+<p>    JSim <a href="User_Projects.html">project files</a> encapsulate the complete state
+of a JSim GUI window, potentially including multiple models, data sets,
+parameter sets, notes, and plot pages.  Project files are self-contained,
+facilitating sharing of results between researchers and restoration of
+state in later JSim sessions.</p>
+<p>    JSim uses a variety of public and proprietary numeric solvers for
+solving <a href="MML_Intro.html#ode">ODEs</a> , 
+<a href="MML_PDE.html">PDEs</a> , <a href="MML_Implicit.html">linear and
+non-linear implicit equations</a> and parameter
+optimization.  Default settings are provided automatically for these
+solvers so that beginning modelers normally do not need to worry about the
+settings. However, the settings are controllable in high-performance
+settings for more sophisticated users.</p>
+<p>    Other notable features of JSim include:</p>
+
+<ul>
+<li>JSim's <a href="MML_RTML_Ref.html">Run Time Markup Language (RTML)</a> which
+allows model writers to develop more sophisticated run-time interfaces for
+their model incorporating multiple pages, diagrams and hyperlinks.</li>
+<li><a href="Devel_Batch.html">jsbatch</a> , a command-line tool that provides access
+to the JSim computational engine in a form convenient for batch
+processing.</li>
+<li><a href="User_Fim.html">jsfim</a> , a tool for constructing functional 
+(parametric) images using region-of-interest(ROI) data and the JSim
+computational engine;</li>
+<li><a href="Admin_Server.html">JSim remote server</a> which allows model
+computations to be done on a powerful server computer rather than the
+user's desktop.  The server is also used to power <a href="Admin_WWW.html">JSim enabled web
+sites</a> .</li>
+<li>JSim <a href="Devel_Plugin.html">plugins</a> allow programmers to extend JSim
+base functionality,  such as customized graphics, data formats, and
+GUI-based model builders.</li>
+<li>JSim supports import of models in the <a href="MML_CellML.html">CellML</a> and 
+<a href="MML_SBML.html">SBML</a> archival formats.</li>
+<li>JSim supports <a href="User_MP.html">multiprocessing</a> , the
+ability to utilize multiple system processors for faster calculation.</li>
+
+</ul>
+
+
+</body>
+</html>
+

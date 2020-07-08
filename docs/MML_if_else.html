@@ -1,0 +1,66 @@
+
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>if/else trinary boolean operator</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> This document describes the syntax of the <strong>if - else</strong> boolean operator.
+(MML).</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p> Contents: </p>
+
+<ul>
+<li><a href="#syntax">Syntax</a></li>
+<li><a href="#example">Example</a></li>
+
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="syntax">if - else syntax</a></h2>
+<p>    The <strong>if - else</strong> boolean operator is used only with equations that specify exact numerical relationships between variables. Arbitrary nesting of <strong>if - else</strong> operators is allowed.</p>
+<p>   <strong>if - else</strong> statements can have one of the following forms:
+<pre>
+      expr2; 
+      expr3;
+      var, var2, var3;
+      var = if (expr1) expr2;
+      var2 = if (expr1) expr2 else expr3;
+      var3 = if (expr1) expr2 else (if (expr4) expr5 else expr3);         
+</pre>
+</p>
+<p>    where exprX are algebraic expression of variables, with expr1 and expr4 being of
+the boolean type.  See <a href="/jsim/docs/MML_Ref.html#algebra">Algebraic Expression Syntax</a> for further
+information.</p>
+
+<h2>  <a name="example">if - else example</a></h2>
+<p>
+
+<?php jsTextDownApp("examples/MML_if_else/MML_if_else.proj"); ?>
+</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,22 @@
+Usage: jsfim [ switches ] project datafile
+
+Switches:
+  <a href="#model">-model</a> name            Select named model within project
+  <a href="#i">-i</a> v=expr              Assign input v to expression 
+  <a href="#fgen">-fgen</a> [file] v=curve   Drive input v via data curve 
+  <a href="#o">-o</a> file                Write func image(s) to specified file
+  <a href="#ofit">-ofit</a> file             Write curve fits to specified file
+  <a href="#log">-log</a> file              Save optim reports in log file
+  <a href="#ofmt">-ofmt</a> dataformat       Specify non-default FIM output data format
+  <a href="#ofitfmt">-ofitfmt</a> dataformat    Specify non-default model fit output data format
+  <a href="#oprec">-oprec</a> integer         Specify numeric output precision
+  <a href="#ref">-ref</a> prefix            Select ref curves by prefix
+  <a href="#refx">-refx</a> name             Exclude ref curves by name
+  <a href="#oproj">-oproj</a>                 Write modified project (debug only)
+  <a href="#noabort">-noabort</a>               Don't abort if some segments fail
+  <a href="#conflim">-conflim</a>               Calculate parm confidence limits
+  <a href="#silent">-silent</a>                Repress normal informative messages
+  <a href="#usage">-usage</a>                 Print usage synopsis
+  <a href="#mp">-mp</a> N                  Enable maximum N-processor multiprocessing  
+  <a href="#server">-server</a> name           Connect to remote server 
+  <a href="#builddirsfx">-builddirsfx</a> suffix    Force build directory suffix (experts only!)

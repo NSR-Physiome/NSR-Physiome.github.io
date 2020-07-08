@@ -1,0 +1,183 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Running XSim models under JSim</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> This document is an introduction to building and running XSim-style
+models under JSim. This functionality is currently available only for JSim
+on Linux (i386) and MacIntosh.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Projects.html">JSim Projects</a> (required)</li>
+<li><a href="MML_RTML_Intro.html">Introduction to RTML</a> 
+(recommended)</li>
+<li>Familiarity with <a href="/software/xsim/index.html">
+XSIM</a>(recommended)</li>
+</ul>
+
+<p> Contents: </p>
+
+<ul>
+<li><a href="User_Fpack.html">Currently available XSim models 
+(Fpack)</a></li>
+<li><a href="#underXSim">Basics of XSim-style models under XSim</a></li>
+<li>     <a href="#underJSim">Basics of XSim-style models under 
+JSim</a></li>
+<li>     <a href="#building">Building XSim-style models for JSim</a></li>
+<li>     <a href="#running">Running XSim-style models under JSim</a></li>
+<li>     <a href="#caveats">Some Caveats</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="underXSim">Basics of XSim-style models under XSim</a></h2>
+<p>    XSim is a simulation control interface for Unix systems developed at
+NSR.  Models running under XSim consist of two principle components: 
+computational model code and a configuration file (.cf).</p>
+<p>    The model code, usually written in Fortran, must conform to the
+XSim API (application programmer interface) and is compiled with a set of
+XSim specific wrappers.  In brief, the XSim API states that model
+parameters are stored in a single-precision floating point array called
+the P array.  Model calculations are divided into an initialization
+subroutine (simini) which is called once at the beginning of a run, a loop
+subroutine (simlop) which is called once for each model time-step during
+the run, and completion subroutine (simend) which is called once at the
+end of the run.  With minor exceptions, all communication between the GUI
+and the model is done through the P array.</p>
+<p>    The configuration file is a data file that contains the parameter
+names the XSim user will associate with various P array locations.  It
+also describes the model appearance to the user in terms of windows,
+parameter boxes, buttons, text and images.  It also contains the name of
+the computational model code, so the two can be conjoined.</p>
+<h2>  <a name="underJSim">Basics of XSim-style models under JSim</a></h2>
+<p>    JSim provides mechanisms that allow running XSim-style models under
+JSim.  Existing XSim models must be recompiled and appropriately wrapped
+before use under JSim.  An XSim-style model for JSim consists of two
+principal components: computational model code and an MML wrapper.</p>
+<p>    The computational model code is a free-standing native code library that
+conforms to the XSim API (Application Program Interface) for JSim.  The XSim
+API for JSim distills the essence of historical Simcon/XSim programs, i.e.
+model-GUI communication via a floating point P array and model
+initialization, loop and completion subroutines.  Most existing XSim-style
+computational models are written in Fortran, so JSim provides tools to
+automatically wrap compiled Fortran code that conforms to the XSim API.  
+This can be accomplished by Fortran programmers with no knowledge of Java.  
+A C language wrapper facility will also be supported in the near future.</p>
+<p>    The MML wrapper is an MML model that utilizes the importable "XSim" 
+template library.  A simple example is shown below:
+<pre>
+        import XSim;
+        XSim main {
+          library lib("demo");
+          ivar time;    
+          time.min=0; time.max=30; time.delta=0.1; time.loc = 130;
+          realInput period = 6; period.loc = 1;
+          realInput amplitude = 1; amplitude.loc = 2;
+          realOutput Sine(time); Sine.loc = 201;
+          realOutput Cosine(time); Cosine.loc = 202;
+       }
+</pre>
+</p>
+<p>    The MML wrapper declares model parameters and their locations in the P
+array.  It also names the computational model ("demo") so the two can be
+conjoined.  In these two respects, an MML wrapper is similar to an XSim
+configuration file.  Unlike the .cf file, the MML wrapper does not describe
+the appearance of the model.  JSim provides a default run-time appearance
+(e.g. Inputs and Outputs pages) that requires no user intervention.  
+Customization of JSim's run-time appearance is handled in a model's
+customization tab using JSim's Run-Time Markup Language (RTML). See
+<a href="MML_RTML_Ref.html">here</a> For further infomation on model customization and
+RTML.</p>
+<h2>  <a name="building">Building XSim-style models for JSim</a></h2>
+<p>    To build an XSim-style model for use under JSim you must create the
+two components described in the previous section:  the computational model
+code and the MML wrapper.  Note that the complete file name for the
+computational model is system dependent.  In the "demo" example above, the
+file name would be libjsxdemo.so under Linux and libjsxdemo.jnilib under
+MacOS.  XSim-style models are not yet available on Windows.</p>
+<p>    The computational model code may be programmed in C or Fortran. The
+process varies depending upon the language used.  See the guide below
+appropriate for your language of preference:</p>
+
+<ul>
+<li><a href="MML_XSim_Fortran.html">Writing XSim-style models for JSim in Fortran</a></li>
+<li><a href="MML_XSim_C.html">Writing XSim-style models for JSim in C</a></li>
+
+</ul>
+<p>    The MML wrapper uses the importable XSim template library:</p>
+
+<ul>
+<li><a href="MML_XSim_Templates.html">The XSim template library for JSim</a></li>
+
+</ul>
+<p>    Once the two pieces are created,  you may try your luck at 
+running them under JSim.  See the next section.</p>
+<h2>  <a name="running">Running XSim-style models under JSim</a></h2>
+<p>    To run an XSim-style model under JSim, you simply load the .mod or
+.proj file containing the MML wrapper (see above) into JSim, compile and
+run as usual.  </p>
+<p>    The only complication is that the free-standing computation model code
+must be somewhere in <a href="User_Ref.html#env">JSIMPATH</a> .  This complication is
+necessary because the free-standing code is not stored in the project file
+itself.  The reasons for this are:</p>
+<p>    1) free-standing model code contains native object code which is not
+portable between operating systems, perhaps even between different versions
+of the same operating system.</p>
+<p>    2) code files are often quite large and would present unacceptable
+storage requirements if they were copied to many project files on the same
+system.</p>
+<p>    In practice, the default JSIMPATH is usually sufficient.  Model
+writers should make sure their free-standing code is in the current
+directory while they are working on it.  Once the model is read for
+general use it may be placed in either the system's local configuration
+directory $JSIMHOME/local or the user's local configuration directory
+$HOME/.jsim/local.  All of these directories are in the default JSIMPATH.</p>
+<h2>  <a name="caveats">Some Caveats</a></h2>
+<p>    Here are some cautions to bear in mind regarding XSim-style models
+under JSim:</p>
+
+<ul>
+<li>See comments regarding JSIMPATH in the previous section.</li>
+<li>If you are sharing a new model with a collaborator, shipping him the
+project file is not enough.  He must also get a working copy of the
+free-standing model computation code.  If he is using the same operating
+system version you are you can ship him your copy of the code.  If he is
+using a different operating system version, he must build or otherwise
+obtain a copy of the code appropriate to his system.</li>
+<li>Native code libraries are inherently insecure.  They can (potentially)
+steal information, delete files, or otherwise corrupt your account.  On
+Microsoft Windows, they can also corrupt your operating system and/or damage
+your hardware.  Bugs in even well-intentioned code can corrupt run-time
+memory crashing not only the model, but the JSim interface as well. You
+should only run native libraries that come from a trusted source.</li>
+<li>Tools for automated conversion of existing XSim models into
+JSim-compatible versions are in progess, but not yet completed. </li>
+<li>XSim templates for JSim do not yet offer functionality equivalent
+to XSim STRING variables.</li>
+<li>RTML does not yet offer equivalents to all the front-end 
+customizations available in XSim.  RTML is not yet documented.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,213 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Plugin Developer's Guide</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p>    This document describes how to write JSim plugins, code modules that
+extend JSim's functionality at run-time.  Familiarity with both JSim and
+Java software engineering is assumed.</p>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#basic">Plugin Basics</a></li>
+<li><a href="#create">Creating a plugin</a></li>
+<li><a href="#datafmt">DataFormat plugins</a></li>
+<li><a href="#graphic">Graphic plugins</a></li>
+<li><a href="#easel">ModelEasel plugins</a></li>
+<li><a href="#optim">Optimizer plugins</a></li>
+<li><a href="#limit">Limitations and Future Plans</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="basic">Plugin Basics</a></h2>
+<p>    A JSim plugin is a Java archive (.jar file) that is loaded into jsim,
+jsbatch or jsserver at run-time to enhance functionality for some user
+purpose.  For example, a user might wish to output model data in a format
+not currently provided by JSim.  This format may be peculiar to a the
+user's current project, but of little value to the general JSim user
+community.  Here a JSim plugin provides the advantages:</p>
+
+<ul>
+<li>the public JSim distribution is not weighed down with code specific
+to a single user;</li>
+<li>the user may implement the plugin without waiting for the JSim
+development team to allocate time for his particular project.</li>
+
+</ul>
+<p>    A plugin's <strong>type</strong> determines the sort of functionality the plugin
+will have within JSim.  The example above is of the DataFormat type.  A
+plugin's <strong>variant</strong> is a unique name for the plugin, within all
+available plugins of the same type.  Suppose the example above was
+implemented via a plugin MyDataFormat.jar, with type DataFormat and
+variant "mine".  Below, the plugin is loaded via the jsbatch -plugin
+switch, and accessed via the -ofmt switch:
+<pre>
+      jsbatch -f some.proj -plugin MyDataFormat.jar -ofmt mine
+</pre>
+</p>
+<p>    Note that -ofmt does not normally accept "mine" as a valid format.
+However,  with the plugin "mine" becomes acceptable (and functional).</p>
+<p>    JSim has a client-server architecture, and plugins may enhance either
+the client or server operation.  When (as by default) jsim or jsbatch is
+run using the local server, either type of plugin will be operational.
+When running the JSim applet or running jsim or jsbatch on a remote
+server, only client-side plugins will be operational.  Remote server-side
+plugins must be installed via jsserver.</p>
+<h2>  <a name="create">Creating a plugin</a></h2>
+<p>    For each type of plugin, there is an associated JSim internal class
+which implements that functionality.  For example, the
+JSim.data.DataFormat class implements the functionality of the plugin type
+DataFormat.  The plugin .jar file must contain a new subclass of the
+internal class.  In our example MyDataFormat extends JSim.data.DataFormat.
+The new subclass, along with supporting classes and resources are bundled
+into the plugin .jar.  The manifest for a plugin .jar must have the
+following entries that allow JSim to recognize the plugin and use is
+appropriately.  Values for each entry correspond to the above example:
+<pre>
+      JSimPluginType: DataFormat
+      JSimPluginVariant: mine
+      JSimPluginClass: MyDataFormat
+</pre>
+</p>
+<p>    The plugin classes may be compiled against the JSimClient and
+JSimServer distributed jar files found in $JSIMHOME/lib.  A client-side
+plugin will need only JSimClient.jar, a server-side plugin will need both.</p>
+<p>    Details for plugin programming may be found in the <a href="Devel_API.html">JSim Public 
+API</a> .</p>
+
+<p> See $JSIMHOME/doc/plugins in your JSim distribution for some 
+examples of JSim plugins and how to build them (on a Macintosh, the doc 
+directory is in the installation directory).  More complete 
+documentation for plugin programming may be found in the <a 
+href="JSim_API.html">JSim Public API</a> .</p>
+
+<p>    Currently supported plugin types:</p>
+
+<ul>
+<li><a href="#datafmt">DataFormat</a> : allow import and export of JSim data in 
+formats not currently supported by JSim.</li>
+<li><a href="#graphic">Graphic</a> : allow customized graphics representation of
+JSim model properties, constraints and (possibly live) data.</li>
+<li><a href="#easel">ModelEasel</a> : allow point-and-click model building within
+JSim.</li>
+<li><a href="#optim">Optimizer</a> : allow use of novel optimization
+algorithms not currently supported by JSim.</li>
+
+</ul>
+<p>    Planned future plugin types:</p>
+
+<ul>
+<li>ODESolver : allow external ODE solvers in JSim model run-time
+calculations.</li>
+<li>if you have ideas for other JSim plugin types, please contact
+the JSim development team.</li>
+
+</ul>
+<h2>  <a name="datafmt">DataFormat plugins</a></h2>
+<p>      A DataFormat plugin allows import and export of JSim data in formats
+not currently supported by JSim. This client-side plugin extends the JSim
+internal class JSim.data.DataFormat.  DataFormat may implement an
+associated DataReader (for importing data) or a DataWriter (for exporting
+data) or both.  Each DataFormat defines a set of file suffixes (e.g.
+.mydata) that are associated with the format.</p>
+<p>    DataReader plugin functionality is activated when a data file is
+read (e.g. the -f switch) and has one of the format associated suffixes.</p>
+<p>    In JSim, DataWriter plugin functionality is activated when a data file
+is written (e.g. PlotPage -> Export data file...) that has one of the
+format associated suffixes.  In jsbatch, it is activated via the -ofmt
+switch, where the format name corresponds to
+JSim.data.DataFormat.shortName().  (Note this is not necessarily the same
+as the plugin "variant", however it is probably simplest for the two to be
+the same.)</p>
+<p>    A simple DataFormat plugin example may be found in
+$JSIMHOME/doc/plugins/mydata.</p>
+<p>    DataFormat implementations in the JSim source code may be found in
+classes JSim.data.*Format.</p>
+
+<h2>  <a name="graphic">Graphic plugins</a></h2>
+<p>    A Graphic plugin allows customized graphics representation of JSim
+model properties, constraints and (possibly live) data.  This client-side
+plugin extends the JSim internal class JSim.gui.plugin.GGraphic. </p>
+<p>    Graphic plugins are created in the JSim GUI by selected the "New
+graphic(plugin)" item in the Project tab "Add" menu.  Project files
+store the Graphics tabs,  but do not yet retain any state information.
+This limitation will be addressed in future releases.</p>
+<p>    A simple Graphic plugin examples may be found in
+$JSIMHOME/doc/plugins/mygraphic and $JSIMHOME/doc/plugins/myconstraints. </p>
+<p>    There are no implementations of GGraphic in the JSim source code
+at this time.</p>
+
+<h2>  <a name="easel">ModelEasel plugins</a></h2>
+<p>    This client-side plugin extends the JSim internal class
+JSim.gui.plugin.GModelEasel,  providing point-and-click model building
+capability within JSim.  </p>
+<p>    ModelEasel plugins are created in the JSim GUI by selecting
+"New model" in the Project tab "Add" menu.  New models are "text" by
+default (users edit MML code directly).  If any ModelEasel plugins are
+available,  the user may select one which will result in a new
+"Easel" tab within the model.  Users manipulate the Easel graphics
+until satified and then hit the "Compile" button which will generate
+an MML representation of the graphic and pass it along to the JSim 
+compiler.  </p>
+<p>    A simple ModelEasel plugin example may be found in
+$JSIMHOME/doc/plugins/myeasel.</p>
+<p>    There are no implementations if GModelEasel in the JSim source
+code at this time.</p>
+
+<h2>  <a name="optim">Optimizer plugins</a></h2>
+
+<p> An Optimizer plugin allows use of novel optimization algorithms not 
+currently supported by JSim.  This server-side plugin extends the JSim 
+internal class JSim.nml.opt.Optimizer. The plugin class must implement 
+the following static method in order to properly advertise itself to 
+JSim clients applications:</p>
+
+<pre>
+public static OptimAlg.Info algInfo();
+</pre>
+<p> In the jsim GUI, an Optimizer plugin will appear as an algorithm choice
+within a model's optimization configuration tab.  For models containing
+non-linear implicit equations, it will also appear in runtime solvers page
+"bound" and "unbound" choice options.  In jsbatch, an Optimizer plugin may
+be selected via the model.optim.alg control and the solver.fzero_bound and
+solver.fzero_unbound parameters.</p>
+<p>    A sample Optimizer plugin example may be found in
+$JSIMHOME/doc/plugins/myoptimizer.</p>
+<p>    Optimizer implementations in the JSim source code may be found
+in classes Simplex, GGopt, GridSearch and NelderMead in package 
+JSim.nml.opt.</p>
+
+<h2>  <a name="limit">Limitations and Future Plans</a></h2>
+<p>    JSim plugin functionality is preliminary, and the mechanisms described
+in this document may change in later JSim releases.</p>
+<p>    Only two plugin types are currently available.  There will be more
+in the future.  If you have an idea for a plugin type that would be 
+useful, please contact the JSim development team.</p>
+<p>    Plugins are loaded into JSim exclusively via the -plugin switch, which
+accepts only a file in the local file system. In the future the -plugin
+switch will accept a URL and there will be a mechanism for installing
+plugins so they are automatically available to any subsequent JSim
+sessions.</p>
+<p>    Plugins are not currently operational in the jsserver program.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

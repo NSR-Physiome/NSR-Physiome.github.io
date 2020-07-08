@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" xmlns:ns1="http://www.w3.org/1998/Math/MathML">
+  <xs:import namespace="http://www.w3.org/1998/Math/MathML" schemaLocation="ns1.xsd"/>
+  <xs:element name="xmml">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="model"/>
+        <xs:element ref="toolList"/>
+        <xs:element ref="sequence"/>
+      </xs:sequence>
+      <xs:attribute name="jsimVersion" type="xs:NMTOKEN"/>
+      <xs:attribute name="version" type="xs:NCName"/>
+      <xs:attribute name="xmmlVersion" type="xs:decimal"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="model">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="unitList"/>
+        <xs:element ref="variableList"/>
+        <xs:element ref="equationList"/>
+        <xs:element ref="relationList"/>
+        <xs:element ref="eventList"/>
+        <xs:element ref="procedureCallList"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="unitList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="fundamentalUnit"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="derivedUnit"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="fundamentalUnit">
+    <xs:complexType>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+      <xs:attribute name="unitType" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="derivedUnit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="realFactor"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="unitFactor"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required"/>
+      <xs:attribute name="unitType"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="realFactor">
+    <xs:complexType>
+      <xs:attribute name="multiplier" use="required" type="xs:double"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="unitFactor">
+    <xs:complexType>
+      <xs:attribute name="exponent" use="required" type="xs:decimal"/>
+      <xs:attribute name="unitID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="variableList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="variable"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="variable">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="domainList"/>
+        <xs:element minOccurs="0" ref="propertyValueList"/>
+      </xs:sequence>
+      <xs:attribute name="dataType" use="required" type="xs:NCName"/>
+      <xs:attribute name="id" use="required" type="xs:NMTOKEN"/>
+      <xs:attribute name="isDomain" use="required" type="xs:boolean"/>
+      <xs:attribute name="isExtern" use="required" type="xs:boolean"/>
+      <xs:attribute name="isPrivate" use="required" type="xs:boolean"/>
+      <xs:attribute name="isState" use="required" type="xs:boolean"/>
+      <xs:attribute name="unitID"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="domainList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="domain"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="domain">
+    <xs:complexType>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="propertyValueList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="propertyValue"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="propertyValue">
+    <xs:complexType mixed="true">
+      <xs:attribute name="dataType" use="required" type="xs:NCName"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="equationList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="equation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="equation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="expression"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="relationList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="relation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="relation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="expression"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="eventList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="event"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="event">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="trigger"/>
+        <xs:element ref="actionList"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+      <xs:attribute name="timeDomainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="trigger">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="debug"/>
+        <xs:element ref="ns1:math"/>
+      </xs:sequence>
+      <xs:attribute name="type" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="actionList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="action"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="action">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="expression"/>
+      </xs:sequence>
+      <xs:attribute name="variableID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="procedureCallList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="procedureCall"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="procedureCall">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="procedureCallArgument"/>
+      </xs:sequence>
+      <xs:attribute name="procedureID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="procedureCallArgument">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="expression"/>
+        <xs:element ref="loopDomainList"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="loopDomainList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="loopDomain"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="loopDomain">
+    <xs:complexType>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="toolList">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element ref="stateTool"/>
+        <xs:element ref="ODETool"/>
+        <xs:element ref="PDETool"/>
+        <xs:element ref="domainTool"/>
+        <xs:element ref="exprTool"/>
+        <xs:element ref="externTool"/>
+        <xs:element ref="implicitTool"/>
+        <xs:element ref="procedureTool"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ODETool">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:sequence>
+            <xs:element ref="solvedVariables"/>
+            <xs:element ref="requiredVariables"/>
+            <xs:element ref="sequenceLoops"/>
+          </xs:sequence>
+          <xs:sequence>
+            <xs:element ref="solvedVariableList"/>
+            <xs:element ref="requiredVariableList"/>
+            <xs:element ref="sequenceLoopList"/>
+          </xs:sequence>
+        </xs:choice>
+        <xs:element ref="initialConditionList"/>
+        <xs:element ref="stateEquation"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+      <xs:attribute name="timeDomainID" use="required" type="xs:NCName"/>
+      <xs:attribute name="timeOrder" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PDETool">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="solvedVariableList"/>
+        <xs:element ref="requiredVariableList"/>
+        <xs:element ref="sequenceLoopList"/>
+        <xs:element ref="initialConditionList"/>
+        <xs:element ref="stateEquation"/>
+        <xs:element ref="spatialDomainList"/>
+        <xs:element ref="boundaryConditionList"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+      <xs:attribute name="timeDomainID" use="required" type="xs:NCName"/>
+      <xs:attribute name="timeOrder" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="boundaryConditionList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="boundaryCondition"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="boundaryCondition">
+    <xs:complexType>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+      <xs:attribute name="equationID" type="xs:NCName"/>
+      <xs:attribute name="side" use="required" type="xs:NCName"/>
+      <xs:attribute name="toolID" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="domainTool">
+    <xs:complexType>
+      <xs:choice>
+        <xs:sequence>
+          <xs:element ref="solvedVariableList"/>
+          <xs:element ref="requiredVariableList"/>
+          <xs:element ref="sequenceLoopList"/>
+        </xs:sequence>
+        <xs:sequence>
+          <xs:element ref="solvedVariables"/>
+          <xs:element ref="requiredVariables"/>
+          <xs:element ref="sequenceLoops"/>
+        </xs:sequence>
+      </xs:choice>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="exprTool">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:sequence>
+            <xs:element ref="solvedVariableList"/>
+            <xs:element ref="requiredVariableList"/>
+            <xs:element ref="sequenceLoopList"/>
+          </xs:sequence>
+          <xs:sequence>
+            <xs:element ref="solvedVariables"/>
+            <xs:element ref="requiredVariables"/>
+            <xs:element ref="sequenceLoops"/>
+          </xs:sequence>
+        </xs:choice>
+        <xs:element ref="expression"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="externTool">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="solvedVariableList"/>
+        <xs:element ref="requiredVariableList"/>
+        <xs:element ref="sequenceLoopList"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="implicitTool">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="solvedVariableList"/>
+        <xs:element ref="requiredVariableList"/>
+        <xs:element ref="sequenceLoopList"/>
+        <xs:element ref="zeroExpressionList"/>
+        <xs:element ref="boundList"/>
+        <xs:element minOccurs="0" ref="linearFactorList"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="zeroExpressionList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="expression"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="boundList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="bound"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="bound">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="variableUsage"/>
+        <xs:element ref="expr"/>
+      </xs:sequence>
+      <xs:attribute name="type" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="expr">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="debug"/>
+        <xs:element ref="ns1:math"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="linearFactorList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="linearFactor"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="linearFactor">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="debug"/>
+        <xs:element ref="ns1:math"/>
+      </xs:sequence>
+      <xs:attribute name="column" use="required" type="xs:integer"/>
+      <xs:attribute name="row" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="procedureTool">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="solvedVariableList"/>
+        <xs:element ref="requiredVariableList"/>
+        <xs:element ref="sequenceLoopList"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sequence">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="main"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="main">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element ref="item"/>
+        <xs:element ref="loopBlock"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="expression">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="debug"/>
+        <xs:element minOccurs="0" ref="subdomain"/>
+        <xs:element ref="ns1:math"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="subdomain">
+    <xs:complexType>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+      <xs:attribute name="side" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="debug" type="xs:string"/>
+  <xs:element name="solvedVariableList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="variableUsage"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="requiredVariableList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="variableUsage"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sequenceLoopList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="sequenceLoop"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="solvedVariables">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="variableUsage"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="requiredVariables">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="variableUsage"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sequenceLoops">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="sequenceLoop"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="initialConditionList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="initialCondition"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="initialCondition">
+    <xs:complexType>
+      <xs:attribute name="toolID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="stateEquation">
+    <xs:complexType>
+      <xs:attribute name="equationID" type="xs:NCName"/>
+      <xs:attribute name="toolID" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="stateTool">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="initialConditionList"/>
+        <xs:element ref="requiredVariableList"/>
+        <xs:element ref="sequenceLoopList"/>
+        <xs:element ref="solvedVariableList"/>
+      </xs:choice>
+      <xs:attribute name="id" type="xs:NCName"/>
+      <xs:attribute name="timeDomainID" type="xs:NCName"/>
+      <xs:attribute name="toolID" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="variableUsage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="domainUsage"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required"/>
+      <xs:attribute name="status" use="required" type="xs:NCName"/>
+      <xs:attribute name="variableID" use="required" type="xs:NMTOKEN"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="domainUsage">
+    <xs:complexType>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+      <xs:attribute name="domainStatus" type="xs:NCName"/>
+      <xs:attribute name="qstatus" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="spatialDomainList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="spatialDomain"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="spatialDomain">
+    <xs:complexType>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="item">
+    <xs:complexType mixed="true">
+      <xs:attribute name="itemID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="loopBlock">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="item"/>
+          <xs:element ref="loopBlock"/>
+        </xs:choice>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="ODEBlock"/>
+          <xs:element ref="PDEBlock"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="loopDomainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ODEBlock">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="stateToolList"/>
+        <xs:element ref="microSequence"/>
+      </xs:sequence>
+      <xs:attribute name="timeDomainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PDEBlock">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="spatialDomainList"/>
+        <xs:element ref="stateToolList"/>
+        <xs:element ref="microSequence"/>
+        <xs:element ref="PDEBlockBoundaryList"/>
+      </xs:sequence>
+      <xs:attribute name="timeDomainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PDEBlockBoundaryList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="PDEBlockBoundary"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PDEBlockBoundary">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="microSequence"/>
+      </xs:sequence>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+      <xs:attribute name="side" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sequenceLoop">
+    <xs:complexType>
+      <xs:attribute name="domainID" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="stateToolList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="stateTool"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="microSequence">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="item"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

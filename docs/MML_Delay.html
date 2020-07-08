@@ -1,0 +1,110 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Delay Lines in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+
+<p> This document describes construction of delay lines in JSim MML.  A 
+delay line is a mechanism for delaying the delivery of a signal. 
+Mathematically, this may be thought of as querying the value of a 
+variable v(t) at an earlier time v(t-delay).  While MML does not have an 
+explicit "delay()" function currently (one is being planned), delay 
+lines may be created in MML using several alternative methods which are 
+described below. </p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#func">Variable Function (VF) Delay Lines</a></li>
+<li><a href="#pde">PDE Delay Lines</a></li>
+<li><a href="#ode">ODE Series Delay Lines</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="func">Variable Function (VF) Delay Lines</a></h2>
+
+<p>This form of delay line uses MML VF syntax, which treats a dynamic 
+variable v as a function v(expression).  For a simple delay line, the 
+appropriate VF call is v(t-delay) which is described below (those 
+interested if the full generality of VFs, should see <a 
+href="MML_VarFunc.html">Using Variable Functions in MML</a>).  
+Consider the following example:</p>
+
+<?php jsText("examples/MML_Delay/vf1.mod"); ?>
+
+<p>Note that the definition of udelayed uses an "if" clause to prevent 
+u() queries for t less than 0.  Such queries would cause a out-of-range 
+error when the model is run.</p>
+
+<p>While the above delay implementation is adequate in most 
+circumstances, there are some subtleties that can sometimes cause 
+problems:</p>
+
+<ol>
+
+<li>JSim calculates u(t-delay) by linearly interpolating u(t) values 
+calculated from previous time points, that is, u's values on the defined 
+time grid.  This means the accuraccy of u(t-delay) depends upon the 
+pseudo-linear behaviour of u.  Normally, specifying an appropriately 
+small time step (t.delta) will address this problem.</li>
+
+<li>The above interpolation behaviour means that if delay is 
+less than t.delta, then u(t-delay) will return a NaN because the 
+interpolated values will include u values not yet calculated.  This 
+means you must specify a delay value greater that t.delta to get
+acceptable results.  In any case, delay must normally be large compared 
+to t.delta in order to achieve acceptable interpolation accuraccy.
+</li>
+
+<li>Third, the "if" clause above is, strictly speaking, correct only for 
+t.min=0.  If t.min is not necessarily zero in your model,  the correct
+"if" clause should be "if (t-t.min &lt delay) ..."</li>
+
+</ol>
+
+<p>The following model incorporates two refinements of the previous 
+one's "if" clause.  First, udelayed is set equal to u if the delay is 
+too small, allowing the case of the delay=0 to be handled correctly.  
+Second, the case of non-zero t.min is handled correctly.</p>
+
+<?php jsTextDownApp("examples/MML_Delay/vf2.proj"); ?>
+
+<h2>  <a name="pde">PDE Delay Lines</a></h2>
+
+<p>To understand this section,  you should first read <a 
+href="MML_PDE.html">Using PDEs in MML</a>.</p>
+
+<p><em>This section is currently under development.</em></p>
+
+<h2>  <a name="ode">ODE Series Delay Lines</a></h2>
+
+<p>To understand this section,  you should first read <a 
+href="MML_ODE.html">Using ODEs in MML</a>.</p>
+
+<p><em>This section is currently under development.</em></p>
+
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

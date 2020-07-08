@@ -1,0 +1,171 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using ODEs in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> This document describes some basics techniques for using ordinary
+differential equations (ODEs) within MML models.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#first">First example</a></li>
+<li><a href="#system">Systems of ODEs</a></li>
+<li><a href="#order">Second order equations</a></li>
+<li><a href="#order">Using implicit equations with ODEs</a></li>
+<li><a href="#parallel">Parameterized parallel systems</a></li>
+<li><a href="#series">Parameterized serial systems</a></li>
+<li><a href="#events">Using events with ODEs</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="first">First example</a></h2>
+
+<p>MML uses the colon (:) to represent differentiation (for example u:t
+represents du/dt).  This construct is used in formulating ODEs in MML.
+Consider the following model of radioactive decay:</p>
+
+<?php jsTextDownApp("examples/MML_ODE/ode1.proj"); ?>
+
+<p>JSim requires an ODE variable (here "u") be given an "initial condition
+(IC)" and a "state equation".  The IC constrains the initial value by
+applying the "when" clause.  In the example, the simplest possible
+constraint is used, that is, setting the numeric value.  In more
+complicated systems, ICs may be calculated from other model
+variables.  The state equation constrains the variable's first derivative
+(here "u:t") for all time. (For simplicity, the word "time" is used in
+this document to refer to an ODE variable's domain, however ODE variable
+domains be assigned any unit appropriate to the model.)</p>
+
+<p>If you run the above model in the JSim GUI, you will discover that
+JSim creates a new IC variable u__init with default value 1 (matching the
+MML equation).  This allows you to change the IC in the GUI without
+recompiling the model.  If the IC for an ODE variable 
+is calculated from other variables, the initial value will not be directly
+changable within the GUI. </p>
+
+<p>Note that IC's when clause must be formulated as "t=t.min".  You may
+not use "t=0" or any other specific numeric value in an IC.</p>
+
+<h2><a name="system">Systems of ODEs</a></h2>
+
+<p>Consider the following model of diffusion between 3 compartments:</p>
+
+<img src="../pics/ode_comp3.gif" />
+
+<?php jsTextDownApp("examples/MML_ODE/ode_comp3.proj"); ?>
+
+<p>Note that each of the three ODE variables (C1, C2, C3) has
+both an initial condition (specified via the "when" clause) and a 
+state equation.  The number of such equation in a JSim model is
+limited only by computer memory,  not by JSim itself.</p>
+
+<h2><a name="order">Second order equations</a></h2>
+
+<p>2nd (and higher) order ODEs may be solved in JSim.  A Nth order ODE 
+require N initial conditions (for u, u:t, ...).  The following example 
+that generates a sinusoid via a 2nd order ODE:</p>
+
+<?php jsTextDownApp("examples/MML_ODE/ode_order2.proj"); ?>
+
+<h2><a name="implicit">Using implicit equations with ODEs</a></h2>
+
+<p>You may use linear or non-linear implicit equations to specify
+ODE ICs or state equations.  Consider the following example using
+linear implicit equations to specify both ICs and state equations:</p>
+
+<?php jsTextDownApp("examples/MML_ODE/ode_implicit.proj"); ?>
+
+<p>Here JSim will solve u and v at t=t.min via the two implicit equations
+in the when clause, and solve u:t and v:t via the last two equations.
+There are a number of tricky issues regarding implicit equations in MML.
+Model writers are <strong>strongly advised</strong> to read <a
+href="MML_Implicit.html">Implicit Equations in MML</a> completely
+before using this construct in their own models.</p>
+
+<h2><a name="parallel">Parameterized parallel systems</a></h2>
+
+<p>In some cases, you may wish to create a set of ODE variables that share
+a common form.  The following code models flow through N parallel
+compartments:</p>
+
+<?php jsTextDownApp("examples/MML_ODE/ode_parallel.proj"); ?>
+
+<p>Here a realDomain "n" is introduced to parameterize the N parallel
+variables.  N is initially set to 5, but may be easily changed in the JSim
+GUI.  The ODE variable C now takes both time and "n" as domains, and the
+IC and state equations apply to each value of "n".  This approach make for
+more concise and efficient code when a set of variables share a common
+equation form, differing only in parameter values.  In this case,
+compartment volume (V) varies over "n".</p>
+
+<p>Special notes:</p>
+
+<ul>
+
+<li>The combined output concentration is calculated via the MML sum()
+operator.  See <a href="MML_Integrals.html">Using Integrals and Summations
+in MML</a> for details on summations.</li>
+
+<li>The "private" statement ensures that N is the only variable affecting
+the values of "n".  See <a href="MML_Topics.html#public">Public, Private
+and Extern variables</a> for more information.</li>
+
+<li>JSim internals issues currently prevent the value of N being set to 1.
+This limitation will be addressed in future JSim releases.</li>
+
+</ul>
+
+<h2><a name="series">Parameterized serial system</a></h2>
+
+<p>The following code models flow through a series of N compartments:</p>
+
+<?php jsTextDownApp("examples/MML_ODE/ode_serial.proj"); ?>
+
+<p>Most of the code is similar to the parallel example.  The state 
+equation uses MML's "if/else" construct to compare a
+compartment's concentration to its predecessor's.  The 1st compartment
+is compared to the input (Cin).</p>
+
+<p> The final "when" statement calculates Cout from the value of C at
+maximum n.  This "when" construct is preferred to following which,
+although possible, is not recommended due to technical reason:</p>
+
+<pre>
+Cout=C(t,N);
+</pre>
+
+<h2><a name="events">Using events with ODEs</a></h2>
+
+<p>An MML ODE variable is inherently continuous, since it is calculated
+from the integral of a real-valued function.  Certain physiological
+systems, such as gate openings and closings, are inherently discontinuous.  
+Events are MML's construct for such discrete changes.  See <a
+href="MML_Events.html">Using Events in MML</a> for complete details.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

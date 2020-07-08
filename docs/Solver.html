@@ -1,0 +1,72 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Solvers Page</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>Introduction</h2>
+
+<p>This page describes JSim's numeric solver algorithms and how to control
+them when running a model.  Numeric solvers are available for ordinary
+and partial differential equations (ODEs and PDEs), linear and non-linear
+implicit equations, and parameter optimization. JSim provides all 
+solvers with default tuning parameters that are appropriate for most
+simple problems.  However, when equations are particularly challenging
+or run-time performance particularly critical,  users may choose to
+adjust solver parameters from their default values.<p>
+
+<div class="jsimleft100">
+
+<div class="jsimleft50">
+
+<h2>Tuning Guides:</h2>
+
+<p>The documents below describe best common practice when tuning
+solver algorithms for a particular problem. </p>
+
+<ul>
+<li><a href="Solver_ODE_Guide.html">ODEs</a></li>
+<li><a href="Solver_PDE_Guide.html">PDEs</a></li>
+<li><a href="Solver_Implicit_Guide.html">Implicit Equations</a></li>
+<li><a href="Solver_Optim_Guide.html">Optimization</a>
+(not yet available)</li>
+<li><a href="Solver_Condition_Number.html">Optimization Condition Number</a>
+</ul>
+
+</div>
+
+<div class="jsimright50">
+
+<h2>Reference manuals:</h2>
+
+<p>The documents below are exhaustive lists of available algorithms and
+their tuning parameters.</p>
+
+<ul>
+<li><a href="Solver_ODE_Ref.html">ODEs</a></li>
+<li><a href="Solver_PDE_Ref.html">PDEs</a></li>
+<li><a href="Solver_Implicit_Ref.html">Implicit Equations</a></li>
+<li><a href="Solver_Optim_Ref.html">Optimization</a></li>
+</ul>
+
+</div>
+
+</div>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>
+

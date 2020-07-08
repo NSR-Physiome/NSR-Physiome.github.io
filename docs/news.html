@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>News</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
+<h1><img src="../pics/news.gif" />What's New with JSim?</h1>
+
+<p class="first"> This document provides a running log of changes made in
+the various public and beta releases of JSim 2.0 as well as pending changes to
+upcoming releases.  Most recent changes are listed first.</p>
+
+<h2>Version 2.20 - Public release 25 Jun 2020 </h2>
+<p> Fixed Particle Swarm optimizer support for multi-processor computers.</p>
+<p>Added Principle Axis optimizer (PRAXIS) to JSim. See <a href="/jsim/docs/Solver_Optim_Ref.html#praxis">JSim optimizers</a> for more information.
+</p>
+<p>Exporting plot data to csv file now supports mismatched domains.
+</p>
+
+<h2>Version 2.19 -  Beta release 29 Jan 2019</h2>
+<p> Fixed genetic optimization bug where best fit usually occurred during first generation (bug report by KC).</p>
+<p>Fixed issue where SBML <em>&lt;notes&gt;</em> were being imported onto more than one line causing compiler errors.
+</p>
+<p>Fixed optimization bug where an error was reported if curves with the same name from different datasets were fitted simultaneously (Bug report by AL). Also increased column width for curve names in optimization configuration page.
+</p>
+<p>Added the ability to automatically preserve the last successfully run project file as model_LastRun.proj in the user directory. This feature is turned on through the 'Preferences' drop-down menu in the 'Project' tab of the JSim GUI (<a href="/jsim/docs/User_Intro.html#save">More info</a>).
+</p>
+<p>Added the ability to create and modify 1D data curves from within the JSim GUI. For more information see <a href="https://www.physiome.org/jsim/docs/User_DataSets.html">JSim Data Sets, </a> and  <a href="/jsim/docs/User_DataSets.html#createnew"> creating and adding data curves.</a>
+</p>
+<p>Updated project file save dialog language when closing JSim without saving first. Thanks to NB for fix.
+</p>
+<p>Added Particle Swarm optimizer (PSO) to JSim. See <a href="/jsim/docs/Solver_Optim_Ref.html#pswarm">JSim optimizers</a> for more information. Thanks to YA for algorithm.
+</p>
+
+<h2>Version 2.18 -  Beta release 05 Sep 2018, public release 29 jan 2019</h2>
+
+<p>Added initial support to JSim for exporting comments into <a href="http://sbml.org/Main_Page">SBML</a> models as SBase sub-object <em>&lt;notes&gt;</em>. Currently, comments at the beginning and end of the model will be exported as SBML <em>&lt;notes&gt;</em> associated with the <em>&lt;model&gt;</em> object. Comments on the same line as JSim mml expressions will be added as <em>&lt;notes&gt;</em> to the SBML object that it is mapped to, where feasible. Often there will not be a direct one-to-one mapping and the comment will not be exported. Comments above and below JSim mml expressions are currently ignored.
+</p>
+<p>Added inital support for importing SBML <em>&lt;notes&gt;</em> into JSim mml as comments. When there is a direct mapping of SBML objects to JSim expressions then a comment will be placed next to it. General <em>&lt;notes&gt;</em> associated with the SBML <em>&lt;model&gt;</em> object will be placed at the top of the JSim mml code. Export/import of comments will be refined as feedback warrants.
+</p>
+<p>Fixed issues related to some unhandled exceptions occurring when importing/exporting SBML models into/from JSim.</p>
+<p>
+Added <a href="https://sites.google.com/site/semanticsofbiologicalprocesses/projects/semsim">SemSim</a> annotation preservation to the JSim project file. Each model stored in a project file now has a page for storing SemSim annotations. Users annotate JSim models using <a href="https://sites.google.com/site/semanticsofbiologicalprocesses/projects/semgen">SemGen</a>, an experimental software tool for automating the modular composition and decomposition of biosimulation models. JSim does not support the annotation process but only stores the SemSim annotations. SemGen (v 4.0 and above) supports storing and retrieving annotations within the JSim  project file, making it easier to update annotations as the model changes throughout the model development process. 
+</p>
+<p>Fixed issue where JSim help links gave an error upon JSim gui start up due to help pages being referenced on a https site. Added code to check and change behavior depending on if help pages located on http or https sites.</p>
+
+<p>fpack model source code is now included with JSim source distribution. Previously only the compiled fpack model libraries (gentex, MMID4, etc) were distributed. Now the fortran source files are included in JSim source download.</p>
+
+<p>Removed yellow from list of plot colors. Added turquoise and rearranged plot color list.
+</p>Partially fixed copy/paste of plot page text on Apple Mac OS by adding support for standard Mac keyboard shortcut for copy.
+<p>
+
+</p>
+
+<h2>Version 2.17a - Beta release 30 Mar 2018, public release 05 sep 2018</h2>
+<p>SBML library built using new version (libSBML v 5.14.0). Now MacOS version of JSim does not throw an unhandled exception when exporting/importing SBML models. No other changes. </p>
+
+<h2>Version 2.17 - Beta release 07 Jun 2017, public release 05 sep 2018</h2>
+<p>JSim updated to require Java 1.8 for use. With 64 bit support, JSim now supports Java virtual machine heap sizes of greater than 2 TB (Though most hardware has less than that). To adjust memory see <a href="http://www.physiome.org/jsim/docs/User_Memory.html">JSim Memory Usage</a>. The Apple Mac OS version of JSim now requires Oracle Java 1.8 jre. </p>
+<p>64 bit support: JSim is now compiled in full 64 bit mode. 32 bit version of JSim is no longer supported. JSim version 2.16 is the last 32 bit version. </p>
+
+<h2>Version 2.16 - Beta release 10 Dec 2015, public release 07 Jun 2017</h2>
+<p>For Sensop optimizations, a new user-settable optimization control parameter added, provisionally named Max stat iter (maximum static iterations).  When this parameter is non-zero, Sensop will terminate if it makes more than 'Max stat iters' iterations without improving the best parameter estimates. See <a href="http://www.physiome.org/jsim/docs/Solver_Optim_Ref.html#sensop">Optimizer reference</a> for more information.Fix by EB. Requested by MB.</p>
+<p>Default PDE solver is now LSFEA, it was MacCormack. Requested by JBB. </p>
+<p> Clarified error message when JSim cannot sequence a variable expression. Bug report by MN. </p>
+<p> Optimization report now includes RMS and relative RMS (RRMS) error for individual curves when multiple, simultaneous data curve fits are run. This information can be useful when data curves differ by orders of magnitude or have different dimensions. The RRMS error is calculated by taking the indivdual curve fit RMS and dividing it by the weighted standard deviation of the data curve (<a href="RRMSEcalculations.pdf">Calculations info</a>). RRMS error is only reported on non-negative data.
+</p>
+<p>The 'Advanced' menu on the Run Time page does not control nth point for available domains if Memory page has Data storage set to 'all points'. Changed behavior of 'Advanced' menu so that domains are not visible if 'nth point' storage not enabled.  
+</p>
+<p>Fixed bug where 'Advanced' settings overlayed 'Model Outputs' when no domains are declared in model. Bug report by GR.
+</p>
+
+<h2>Version 2.15 - Beta release 22 Oct 2014, public release 10 Dec 2015</h2>
+
+<p>Fixed bug in jsfim that caused crash when only a single curve was to be modeled. Fix by EB.
+</p>
+<p>Added RMS error value column to jsfim output file specified by -o switch. Fix by EB.  Feature request by MB.
+</p>
+<p>Fixed misspelling in jsfim verbose messages ("Staring optimizations"). Fix by EB.  Bug report by MB.
+</p>
+<p>Updates to support Ubuntu Linux build (Thanks to EB):
+<ul>
+<li>Makefile.global.linux now includes comments appropriate for Ubuntu builds.</li>
+<li>JSim build and verify scripts now use #!/bin/bash rather than #!/bin/sh, which behaves incompatibly on Ubuntu.</li>
+</ul>
+</p>
+<p>Scaled Monte Carlo histogram when printing hardcopy. Previously the histogram was truncated on right-hand side. Bug reported by GR.</p>
+<p>Fixed issue where the plot page rules no longer work after saving a project file, after tabbing between 'Message' and 'Plot' page, or when user changed color preference. Issue more pronounced in version 2.14 but was also in previous versions. Bug report by JBB and GR. <p>
+
+<p>Added confirmation dialog when a parameter set is unlocked.  Feature
+request JB.</p>
+
+<p>Fixed position of "Data storage:" label in model "Memory" tab so that
+it doesn't overlap with menu control.  This bug was first noted in 
+version 2.14.</p>
+
+<p>Added pointer to JSim memory configuration options to model "Memory"
+tab.  Feature request JB.</p>
+
+<p>Improved run-time Nth point memory storage. See <a href="/jsim/docs/User_Memory.html">JSim Memory Usage web page</a> for more information.</p>
+
+<p>JSim now checks the $HOME environment variable if the Java property 
+"user.home" is not set correctly.  This allows JSim to run, without 
+modification, on some systems where "user.home" is not set correctly.  Bug 
+report by MB & DM.</p>
+
+<h2>Version 2.14 - Beta release 14 May 2014</h2>
+
+<p>Moved parameter locking control from top right to left top of parameter page 
+and added accompanying locked/unlocked icon for clarity. Added locked/unlocked
+indications to various parameter set selection lists. Change request by JB.</p>
+
+<p>Updated Permissions attribute in JSim applet jar file to remove annoying
+warning from latest Java.  This change effected Mar 25 on physiome.org (while
+still running JSim version 2.13). Bug report by JB.</p>
+
+<p>Fixed bug in Monte Carlo analysis that aborted when optimizing on
+function generation parameters. Bug report by GR.</p>
+
+<p>Fixed bug wherein a change to the JSim color preference would be 
+incompletely propagated to all content tabs.  Previously,  only tabs
+that had been previously visited would be rendered in the new color.</p>
+
+<p>Fixed bug wherein RTML variable buttons that had been previosly clicked 
+became inoperative if the user changed the JSim color preference.  Bug
+report by GR.</p>
+
+<p>Added "-i" and "-ofitfmt" switches to <a href="User_Fim.html">jsfim</a> in 
+support of AA's QCT application.  Also, modified fit data output so curve 
+names reflect the name of the reference data to which they are matched.</p>
+
+<p>Clarified error message resulting from invalid specification of the Java
+property "user.home".  Bug report by MB/DM.</p>
+
+<p>Added "Advanced" section to main model parameter page including "# 
+loops"  and "every Nth point" controls.  Feature request by JB.</p>
+
+<h2>Version 2.13 - Beta release 15 Jan 2014, public release 14 May 2014</h2>
+
+<p>While running <a href="User_Loops.html">model loops</a>, the user may now 
+skip ahead to the next iteration by pressing the <a 
+href="User_Loops.html#next">Next Loop button</a>.  Feature request by 
+JB.</p>
+
+<p>Made numerous improvements and bug-fixed to plot and plot tics
+routines.  Linear scale plot tics now include subtics (3 or 4
+between each tic, depending upon the scale).  Log scale plot tics
+and subtics are now more appropriate to the data,  especially when
+large or small dynamic ranges are used. Tics routine now also
+controls the contour levels in contour plots,   Log scale contour
+plots now use contour levels that are logarithmically spaced and not
+longer hang when displaying a large dynamic range (e.g. 10 orders of
+magnitude).  Numeric labels on plot contours now display using
+JSim's standard numeric formatting. SGT plot routines were improved to
+properly display log scale axis labels in PlainAxis objects. 
+Contour plot line style and thickness controls now work properly.  
+Contour plot lines may be made invisible by selecting the blank line
+style (this is not a change, but the functionality was not well
+known).</p>
+
+<p>Fixed bug in auto log scaling of of regularly spaced grid data 
+that would occasionally misscale the X axis.  Bug report BJ.</p>
+
+<p>The "LSFEA" PDE solver now refers to LSFEA3.  In previous versions,
+LSFEA referred to the older LSFEA2,  and LSFEA3 had to be selected
+separately.  LSFEA3 appears to be superior in every sense to LSFEA2,
+so LSFEA2 has been retired.  Thanks to GR for the LSFEA3 code.</p>
+
+<p>A warning message is now issued when a variable possesses both an 
+initial condition and a specifying equation (example below).  Previously,
+no warning was issues.  Users should correct their models if they see 
+this warning,  which will be upgraded to an error in Version 2.14.  Bug
+report by GR.</p>
+
+<pre>
+// example code overspecified variable A
+// will generate warning in version 2.13, an error in version 2.14
+real A(t);
+when (t=t.min) A=1;  // initial condition
+A = t^2;             // entirely specifying equation
+</pre>
+
+<p>All model compilation errors now trigger a beep and bright yellow background warning 
+messages.  Previously, only model parser errors triggered this behaviour. Other 
+compilation errors did not beep, and left the warning message background the 
+default color.</p>
+
+<p>Created new document <a href="User_ParSets.html">JSim Parameter Sets</a> 
+describing various features of JSim parameter sets.  Moved parameter set 
+lock from parameter set "Edit" menu to top right corner of parameter set 
+content page for better visibility.  Also augmented text in a model's 
+"ParSet" menu showing the current parameter set to also show whether that 
+parameter set is locked. Change requests by JB.</p>
+
+<p>Added run-time profiling options for better assessment of numeric solver 
+performance.  In the JSim GUI, the profile may be viewed a model's "Debug" tab 
+by selecting "View Runtime Profile" from the "View" menu.  When using jsbatch, 
+use the new switch <a href="Devel_Batch.html#synopsis">-oprofile</a>.</p>
+
+<p>Added -refx option to <a href="User_Fim.html">jsfim</a>.  This
+switch will support future work regarding  AA's QCT 
+project.</p>
+
+<h2>Version 2.12 - Beta release 12 Aug 2013, public release 14 Aug 
+2013</h2>
+
+<p>Fixed bug that delivered a "NullPointerException" message to the user
+when model compilation aborted at and early stage due to an MML syntax error.
+This bug occurs in JSim releases 2.10 and 2.11.  Bug report by JB.</p>
+
+<p>Removed vestigal ODE code that could sometimes cause models with
+intertwined ODEs and implicit equations to fail with the message 
+below (bug report by YA):</p>
+
+<pre>Variables {} exceeded specified zero-finder error: (NaN>1.0E-6)</pre>
+
+<p>JSim WWW applets are now signed with a certificate from the InCommon
+certificate authority.  As a result,  warning messages users receive at 
+applet launch will be less dire in most cases.  Previously,  JSim WWW 
+applets were signed using a self-signed certificate.</p>
+
+<p>Added more descriptions for ontological tags in the <a 
+href="/jsim/db">Consolidated Model Database</a>. Now more than 95% of tags 
+have associated descriptions (up from 64% previously).</p>
+
+<p>Optimization and Monte Carlo residual graphs now show the absolute value
+of residuals when the log scale option is selected.  Change request by GR.</p>
+
+<p>Changed the term "Normalized covariance matrix" to "Correlation matrix".
+Change request by JB.</p>
+
+<h2>Version 2.11 - Beta release 13 May 2013</h2>
+
+<p>Added numerous descriptions to the ontological tagging in the <a 
+href="/jsim/db">Consolidated Model Database</a>.  3387 of the 5307 
+ontological tags (64%) now have descriptions.  Previously, only 1555 did 
+(29%).  Work continues to associate descriptions with all the ontological 
+tags in the database.</p>
+
+<p>Fixed bug in MML parser that failed to warn user if a variable had
+multiple conflicting unit definitions.  Bug report by BJ.</p>
+
+<p>JSim MacOS are now digitally signed,  which makes them simpler to 
+install on version 10.8 and above.  Previously, the MacOS security 
+monitor needed to be manually disabled before JSim could be installed
+on Mac OS version 10.8 and above.</p>
+
+<p>Fixed bug that caused a NullPointerException during save if the 
+user visited a model's "Browser" tab without rendering.  Bug report 
+by GR.</p>
+
+<p>Fixed bug that caused project data sets to fail at load time if a 
+regularly spaced data grid within the data set had a number of points more 
+compactly notated as an exponential than as an integer (e.g. 1E3 vs 1000).  
+The exponential count for the number of points was not correctly 
+interpreted at file read time, causing the data set to disappear from the 
+project.  This problem has been fixed.  Bug report by GR.</p>
+
+<p>Changed JSim's <a href="User_Memory.html">default memory allocation</a>
+on Windows from 1500MB to 1200MB.  We've had reports of several Windows 
+machines that fail to start JSim when more that 1200MB is requested.</p>
+
+<p>Added cellMLNames property to MML code generated on CellML import. 
+This property is a semi-colon separated list of CellML 
+component.variable names mapped to the MML variable.  Feature request by 
+MN.</p>
+
+<h2>Version 2.10 - Beta release 30 Jan 2013, Public release Apr 2013</h2>
+
+<p>Changed the number of significant digits for output values
+on model pages from 8 to 5 digits to prevent text-field overflow.
+Change request by JB.</p>
+
+<p>Widened best parameter value column in optimization report from 12 to 15
+characters because some values were being truncated.  Bug report by
+GR.</p>
+
+<p>The <a href="/jsim/db">JSim Consolidated Model Database</a> is now
+available,  providing uniform model search across 5 model archives:
+NSR Webmodels, Biomodels, JWS, CellML and Kegg pathways.</p>
+
+<p>Fixed bug in <a href="User_Nested.html">Nested Plot</a> printing that caused 
+some of the component plots to be pushed off the edge of the page when
+then plot window was made very wide.  Bug report by GR.</p>
+
+<p>Fixed bug in Matlab data export that generated Matlab-incompatible 
+names for expressions starting with a digit (e.g. 10*F).  Bug report by 
+MB.</p>
+
+<p>Modified JSim local server so that it does not load native solver 
+libraries until run-time.  This allows access the server
+translation facitilies by Java clients without the need for native 
+libraries. Change based on request by MN.</p>
+
+<p>Improved binary distribution scripts so that multiple copies of libsbml 
+are not included.  Previous distributions made copies instead of symbolic
+links for libsbml libraries.</p>
+
+<h2>Version 2.09 - Beta release 16 Oct 2012, public release 30 Jan 2013</h2>
+
+<p>Added new <a href="User_Memory.html#nth">Save Every Nth Point</a> 
+feature, reducing the memory required for long model runs.  Feature 
+request JB.</p>
+
+<p>Texts in a model's "Debug" tab (e.g. standard units file) are now 
+initially positioned at the beginning of the file.  Previously, they 
+were positioned at the end of the file.  Change request JB.</p>
+
+<p>Added -builddirsfx switch to <a href="Devel_Batch.html">jsbatch</a>
+and <a href="User_Fim.html">jsfim</a> to enable running large numbers
+of simultaneous jobs on high-performance clusters.  Feature request by
+AA.</p>
+
+<p>Added -ofinal switch to <a href="Devel_Batch.html">jsbatch</a>, 
+allowing printing of only the final values for model variables after
+a run.</p>
+
+<p>Added JSim.plan.XMMLTranslator class for light-weight MML to XMML 
+translation.  Feature request by MN.</p>
+
+<p>Due to internal engine changes,  JSim release 2.09 will require a new
+compatible release of QPP (0.916) to work with it.</p>
+
+<h2>Version 2.08 - Beta release 8 Aug 2012</h2>
+
+<p>Fixed bug in LSFEA PDE solver in which problems with x-dependent 
+source terms were not calculated correctly.  Bug report by GR.</p>
+
+<p>A revised version of the LSFEA PDE solver is now available under
+the name LSFEA3.  This is expected to replace the existing LSFEA
+solver,  once users have had a chance to evaluate it.  The algorithm
+change is as follows.  The spatial resolution equals the number of
+grid points used by the other solvers (no longer restricted to just
+the odd integers) and the solution values at the endpoints of the
+spatial array are no longer used to store information needed for the
+next time step. This has resulted in more accurate spatial displays.
+The calculations for system transit time and mass balance are
+approximately the same with minor differences.  New code thanks to
+GR.</p>
+
+<p>Fixed bug in MacIntosh version in which double-clicking on model
+or project files did not always launch the most recent version.  Bug
+fix thanks to AS.</p>
+
+<p>Most tabs in the JSim GUI now have a "Help" menu.  Selecting items 
+from this menu causes the relevant documentation page to be loaded into 
+your desktop web browser.</p>
+
+<p>JSim's <a href="User_Browser.html">Model Browser</a> now retains
+any user edited layout between refreshes.  The layout is also stored
+in the project file so it can be restored when reloaded.  Selecting
+"Revert to default layout" from the Render menu abandons user edits and
+performs a fresh computer generated layout.  Update thanks to BJ.</p>
+
+<p>Each JSim download and documentation page now has a button
+to send comments and questions to JSim support staff.</p>
+
+<h2>Version 2.07 - Beta release 12 Jun 2012</h2>
+
+<p>JSim <a href="User_Nested.html">Nested Plots</a>,  implementing 
+Bosan-Harris "worlds within worlds" graphics for multidimensional 
+parameter visualization,  are now available.</p>
+
+<p>JSim multiple optimization runs now work properly with a remote
+server.  This allows you run <a href="User_Monte.html">Monte Carlo
+analysis</a> in applets and <a href="User_Fim.html">jsfim</a> now
+supports the same -server  switch as JSim and jsbatch.</p>
+
+<p>Note for QPP users: Above changes to multiple optimization mean that 
+a new QPP release (0.915) will be required to work correctly with JSim 
+2.07.</p
+
+<p>JSim can now export models in <a
+href="MML_Matlab.html#model">Matlab .m format</a>.  Thanks to SG, 
+BJ and GR.</p>
+
+<p>Updates to <a href="MML_SBML.html">SBML import</a> (most thanks to LS):</p>
+
+<ul>
+
+<li>More warnings for untranslateable bits.</li>
+
+<li>Bugs in variable stoichiometry translation were fixed.</li>
+
+<li>SBML conversion factors are now translated.</li>
+
+<li>Variable compartments are now correctly handled, both in terms of 
+species amounts or concentrations varying in time, and in terms of    
+species initial amounts/concentrations being set.</li>
+
+<li>Formulas that use SBML function definitions now correctly note
+that they vary in time. </li>
+
+<li>Reactions with local parameters with IDs that duplicate global 
+parameters and/or other local parameters are now given unique global IDs 
+for the translated version.</li>
+
+<li>Variable and unit names starting with and underscore are now 
+properly mapped to JSim-safe names.</li>
+
+<li>All variables renamed due to JSim name-space considerations,  are
+now tagged with property "sbmlName" mapping to the original SBML
+name or identifier.  Bug report by MN.</li>
+
+</ul>
+
+<p>Bumped default JSim maximum memory allocation from 600 to 1500MB.  If 
+your computer has less than 2GB of memory, you will need to <a 
+href="User_Memory.html"> configure JSim to use less than the default 
+allocation</a>.</p>
+
+<p>Plot data text display now scrolls properly using the mouse
+wheel.</p>
+
+<p>Changed values of Monte-Carlo "addMethod" control parameter from 
+"scaled" and "fixed" to "proportional" and "additive".  Change request 
+by JB.</p>
+
+<p>Fixed bug in Monte-Carlo printing that caused "can't be cast to
+Printable" error message when any graph other than the histogram was
+printed.</p>
+
+<p>Fixed bug in Antimony code generation that caused at timeout error
+message for very large models.  Bug report by GR.</p>
+
+
+<p>Fixed bug in model and data file import in which loading a 
+misformatted data file or XML model file caused the GUI to become
+confused,  creating a temporarily invisible, but empty, project data
+set or model.  Bug report by MB.</p>
+
+<p>Added option to delete model <a href="MML_RTML_Intro.html">custom 
+RTML</a> to model RunTime "Pages" menu.</p>
+
+<p>Fixed bug in Monte Carlo graphs in which the View menu selected item
+was not properly set when an existing project file was reloaded.</p>
+
+<p>Messages indicating project file settings that do not apply to
+the current version of JSim now appear only in verbose mode (-v
+switch).</p>
+
+<h2>Version 2.06 - Beta release 2 Feb 2012</h2>
+
+<p>JSim's <a href="User_Monte.html">Monte Carlo analysis</a> module is 
+now available.  This module, found in the new "Monte Carlo" tab in the 
+JSim GUI, allows the user to estimate parameter confidence by running 
+multiple optimizations on noisy data sets.  Currently, this 
+functionality is not available when using a remote server (e.g. running 
+applets).</p>
+
+<p>JSim now allows export of models in <a href="MML_CellML.html">CellML 
+format</a>  using either the JSim GUI or jsbatch.  Feature 
+implementation thanks to LS.</p>
+
+<p>Fixed bug in the handling <a href="MML_SBML.html">SBML 
+models</a> with time-varying compartment volumes.  Bug fix by LS.</p>
+
+<p>JSim's Linux Makefiles now support both EL5 or EL6 releases of Redhat 
+Linux.  Previously,  only EL5 was supported.  This change only affects 
+those building JSim from source.  Additions thanks to BJ.</p>
+
+<p>Removed extraneous console messages when rendering graphics in a 
+model's "Browser" tab.  Change thanks to BJ.</p>
+
+<p>Fixed bug in UtilIO.readBytes(File) that caused inconsistent QPP
+"File not found" error due to accumulation of unclosed FileInputStreams.
+Bug report by AA.</p>
+
+
+<h2>Version 2.05 - Beta release 19 Dec 2011</h2>
+
+<p>JSim distributions are now built with JDK 1.6.  Previously, JDK 1.5 
+was used.  This change keeps JSim in step with current Java feature, 
+performance and security developments.  JSim WWW users are advised to 
+update their browser JRE to 1.6.  Because of this change, Macintoshes 
+must now run Snow Leopard or later (earlier versions do not support 
+Java 1.6). This change fixes a two bugs noted in the previous 
+version:</p>
+
+<ul>
+<li>GR noted JSim would occasionally exit with an "insufficient heap 
+memory" error during contour plotting.</li>
+<li>MH reported JSim on his Windows 7 box would consistently crash when 
+navigating directories in file selection menus.</li>
+</ul>
+
+<p>Improvements to parameter set functionality:</p>
+
+<ul>
+
+<li>Parameter sets now include sections for model loops, 
+sensitivity analysis and optimization. Feature request by JB.</li>
+
+<li>The parSetModified flag (indicating that model parameter values have 
+been changed since the last parameter set load or store) is now restored
+properly when a project file is loaded.  Previously,  the flag was 
+written to the project file correctly,  but restored incorrectly when 
+the project file was reloaded. Bug report by JB.
+</li>
+
+<li>User changes to solver and function generator parameters now 
+set the parSetModified flag properly.  Previously,  only model 
+parameter changed affected the parSetModified flag.</li>
+
+<li>JSim now supports parameter files with the .par suffix.  These 
+files are designed to be both human and machine readable and support 
+programatic interation with JSim parameter sets.  The .par file text 
+displays in JSim ParSet tabs and may be written via the "Export par 
+file..." item in the GUI File menu or via the <a 
+href="Devel_Batch.html#opar">-opar switch in jsbatch</a>.  Par files 
+may be loaded into the GUI via either Project tab Add menu item "Import 
+par file", or via the -f command line switch </li>
+
+<li>The ParSet tab File menu now has an item "Import selected 
+pars..." that allow you to import selected contents from other 
+parameter sets.</li>
+
+</ul>
+
+<p>JSim's CellML importer has been substantially improved (thanks to 
+LS):</p>
+
+<ul>
+<li>Implicit equations are now handled better.  Previously, 
+implicit equations generated compilation errors that needed to be 
+corrected by user.</li>
+<li>Models contain unit consistency errors now have unit conversion set 
+off.  Previously, for the model to compile successfully, the user was 
+required to either turn unit conversion off, or correct the model unit
+errors.
+</li>
+<li>Constant variables that appear in exponents may cause problem for
+unit-balance, since JSim allows you to adjust these values.  Such 
+variables are now replaced by their constant values, allowing the model
+to pass unit balance.
+</li>
+<li>MathML piecewise without otherwise is now supported.</li>
+<li>Variable and units are now renamed if they cause conflicts with 
+JSim reserved words or pre-defined units. </li>
+<li>For further details of this update, see <a 
+href="MML_CellML.html#changelog">here</a>.</li>
+<li>For information on using JSim to curate CellML models, see <a 
+href="MML_CellML.html#curation">here</a>.</li>
+<li>NSR's <a href="/jsim/models/cellml">CellML archive</a> has been 
+updated with more recent versions of the v1.0 models. As a result of 
+these changes, 615 of the 642 models now run under JSim, and 494 of 
+those pass unit balance.</li>
+
+</ul>
+
+<p>Added list of value labels to XMML output for choice variables.  
+Feature request by MN.</p>
+
+<p>Increased precision in definition of unit atm (atmosphere) in 
+nsrunit.mod to 101325 pascals. Previously, it was 101300 pascals.</p>
+
+<p>Fixed bug in unit processing that incorrectly allowed unit prefixes 
+to be applies to non-prefixable units.  Bug report LS.</p>
+
+<p>Fixed bug in tracking parameter set changes.  Previously, the 
+parameter set change flag was erroneously set whenever a model was 
+recompiled.  Bug report by JB.</p>
+
+<p>Fixed bug that sometimes caused applet plotpages with "update during 
+run" enabled to generate an "Array index exception" message.  Bug report 
+by GR.</p>
+
+<h2>Version 2.04 - Beta release 24 Oct 2011, public release 19 Dec 
+2011</h2>
+
+<p>Added control to model optimization page for rounding precision of 
+optimization results. Feature request by GR.</p>
+
+<p>Widened parameter value text boxes in model Run Time tab by one 
+digit (was 11, now 12).  Feature request by JB.</p>
+
+<p>Fixed bug in Simulated Annealing in which optimizer sometimes 
+returned a bogus error code,  with the result that the optimized 
+parameters were not updated properly.  Bug fix by GR.</p>
+
+<p>Fixed bug in SBML import that calculated species concentration 
+incorrectly.  Bug fix by LS.</p>
+
+<p>Improved unit handling during SBML import to produce more 
+user-friendly names (e.g. millimeter*second^-1.0 is now mm/s).</p>
+
+<p>CellML import now uses improved MathML processing routines that 
+were previously used only by SBML import.  The result is that 
+approximately 100 more models on the <a 
+href="/jsim/models/cellml">CellML Models Page</a> now run under JSim 
+than did under version 2.03.</p>
+
+<p>JSim's <a href="/jsim/models/biomodels">Biomodels archive</a> has 
+been updated to include approximately 150 new models.</p>
+
+<h2>Version 2.03 - Beta release 20 Sep 2011</h2>
+
+<p>PowerPC-based Macintoshes are no longer supported.  You must have
+an Intel-based Mac to run JSim 2.03 and above.</p>
+
+<p>Numerous upgrades to SBML import/export, thanks to LS:</p>
+
+<ul>
+<li>SBML export now includes units for variables.</li>
+<li>SBML import now treats units in a more idiomatic JSim-like fashion.</li>
+<li>An initial assignment to a constant value that uses a non-constant 
+variable in the formula now gets the phrase 'when (t=t.min)' in front of 
+it.</li>
+<li>Initial assignments for compartments were being lost, but now are 
+found.</li>
+<li>Rational numbers in mathml now accepted.</li>
+<li>Stoichiometry Math is now working for SBML level 3 (this is where the 
+stoichiometry of a reaction is a variable that can be used in other 
+mathematical contexts, and changed or assigned values to over time.)</li>
+<li>The algebraic rule sorter had a bug when converting overdetermined 
+systems to just-enough-determined systems.</li>
+<li>'exponentiale' now accepted.</li>
+<li>A variety of functions like 'arctan' etc. are now converted to more 
+basic forms.</li>
+<li>avogadro as a csymbol in mathml is now accepted.</li>
+<li>Boolean symbols 'false' and 'true' now accepted in mathML.</li>
+<li>A constant value with a delay equation ('x three seconds ago' when x is 
+constant) is now converted to just 'x' in JSim.</li>
+<li>A bug where a species with an initial assignment that was flagged 
+'isSubstanceOnly' would cause JSim to crash if converting from sbml to 
+sbml was fixed (a pointer was being saved in JSim that was part of the 
+sbml model--when the model went out of scope, it deleted the pointer.)</li>
+</ul>
+
+<p>Antimony model import, export and embedding are <a 
+href="MML_Antimony.html">now supported</a>.</p>
+
+<p>jsbatch -osbml switch now accepts an SBML version number, e.g.</p>
+
+<pre>
+jsbatch -f test.mod -osbml l2v1
+</pre>
+
+<p>XMML output now supports constants with units.</p>
+
+<p>The process of <a href="Devel_Build.html">building JSim from
+source</a> has changed somewhat.</p>
+
+<h2>Version 2.02 - Beta release 11 May 2011, public release 9 Aug
+2011</h2>
+
+<p>Fixed bug in compiler's handling of delay ODEs that caused 
+run-time errors in the VS001 model.  Bug reports by MN, GR.</p>
+
+<p>Improved error message for improperly formed integrals and summations.
+Bug report by JB.</p>
+
+<p>Fix bug that caused stack dump during font resize when model is not 
+compiled.  Bug report by BJ.</p>
+
+<h2>Version 2.01 - Beta release 28 Mar 2011, public release 11 May 
+2011</h2>
+
+<p>Added <a href="Solver_Optim_Ref.html#genetic">Genetic algorithm 
+based optimizer</a>.  Code by DC and GR.</p>
+
+<p>Added alternative standard units file "nsrunitcgs.mod", which defines 
+the same units as "nsrunit.mod", but implements CGS-based unit 
+compatibility rather that SI-based compatibility.  This can be important 
+for some electrophysiology models in which, for example, conductivity 
+may be expressed in either sec/cm or siemens, which are compatible units 
+under CGS, but not under SI.  The model "Debug" tab in the JSim GUI, now 
+offers view options for both nsrunit and nsrunitcgs.  To support 
+nsrunitcgs, the JSim computational engine was modified to be units 
+agnostic.  Previously, "nsrunit" was assumed by all model, regardless of 
+whether it was included in the model. Change request by JB.</p>
+
+<p>Fixed bug in JSim GUI where SBML ouput text in model "Debug" pane did 
+not properly refresh when model was recompiled.  Bug report by BJ.</p>
+
+<p>Completed <a href="MML_XMML.html">XMML specification</a> and 
+implementation. Additions include unit types, implicit bounds and 
+matrix, and calculation sequence. Also modified a number of tag names 
+for consistency.</p>
+
+<p>Added explicit error message when LSFEA PDE solver is run with too 
+few grid points.  Previously this error resulted in unhelpful 
+ArrayIndexException.  New code by GR.</p>
+
+<p>SBML output now properly handles implicit equations.</p>
+
+<p>Modified jsbatch <a href="Devel_Batch.html#i">-i</a> and <a 
+href="Devel_Batch.html#o">-o</a> switches to replace at signs (@) in 
+switch arguments by spaces.  This is useful when specifying expressions 
+with united constants which require embedded spaces, e.g. "(1 sec)".</p>
+
+<p>MathML "logbase" tag is now properly handled during SBML/CellML 
+import.</p>
+
+<h2>Version 2.00 - Public release Feb 22, 2011</h2>
+
+<p>This version introduces the new JSim compiler and associated
+functionality.  See <a href="version2.html">here</a> for details.
+
+<p>JSim pop-up help is now disabled at program startup.  Use F1 to enable
+hover help,  Shift-F1 to enable fast help.</p>
+
+<p>JSim's default background color is a deeper shade of blue for version 2.
+If you prefer the old color,  select "Light blue background" from the Project
+tab Preferences menu.</p>
+
+<p>PlanWriter plugins have been discontinued in version 2.  Use the new XMML 
+output instead.</p>
+
+<p>The following bug has been noted: in the JSim GUI, SBML output text 
+in model "Debug" pane does not properly refresh when a model is 
+recompiled.</p>
+
+
+</body>
+</html>
+

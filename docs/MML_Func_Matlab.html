@@ -1,0 +1,180 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Calling Matlab Code from MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>Introduction</h2>
+
+<p> This document describes the process of calling Matlab computations 
+within MML models.  This is one of several ways to connect JSim and 
+Matlab.  For an overview of possible JSim/Matlab connection 
+strategies, see <a href="MML_Matlab.html">Connecting JSim and 
+Matlab</a>.</p>
+
+<h2>Prerequisites: </h2>
+
+<ul>
+<li><a href="MML_Matlab.html">Connecting JSim and Matlab</a>
+<li><a href="MML_Func_Intro.html">Using Functions and Procedures in 
+MML</a>
+<li>Familiarity with Matlab</li>
+<li>Familiarity with either the Java or C programming languages,
+preferably both</li>
+</ul>
+
+<h2>Contents</h2>
+
+<ul>
+<li><a href="#start">Getting Started</a></li>
+<li><a href="#command">Calling Matlab via the command line</a>
+  <ul>
+  <li><a href="#example_jdet">Example: Determinant calculated 
+via Java function and Matlab</a></li>
+  <li><a href="#example_jinv">Example: Matrix inverse calculated via 
+Java procedure and Matlab</a></li>
+  <li><a href="#example_react4">Example: 4 solute reaction network, 
+steady state calculated via Java procedure and Matlab</a>
+<img src="/jsim/pics/new.png" /></li>
+<?php jscoqli() ?>
+  </ul>
+
+</li>
+<li><a href="#api">Calling Matlab via an API</a></li>
+<li><a href="#future">Future Plans</a></li>
+</ul>
+
+<h2><a name="start">Getting Started</a></h2>
+
+<p>Although, <a href="#future">in the future</a>, model writers will be 
+able to write Matlab commands directly in MML, for the present, you must 
+connect to Matlab via <a href="MML_Func_Java.html">Java</a> or <a 
+href="MML_Func_C.html">C</a> (follow links for details on each 
+language).  Using either language you may call Matlab via the command 
+line or an available Matlab API.  Calling Matlab via the command line is 
+simple and robust, but the overhead of loading Matlab for each function 
+or procedure call may result in inadequate performance, depending upon 
+the nature of the problem at hand.  Calling Matlab via a Java or C API 
+requires more technical expertise, but is potentially much higher 
+performance, again depending upon the problem.</p>
+
+<h2><a name="command">Calling Matlab via the command line</a></h2>
+
+<p>In this scenario, an MML function or procedure creates or 
+modifies one or more Matlab .m files,  launches Matlab to run the
+.m file command which writes an appropriate output file,  then
+reads the output file back,  and returns the results to the JSim model.
+Since there is signficant overhead in starting Matlab,  this approach
+is only well suited to problems in which the number of Matlab calls 
+is limited or the computation time for each Matlab call in large in
+comparison to the Matlab load time.
+</p>
+ 
+<h3><a name="example_jdet">Example: Determinant calculated via Java 
+Function and Matlab</a></h3>
+
+<p>In this example model, a Java function runs the Matlab application to 
+calculate the determinant v of a random square matrix u.</p>
+
+<?php jsTextDown("examples/MML_Matlab/jdet.mod"); ?>
+
+<h3><a name="example_jinv">Example: Matrix inversion calculated via Java 
+Procedure and Matlab</a></h3>
+
+<p>In this example model, a Java procedure runs the Matlab application 
+to calculate the inverse v of a random square matrix u.</p>
+
+<?php jsTextDown("examples/MML_Matlab/jinv.mod"); ?>
+
+<h3><a name="example_react4">Example: 4 solute reaction network, steady 
+state calculated via Java procedure Matlab</a></h3>
+
+<p>In this example, 4 solutes (A,B,C,D) react in a mixing chamber.  JSim 
+calculates the time-series solution via standard ODEs.  JSim also passes 
+the stoichiometry matrix to Matlab, for calculation of the steady-state 
+solution(Af, Bf, Cf, Df).</p>
+
+<p> JSim model with matlab: 
+<?php jsDown("examples/MML_Matlab/react4matlab.proj"); ?>
+</p>
+
+<p> JSim model without matlab (for comparison): 
+<?php jsDown("examples/MML_Matlab/react4.proj"); ?>
+</p>
+
+
+<h2><a name="api">Calling Matlab via an API</a></h2>
+
+<p>Using an API to control to Matlab allow the model writer to
+start the Matlab engine only once, rather than multiple times.
+Depending upon the problem,  this approach can save a significant
+amount of computation time,  usually at the cost of more complex
+control code.</p>
+
+<p>Matlab provides a variety of APIs for connecting to external 
+software.  A complete description of Matlab's APIs is beyond the scope 
+of this document, but see, for example: "Mastering Matlab 7" by 
+Hanselman and Littlefield, chapter 34.  In addition, various third 
+parties have provided Matlab connectivity products.  Again, a complete 
+review of such products is beyond the scope of this document. This 
+document will demonstrate one possible API for controlling Matlab from 
+JSim: the Matlab Engine C API.</p>
+
+<h3>The Matlab Engine C API</h3>
+
+<p>This API is supported by Mathworks,  and so should be fairly stable.
+Connecting via C poses the standard portability problems mentioned 
+in <a href="MML_Func_C.html">Calling C Code From MML</a>,  including
+the inability to run in applets and the difficulties of distributing
+such models to non-expert users.</p>
+
+<h4>Example of calling Matlab Engine C API from MML</h4>
+
+<p><em>This example is under construction.</em></p>
+
+<h2><a name="future">Future plans</a></h2>
+
+<p>In the future, JSim will support writing Matlab commands directly 
+within MML functions and procedures.  When this feature is available, it 
+will make the process of calling Matlab efficiently from MML 
+considerably simpler that it is currently.  The text below is a mockup 
+of what Matlab F&P might look like.  In this example,  the Matlab 
+procedure <em>reverse()</em> reverses the elements in the 
+provided 1-dimensional array.</p>
+
+<pre>
+source procedure reverse(u@t; v@t) {
+        language = "matlab";
+        maincode={{
+            % u and t automatically generated
+            N = length(u)
+            v = u( N:(-1):1 )
+        }};
+}
+
+math main {
+        realDomain t;
+        t.min=0; t.max=4; t.delta=1;
+        real u(t) = t^2;
+        real v(t);
+        reverse(u@t, v@t);
+}
+</pre>
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

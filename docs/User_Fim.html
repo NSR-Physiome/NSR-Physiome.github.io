@@ -1,0 +1,334 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Functional Imaging Manual</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p>    This document describes how to generate functional images using the
+jsfim command line tool.</p>
+
+<p> Prerequisites: </p>
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim 
+GUI</a> (required)</li>
+<li><a href="User_Projects.html">JSim Projects</a> (required)</li>
+<li><a href="User_DataSets.html">Data Files and Project Data Sets</a> 
+(required)</li>
+<li><a href="User_Fgen.html">Using Function Generators in JSim</a> 
+(required)</li>
+<li><a href="User_Optim.html">Introduction to the JSim Optimizer</a> 
+(required)</li>
+<li>Familiarity with the <a href="/software/i4">I4</a> or J4
+Imaging Systems (recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+<ul>
+<li>      <a href="#over">Overview</a></li>
+<li>      <a href="#syntax">Command Syntax</a></li>
+<li>      <a href="#example">Example Usage</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2> <a name="over">Overview</a></h2> 
+
+<p> A JSim functional image is a data curve that maps a model parameter to
+some visual space.  For example, a cardiac bullseye image represents the
+left ventricle myocardium as a multicolored circular disk where color
+values code model parameter values for corresponding segments of the
+myocardium. jsfim thinks of a functional image as a collection of values
+corresponding to image segments and provides the mechanism to calculate
+these values using JSim models and store the results. It is up to external
+programs (such as I4 or J4) to render the resulting data files using
+appropriate geometries and color scales.</p>
+
+<p> jsfim operates by optimizing a specified set of JSim model parameters
+to match a data curve specific for each image segment.  A separate
+functional image data curve is generated for each model parameter varied
+during the optimizations. jsfim requires an input project file and one or
+more input data files.  It is designed so that a properly configured
+project file can be reused with many different data files without
+modification.</p>
+
+<p> The project file must contain a JSim model whose optimization tab is
+mostly set up. The "Parameters to Vary" must be complete.  One output
+bullseye will be generated for each of these parameters.  In the "Data to
+Match" section, the 1st line must contain valid entries in the Par/Expr
+Pwgt and Cwgt columns.  The DataSet and Curve columns are controlled by
+jsfim, and need not be preconfigured.  jsfim does not manipulate "Data to
+Match" lines beyond the 1st one.  If there is more than one model in the
+project, you must tell jsfim which model to use via the -model switch.  
+</p>
+
+<p> The required data file must contain sample curves for each image
+segment.  This file may also contain other curves, including input
+function driving data.  By default, all curves in the data file are
+treated as sample curves.  If the data file contains other curves
+(such as input drivers),  you must use the -ref switch to specify
+which curves should be used as segment samples. </p>
+
+<p> Upon completing the optimzations for each image segment, a data file
+containing functional image curves (one for each optimization parameter)
+is written to the standard output (or to a file, if -o is specified). By
+default, the output is written in <a
+href="User_DataSets.html#column">columnar data format</a>, which is
+appropriate for the J4 imaging system.  I4 users desiring <a
+href="User_DataSets.html#i4bull">I4 bullseye</a> output should consult the
+<a href="#example">example below</a>.</p>
+
+<h2>  <a name="syntax">Command Syntax</a></h2>
+<p>    The syntax of the jsfim command is as follows:</p>
+
+<pre>
+<?php readfile("jsfimUsage.txt"); ?>
+</pre>
+
+<h3>    Switch details</h3>
+
+<h4><a name="model"> -model name</a></h4>
+<p>Select the named model within the project file.  This switch is 
+required only when the project file contains multiple models.</p>
+
+<h4><a name="i"> -i v=expr</a></h4> <p> Assigns the value
+of model parameter v to an algebraic expression.</p>
+
+<h4><a name="fgen"> -fgen [file] v=curve</a></h4> 
+
+<p> Assigns the values of model parameter v to an function generator
+utilizing curve from the [file] (if present) or the primary data file
+(if not).  The curve may be specified by either name or description. 
+This flexibility is most important for TAC file curves whose
+descriptions (e.g. "lacav") are usually easier to deal with than their
+names (e.g. "R1i1"). The file name may not contain the equals sign
+(=). If v is already assigned to a function generator, that function
+generator is used.  If not, a new function generator is created.  This
+switch may be used multiple times if more than one assignment is
+desired.</p>
+
+<h4><a name="o">      -o file</a></h4>
+
+<p> Write functional image output to file.  By default, output is directed
+to the standard output, usually the terminal.</p>
+
+<h4><a name="ofit">      -ofit file</a></h4>
+
+<p> Write optimization fit data to file.  By default, this data is not 
+written anywhere.  Fit data is written in JSML format.</p>
+
+<h4><a name="log">      -log file</a></h4>
+
+<p> Save a optimization results report for each image segment in the 
+specified file.</p>
+
+<h4><a name="ofmt">      -ofmt dataformat</a></h4>
+
+<p> Write functional image output in the specified format.  The default is
+"column".  I4 users will usually prefer "i4bull". See <a
+href="User_DataSets.html">here</a> for a complete list.</p>
+
+<h4><a name="ofitfmt">      -ofitfmt dataformat</a></h4>
+
+<p> Write model fit output in the specified format.  The default is "JSML". 
+See <a href="User_DataSets.html">here</a> for a complete list. This switch is
+available in JSim releases 2.14 and above.</p>
+
+<h4><a name="oprec">      -oprec integer</a></h4>
+
+<p> Write output data to the specified number of digits of precision.
+The default is 8,  which is appropriate for single-precision numbers.</p>
+
+<h4><a name="ref">      -ref prefix</a></h4>
+
+<p> Treat only data curve names or descriptions beginning with the specified prefix
+as segment sample curves.  This is useful when the data file contains 
+other data curves.  By default,  all curves in the data file are 
+treated as segment sample curves.</p>
+
+<h4><a name="refx">      -refx name</a></h4>
+
+<p>Exclude ref curves by name.  This is useful when the data file contains 
+curves that should be excluded from modeling.  This switch is 
+available in JSim release 2.13 and above.</p>
+
+<h4><a name="oproj">      -oproj</a></h4>
+
+<p> Write the current project file state and exit.  No optimizations are
+performed, and no functional image data is written.  This project output
+can then be run interactively using the JSim GUI to diagnose various
+configuration and scientific problems.</p>
+
+<h4><a name="noabort">      -noabort</a></h4>
+<p> Do not abort entire run if optimizer fails for some segments.
+
+Functional image values will be NaN's at values in segments where the optimizer
+fails.  Without this switch,  the entire run aborts if the optimzer
+fails on any segment.</p>
+
+<h4><a name="conflim">      -conflim</a></h4>
+
+<p> Calculate parameter confidence limits after each optimization.  This
+require P*S additional model evaluations, where P is the number of
+parameters to be optimized and S in the number of image segments.</p>
+
+<h4><a name="silent">      -silent</a></h4>
+
+<p> Repress the processing messages that are normally generated
+as jsfim runs.</p>
+
+<h4><a name="mp">      -mp N</a></h4>
+
+<p> Use a maximum of N processors for parallizable run-time
+calculations.  If N is greater that the number of system processors, the
+lower number is used.  By default,  only one processor is used.</p>
+
+<h4><a name="server">      -server name</a></h4>
+
+<p> Connects to a remote computational server. By default, a local
+server is used.  This switch available in JSim version 2.07 and above.</p>
+
+<h3><a name="builddirsfx">-builddirsfx SUFFIX</a></h3> 
+<p>Specify the temporary build directory as $HOME/.jsim/workSUFFIX.  The specified build directory must NOT EXIST, or else JSim will exit with 
+an error. This switch is for expert
+use only. It was added to prevent large numbers of simultaneous JSim jobs
+getting confused about whose build directory is whose.  When using this switch,
+the user is responsible that no two JSim jobs are using the same build directory at
+the same time, lest unexpected (read bad) results occur.  This switch is available 
+in JSim 2.09 and above.</p>
+
+<h4><a name="usage">      -usage</a></h4>
+
+<p>  Print jsfim syntax synopsis and exit. </p>
+
+<h2>  <a name="example">Example Usage</a></h2>
+
+<p> Suppose the following: You wish to generate functional images for
+parameter P1 and P2 in model example.mod.  The model contains extern variable
+Cin(t) that must be driven by samples from a left atrial ROI.  The model output
+Cout will be match against sample curves for each image sector during 
+optimization.</p>
+
+<p> First, generate an appropriate jsfim project file as follows:</p>
+
+<ol>
+<li>Install <a href="../download">JSim</a> on your system, if it's 
+not already there.</p>
+<li> Start jsim, load the model and compile it;</li>
+<li> Select the model optimization tab.  Adjust overall optimizer 
+parameters (e.g. algorithm, #calls, etc.) as appropriate.  Put P1 and P2 
+in the "Parameters to Vary" section and set appropriate starting values
+and bounds for each.  In the 1st line under "Data to Match",  set 
+the Par/Expr column value to Cout and set the Pwgt and Cwgt columns
+appropriately.</li>
+<li> Save the project as fim.proj.</li>
+</ol>
+
+<p> Now use the <a href="#J4">J4</a> or <a href="#I4">I4</a> system instructions below
+to generate jsfim input files, depending on which system you're using.</p>
+
+<h3> <a name="J4">J4 Example Instructions</a> </h3>
+
+<p> The J4 system is still under development.  As currently envisioned, it will generate
+separate data files (columnar data format) for the input and segment sample curves.  
+Suppose we have an input file RestCav.cdata containing a single curve named "cav" and 
+an LV samples file RestLVMyo.cdata containing curves segment_1 through segment_20.</p>
+
+<p>Generate a functional image file (results.cdata) via the command:</p>
+
+<pre>
+      jsfim -log fim.log -fgen RestCav.cdata Cin=cav fim.proj RestLVMyo.cdata &gt; results.cdata
+</pre>
+
+<p>results.cdata now contains 2 curves "P1" and "P2", each with 20 data points.
+The results may be examined in a editor or other data analysis tools.  The means by
+which the J4 system will display this data is still under development.</p>
+
+
+<h3> <a name="I4">I4 Example Instructions</a> </h3>
+
+<p> Let's assume you have a dynamic cardiac image file "heart" (I4 image format) and
+associated ROI file "cardio.roi" containing ROIs lacav (left atrial cavity), lv (left
+ventricle myocardium) and div (lv radial divider) to generate jsfim data files. Proceed
+as follows.</p>
+
+<ol>
+<li>Install I4 on your system, if it's not already there.</li>
+
+<li> Use I4 to generate appropriate jsfim input data files:
+<pre>
+      // generate sample lacav
+      //   the input curve is named "R1i1" with description "lacav"
+      i4samp -tacin heart cardio.roi lacav &gt; lacav.tac
+
+      // generate samples for each ring/sector
+      //   the sample curves are named "R1s*" with descriptions "rs*_*"
+      i4samp -bull -tac heart cardio.roi lv div &gt; lv.tac
+
+      // you may wish to combine above tac files
+      cattac -a lv.tac lacav.tac &gt; combined.tac
+</pre>
+</li>
+
+<li>    Run jsfim to generate bullseye file results.bul one of two ways:
+<pre>
+      // this command uses two input files (lacav.tac and lv.tac)
+      jsfim -log fim.log -fgen lacav.tac Cin=R1i1 -ofmt i4bull fim.proj lv.tac &gt; results.bul
+
+      // this command uses the combined file (combined.tac) instead
+      //  the -ref switch is required since data file contains both the input and sample curves
+      jsfim -log fim.log -fgen Cin=R1i1 -ref rs -ofmt i4bull fim.proj combined.tac &gt;  results.bul
+
+      // Note that the -fgen curve may be specified in the above commands
+      // as either "R1i1" or "lacav"
+</li>
+
+
+<li>    Examine results in i4view:
+<pre>
+      i4view results.bul
+</pre>
+</li>
+</ol>
+
+
+
+<h4><a name="I4spec">I4 Input Data File Specifications</a></h4>
+
+<p>I4 users usually need not concern themselves with details since "i4samp -bull -tac" 
+automatically
+generates a JSim readable TAC file that conforms to these specifications.  For those
+interested in the technical details, the jsfim input dataset must contain the following 
+items:</p>
+
+<ul>
+<li>z.ct : 0D curve containing the # of rings (Z planes) in the 
+bullseye;</li>
+<li>z.offset : 0D curve containing the Z offset from 0 of the 1st
+ring;</li>
+<li>s.ct : 0D curve containing the # of sectors in the bullseye;</li>
+<li>rsR_S where R varies from 1 to z.ct and S varies from 1 to s.ct :
+these contain reference data to match for the optimizer for each sector.
+These curves are 1D in most cases,  although this is not strictly 
+necessary.</li>
+</ul>
+
+<p>    Note that JSim's TAC format data reader generates z.ct, z.offset and
+s.ct from a FIM_FORMAT clause in the auxiliary data section.  The 
+FIM_FORMAT clause is automatically generated via "i4samp -bul -tac".</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

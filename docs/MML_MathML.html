@@ -1,0 +1,149 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>MathML in JSim</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p> MathML is a W3C standard specification for describing mathematics
+content and presentation markup.  As well as being useful in itself,
+MathML is used as part of the <a href="MML_CellML.html">CellML</a> and <a
+href="MML_SBML.html">SBML</a> model specifications.  This document
+discusses MathML export from JSim.  JSim
+currently supports import of MathML only when it is embedded in CellML or
+SBML. </p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+<li>Familiarity with <a href="http://www.w3c.org/Math">MathML</a>
+(recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#basic">MathML Basics</a></li>
+<li><a href="#scope">JSim MathML Scope and Usage</a></li>
+<li><a href="#graphic">Creating Graphics from JSim MathML Output</a></li>
+<li><a href="#details">Implementation Details</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="basic">MathML Basics</a></h2>
+
+<p>    MathML documents may specify either content or presentation markup.
+Content markup describes the underlying mathematic structure of a
+mathematical expression.  Presentation markup describes the graphical
+layout of mathematical symbols.  For example, the underlying content 
+"A multiplied by B" might be presented in any of the 
+following manners:</p>
+
+<pre>
+      A * B
+      A x B
+      A . B
+      AB
+      (A)(B)
+</pre>
+
+<p> Content markup is most often used mathematical processing packages 
+or documents, such as CellML and SBML.  Presentation markup is used by 
+graphics packages to produce publication quality equation graphics.</p>
+
+<p> A complete description of MathML is beyond the scope of this 
+document.  Those interested in the reasoning behind MathML design, and 
+specifics of the implementation should consult the <a 
+href="http://www.w3.org/Math">MathML home page</a></p>
+
+<h2>  <a name="scope">JSim MathML Scope and Usage</a></h2>
+
+<p> JSim generates MathML content markup for MML models as an XHTML 
+document with one equation per paragraph.  The equations are in the form 
+of MathML content markup.  This document will be rendered properly in 
+MathML-enabled browsers after the addition of an appropriate stylesheet 
+(see <a href="#graphic">below</a> ).  Most MML equations translate to 
+MathML properly.  There are certain limitations to models contains 
+events, functions and procedures.  For further information, see <a 
+href="#details">Implementaton Details</a>.</p>
+
+<p> You can export MathML from either the <a href="User_Ref.html">JSim 
+GUI</a> or <a href="Devel_Batch.html">jsbatch</a> .  In the JSim GUI, 
+select "View MathML" from the View menu in the model's Debug tab.  In 
+jsbatch, use the -mathml switch:</p>
+
+<pre>
+      jsbatch -f test.mod -omathml &gt; test.xml
+</pre>
+
+<p> Both options above require successful model compilation.</p>
+
+<p> There is currently no JSim options to tailor MathML output.  Any 
+needed output editing must be done in external packages, such as text, 
+XML or MathML editors.</p>
+
+<p> Note that generated models compiled with "unit correction on;" will 
+include conversion factors in the MathML output.  If you don't want to 
+include such factors, modify the MML to "unit correction off;" and 
+recompile.  We realize this approach is rather awkward, and will work 
+out a simpler methodology in the future.</p>
+
+<h2>  <a name="graphic">Creating Graphics from JSim MathML Output</a></h2>
+
+<p> The generated .xml output requires a style sheet for proper graphic 
+rendering.  A style sheet provides information to a MathML-enabled 
+browser on how to render MathML. See the <a 
+href="http://www.w3.org/Math/XSL/Overview-tech.html">MathML XSL 
+Overview</a> for a specific example.</p>
+
+<p>    Example usage: Download mathml.xsl and related files from the above
+link, place them in the same directory as the output .xml file,  and 
+insert the following as the 2nd line of the .xml:</p>
+
+<pre>
+      &lt;?xml-stylesheet type="text/xsl" href="mathml.xsl"?&gt;
+</pre>
+
+<p>    The .xml should now render passable graphics in an MathML-enabled 
+browser.</p>
+
+<h2>  <a name="details">Implementation Details</a></h2>
+
+<p>    This section describes details and quirks of the MML to MathML
+conversion process.</p>
+
+<p>    MML "when" clauses are translated to MathML "condition" tags.</p>
+
+<p>    MML <a href="MML_Events.html">events</a> are not translated to MathML.  These
+constructs are procedural (rather than mathematical) and, as such, have
+no obvious counterpart in MathML.</p>
+
+<p>    Code definition blocks and library references in MML <a href="MML_Func_Intro.html">functions and
+procedures</a> are not translated to MathML (see events
+above).  However, calls to functions, as part of an mathematical
+equation, are translated.</p>
+
+<p>The integral operator "integral(t=t.min to t.max, u)"
+is not yet translated properly to MathML.  However, the form
+"integral(u@t)" is.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

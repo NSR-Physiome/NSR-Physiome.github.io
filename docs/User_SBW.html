@@ -1,0 +1,176 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using JSim with the Systems Biology Workbench (SBW)</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>Introduction</h2>
+
+<p><a href="http://sbw.sourceforge.net/">SBW</a> is a software framework 
+for passing systems biology models and data between various software 
+applications. Of special interest here is the ability of SBW to pass 
+SBML models created in various application (e.g. Copasi, CellDesigner, 
+QTAntimony) directly into JSim. The converse ability to pass JSim models 
+to other applications via SBW, along with other JSim/SBW functionality, 
+is under development, but not yet available.</p>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#start">Getting Started</a></li>
+<li><a href="#apps">SBW Source Applications So Far Tested</a></li>
+<li><a href="#module">Connecting SBW to a running JSim application</a></li>
+<li><a href="#target">Understanding JSim's SBW target model</a></li>
+<li><a href="#limits">Limitations</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="start">Getting Started</a></h2>
+
+<p>Here's an overview of how things work.  The user loads or develops a 
+model in some source application (e.g. Copasi).  The user then directs 
+the source application (typically via an SBW menu) to send an SBML 
+version of its model to JSim, or some other application.  The source 
+application generates SBML code, passes that code to the SBW broker (a 
+process running in the background), which passes the code onto JSim 
+(starting a new JSim process, if necessary).  JSim reads the SBML code 
+and translates it into MML.  The user can then use JSim to run and 
+explore the model.</p>
+
+<ol>
+
+<li><a href="http://sbw.sourceforge.net/installer.html">Install SBW</a> 
+on your computer (Windows, MacIntosh and Linux are supported).</li>
+
+<li>Start the SBW broker. The broker runs in the background passing
+messages between SBW-enabled applications.  Only one instance can be
+running for a given user on a given computer.</li>
+
+<li>Register JSim with the broker.  This may be done via the Project tab 
+SBW menu, or by typing <pre>jsim -sbwregister</pre> at the command 
+prompt. Registration information is stored in the .sbw sub-directory of 
+your user home directory, and normally needs to be done only once.  (You 
+should also reregister whenever you install a new version of JSim.)
+
+<li>Download and install JSim and one or more of the <a 
+href="#apps">tested source applications below</a> and register these with 
+the broker.  Follow instruction as provided by each application's 
+documentation.  Often this can be done by typing the command
+<pre>ApplicationName -sbwregister</li>
+
+<li>Start one of the tested source applications, and create or load a 
+model into it.  Use the application's SBW menu to send the model to JSim.  
+After a moment or two, a JSim project window should appear containing the 
+model code.  For hints on operating the various applications, see 
+the section below.</li>
+
+</ol>
+
+<h2><a name="apps">SBW Source Applications So Far Tested</a></h2>
+
+<p><a 
+href="http://jdesigner.sourceforge.net/Site/Biomodels_Importer.html"> 
+Biomodels Importer</a>
+: Tested sucessfully on Windows.</p>
+
+<p><a href="http://www.celldesigner.org/">CellDesigner</a>: The SBW 
+menu is active when the SBW broker is running. Version 4.0.1 tested 
+successfully on Windows, MacIntosh and Linux (Redhat EL5).</p>
+
+<p><a href="http://www.copasi.org">Copasi</a>: The SBW sub-menu appears 
+in the Tools menu when the SBW broker is running.  Version 4.5(Build 30) 
+tested successfully on Windows, MacIntosh and Linux (Redhat EL5).</p>
+
+<p><a href="http://www.sys-bio.org/software/jarnac.htm"> Jarnac</a>
+: Tested sucessfully on Windows.</p>
+
+<p><a 
+href="http://www.sys-bio.org/sbwWiki/sbw/jarnaclite">JarnacLite</a>: 
+Tested sucessfully on Windows and MacIntosh.</p>
+
+<p><a href="http://jdesigner.sourceforge.net/Site/Jacobian_Viewer.html"> 
+JacobianViewer</a>
+: Tested sucessfully on Windows and MacIntosh.</p>
+
+<p><a href="http://www.sys-bio.org/software/jdesigner.htm"> 
+JDesigner</a>
+: Tested sucessfully on Windows.</p>
+
+<p><a href="http://antimony.sourceforge.net/">QTAntimony</a>: The SBW 
+menu appears when the SBW broker is running.  Custom (unreleased) 
+version tested successfully on Windows, MacIntosh and Linux (Redhat 
+EL5), however please note the <a href="#limits">limitations</a> below. 
+</p>
+
+<p><a 
+href="http://www.sys-bio.org/sbwWiki/sbw/roadrunner">RoadRunner</a>: 
+Tested sucessfully on Windows and MacIntosh.</p>
+
+<p><a 
+href="http://www.sys-bio.org/sbwWiki/sbw/simdriver">SimDriver</a>: 
+Tested sucessfully on MacIntosh.</p>
+
+<h2><a name="module">Connecting SBW to a running JSim application</a></h2>
+
+<p>In some circumstances you may desire to connect a running JSim 
+application to SBW, rather than to have SBW launch it.  For example, you 
+may have a complex existing project file you want to augment with an 
+SBW-provided model.  A JSim application that listens to the SBW broker is 
+called an SBW module.  When the broker launches JSim, it automatically 
+becomes an SBW module.  If you launch JSim yourself, you may make it an 
+SBW module either by selecting "Enable module" from the project tab SBW 
+menu, or by including the following switch when starting JSim from the 
+command line: <pre>-sbwmodule</pre> </p>
+
+<h2><a name="target">Understanding JSim's SBW target model</a></h2>
+
+<p>A running JSim application may consist of several project windows, 
+each of which may contain one or more model tabs.  SBW has no concept of 
+projects or multiple models, so it is up to the JSim user to control 
+which project and model tab an SBW-transmitted model will be placed.  
+This model tab is called the SBW target model.  When the SBW broker 
+starts a JSim application, a single project is created containing a 
+single model tab.  This tab is designated the SBW target model, and will 
+remain so until it is deleted, or the user selects another model tab as 
+the SBW target (via the SBW menu's "Set target model..." item). When you 
+launch JSim separate from the broker (and enable SBW module 
+functionality <a href="#module">as described above</a>) the SBW target 
+is initially not set, but may be set by the user.  If JSim receives a 
+model from SBW when the SBW target is not set, JSim creates a new model 
+tab, and designates it as the SBW target.</p>
+
+<h2><a name="limits">Limitations</a></h2>
+
+<p>JSim currently can process only SBML code that can be translated to 
+SBML level 2 version 1.  For example, QTAntimony models sometimes 
+generate initialAssignment tags, which are incompatible with level 2 
+version 1.  JSim support for more recent SBML versions is under 
+development, but not yet available.</p>
+
+<p>Several other roles that JSim might play in the SBW world are being
+considered for the future, but are not yet implemented.  These abilities
+include:</p>
+
+<ul>
+<li>the ability to send JSim models to other SBW modules;</li>
+<li>the ability to provide simulation services for other SBW 
+modules;</li>
+<li>the ability to provide data analysis and graphing abilities for other 
+SBW modules.</li>
+</ul>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

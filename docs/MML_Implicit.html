@@ -1,0 +1,287 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Implicit Equations in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+
+<p>    This document describes using implicit equations within JSim MML
+models.  Implicit equations refer to equations in which the unknown
+variable(s) are not isolated on one side of the equation, but are
+intermixed with other known and unknown variables.  
+
+<p>    Implicit equations may be linear or non-linear and may involve one or
+many unknown variables.  The number of equations must be the same as the
+number of unknowns.  If it is less, the problem will be rejected as
+underspecified.  If it is more, the problem will be rejected as
+overspecified.  (There are cases where N+1 equations exactly specify N
+unknowns, but JSim is not yet smart enough to recognize them.) Unknown
+variables may have any number of domains, however all variables that are
+solved together must have the same set of domains.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#linear1">Linear Implicit Equations in One Variable</a></li>
+<li><a href="#linearM">Linear Implicit Equations of Multiple Variables</a></li>
+<li><a href="#ode">Linear Implicit Equations in ODEs</a></li>
+<li><a href="#nonlinear">Non-linear Implicit Equations</a></li>
+<li><a href="#bound">Bounded and Unbounded Non-Linear Implicit Equations</a></li>
+<li><a href="#approx">The Approximately-Equals Relation</a></li>
+<li><a href="#controls">Non-Linear Solver Run-Time Controls</a></li>
+<li><a href="#mult">Non-linear Implicit Equations in Multiple Variables</a></li>
+<li><a href="#limit">Limitations</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="linear1">Linear Implicit Equations in One Variable</a></h2>
+<p>    Linear implicit equations of a single variable are solved internally
+by JSim via algebraic variable isolation.  JSim solves the following:</p>
+
+<?php jsTextDownApp("examples/MML_Implicit/implicit1.proj"); ?>
+
+<p>    by internally rearranging it as:
+<pre>
+      x = (y+b)/a;
+</pre>
+</p>
+
+<p>    Therefore,  model writers should not hesitate to use the implicit form
+of such equations if they express the underlying ideas more clearly.</p>
+<h2>  <a name="linearM">Linear Implicit Equations of Multiple Variables</a></h2>
+<p>    These problems are often call simultaneous equations.  For example:
+</p>
+
+<?php jsTextDownApp("examples/MML_Implicit/implicit2.proj"); ?>
+
+<p>    JSim solves such problems via a matrix inversion operation.  If the 
+equations are not independent,  the matrix will not be invertible and an
+error will be generated at model run time. </p>
+<h2>  <a name="ode">Linear Implicit Equations in ODEs</a></h2>
+<p>    Linear implicit equations can be used to define the initial conditions
+and/or state equations for ordinary differential equations (ODEs).  An
+example involving initial conditions:</p>
+
+<?php jsTextDownApp("examples/MML_Implicit/implicit3.proj"); ?>
+
+<p>    When defining ODE state equations,  the derivates of the state
+variables are treated as unknowns,  while the state variables themselves
+are treated as knowns.  Implicit equations allow the simultaneous
+calculation of several derivates:</p>
+
+<?php jsTextDownApp("examples/MML_Implicit/implicit4.proj"); ?>
+
+<h2>  <a name="nonlinear">Non-linear Implicit Equations</a></h2>
+
+<p>Consider a simple example with a single
+unknown variable (<strong>x</strong>):</p>
+
+<pre>
+      realDomain t;
+      real x(t);
+      x^3 - t = 0;
+</pre>
+
+<p> This example yields <strong>x</strong> as the cube-root to 
+<strong>t</strong>.  Easy pie.</p>
+
+<p>    However, many non-linear implicit equations are trickier than the
+above example because they may have no solution or multiple solutions.
+Consider the following system:</p>
+
+<pre>
+      realDomain t;
+      real x(t);
+      x^2 = t;
+</pre>
+
+<p>    In this system, <strong>x</strong> has two possible solutions for all positive
+<strong>t</strong> (<strong>x</strong>'s positive and negative square roots).  There is a
+unique <strong>x</strong> solution at <strong>t=0</strong>, but no real <strong>x</strong> solution for
+negative <strong>t</strong>. (Complex variables are contemplated in JSim's future,
+but are not yet available).  At run time this model would generate an
+error if <strong>t</strong> assumes any negative values.  For positive <strong>t</strong>,
+<strong>x</strong> would be assigned to either the positive or negative square root
+without guarantee as to which. In fact, some <strong>x</strong> may be positive
+while others are negative.</p>
+
+<p>    This unpredictability is often unacceptable in predictive modeling
+situations.  In the example above, for instance, the modeler may always
+desire the non-negative solution. In this particular case, it would be
+trivial to rewrite the model as:</p>
+
+<pre>
+      x = sqrt(a);  // sqrt() always returns a non-negative value
+</pre>
+
+<p>    however, non-linear equations are often too complicated for
+this approach to work.  </p>
+
+<p>    To combat the unpredicability of multiple solutions, models may be
+refined by using relational expressions to bound solution values.  
+Supported relational operators are:</p>
+
+<ul>
+<li>"<" - less than;</li>
+<li>"<=" - less than or equal to;</li>
+<li>"~=" - approximately equal to (clarification follows);</li>
+<li>">=" - greater than or equal to;</li>
+<li>">" - greater than.</li>
+</ul>
+
+<p>    In the current case, an ideal respecification for a non-negative
+solution for x would be:</p>
+<pre>
+      realDomain t;
+      real x(t);
+      x^2 = t;
+      x &gt;= 0;
+</pre>
+
+<p>    Unfortunately, JSim's current numeric solvers are not quite
+sophisticated enough to solve this problem as specified.  To understand
+why, we need to look a little more closely at JSim's underlying numeric
+solvers.</p>
+
+<h2>  <a name="bound">Bounded and Unbounded Non-Linear Implicit Equations</a></h2>
+
+<p> The JSim numeric engine distinguishes two cases of non-linear 
+implicit equations.  Bounded problems are those in which the model 
+specifies both a low bound (">" or ">=") and a high bound ("<" or "<=") 
+for each variable to be solved.  Unbounded problems are those in which 
+at least one variable to be solved is missing at least one bound.  
+Bounded problems are, by default, solved via the simplex algorithm which 
+uses the bounds explicitly to limit its search.  Unbounded problems are 
+solved via the GGopt algorithm which does not use bounds at all.  </p>
+
+<p> JSim currently does not have any algorithms to solve "semi-bounded" 
+problems such as the above square-root problem with a low bound of 
+<strong>"x>=0"</strong> but no upper bound.  As a consequence the model 
+will be solved via the GGopt algorithm, which ignores the low bound 
+during its calculations, and may possibly return a negative value.  
+Therefore, the proper formulation for square-root model in to provide an 
+upper bound in addition to a lower bound, turning it into a fully 
+bounded problem which allows simplex to work properly.  The following 
+reformulation should work properly for all positive 
+<strong>t</strong>:</p>
+
+<?php jsTextDownApp("examples/MML_Implicit/implicit5.proj"); ?>
+
+<p> JSim guarantees that any solution returned will satisfy all 
+specified relations.  Therefore, if ggopt is used in problems containing 
+bounds (either because the problem is semi-bound, or because the user 
+specifies ggopt as the bounded solver control below) the returned value 
+may or may not pass the relations tests.  If the returned value does not 
+satify the required relation, an run-time error will result.  Summary of 
+the three variants of the square-root model:</p>
+
+<ul>
+<li>unbounded:  x may return negative or positive;</li>
+<li>semi-bounded:  x will return positive,  or an error will result;</li>
+<li>bounded:  x will return positive.</li>
+</ul>
+
+<h2>  <a name="approx">The Approximately-Equals Relation</a></h2>
+
+<p> The "~=" relation is currently used by JSim to give the simplex and 
+GGopt numeric algorithms a starting value to search.  A good starting 
+guess can significantly improve the performance of these algorithms. If 
+there multiple solutions, the starting value contributes to which one is 
+selected.  This often means that the selected solution will be the one 
+closest to the starting value, <strong>but this is not always the case, 
+so modelers should not rely upon it for stable models</strong>. </p>
+
+<p> In the future, JSim may incorporate algorithms that find all 
+solutions to a set of implicit equations and use the 
+approximately-equals relation to pick the closest one.  Such algorithms 
+are not yet available, however.</p>
+
+<h2> <a name="controls">Non-Linear Solver Run-Time Controls</a></h2>
+
+<p> Like the controls that govern ODE and PDE solvers, there are 
+user-adjustable controls that affect non-linear implicit equation 
+solvers.  (There are currently no user-adjustable controls for linear 
+implicit equations).  This set of controls will be visible in the 
+"Solvers" page of JSim's model run-time tab when a model requires them. 
+The controls are detailed below:</p>
+
+<ul>
+<li><strong>unbound</strong>: This controls which algorithm is used for unbounded
+implicit equations.  Currently,  the only available algorithm is "ggopt",
+but that may change in the future;</li>
+<li><strong>bound</strong>: This controls which algorithm is used for bounded 
+implicit equations.  The default is "simplex",  but "ggopt" is also 
+available.  If ggopt is selected,  a run-time error will result if 
+the returned value does not satisfy the specified bounds.</li>
+<li><strong>errtol</strong>: This is the average root-mean-square error required
+for the equations to be considered solved.  If the solvers cannot achieve
+this level of accuracy,  a run-time error will result.  Decreasing this 
+number will increase the accuracy of the solution,  but increase the 
+probability of run-time error.  Increasing this number will decrease the
+probability of run-time error,  but decrease solution accuracy.</li>
+<li><strong>maxcalls</strong>: This number,  multiplied by the number of 
+simultaneous variables to be solved,  gives to maximum number of function
+calls to try in attempting to find a solution.</li>
+<li><strong>maxiters</strong>: This number,  multiplied by the number of 
+simultaneous variables to be solved,  gives the maximum number of 
+ggopt iterations (which ggopt is used).</li>
+<li><strong>eps</strong>: GGopt relative error.</li>
+<li><strong>istep</strong>: Simplex initial step size.</li>
+</ul>
+
+<h2>  <a name="mult">Non-linear Implicit Equations in Multiple Variables</a></h2>
+
+<p>    These problems are a straight-forward analogy of the single variable
+case.  The following example finds points of intersection between
+a simple parabola and the unit circle:</p>
+
+<pre>
+      real x, y;
+      x^2 + y^2 = 1;
+      y = x^2;
+</pre>
+
+<p>    Note that there are two solutions,  symmetric about the Y axis.</p>
+
+<p>    If we were interested in only the positive X value, we could make this
+a bound problem via:</p>
+
+<?php jsTextDownApp("examples/MML_Implicit/implicit6.proj"); ?>
+
+<p> Note that upper and lower bounds for each variable are required. 
+Otherwise, the unbounded algorithm will be used, possible generating 
+errors as explained above.</p>
+
+<h2>  <a name="limit">Limitations</a></h2>
+
+<p> JSim's current non-linear zero finders share non-reentrant native 
+simplex and ggopt methods, meaning that models using them cannot run the 
+model optimizer successfully.  Work is under way to correct this 
+situation.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

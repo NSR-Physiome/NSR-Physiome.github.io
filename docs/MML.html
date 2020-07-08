@@ -1,0 +1,116 @@
+<?php
+    // This block is the phphead.frg file from tpt.
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match('@\<h1[^\062]*\>(.*)\<\/h1\>@sU',"$contents",$matches);
+    $pagtit = preg_replace('@\<.*\>@sU','',"$matches[1]");
+    require_once("phead.html");
+    // phead.html provides $haystack, the name of the current file
+?>
+
+<h1><img src="../pics/write.gif" />Writing JSim Models</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>    The documents below provide information on how to write JSim models.  
+JSim models are written in JSim's own Mathematical Modeling
+Language(MML), an easy-to-read text-based language. MML models are most
+often expressed in terms of mathematical equations (for example, ordinary
+or partial differential equations), but formulation via discrete events
+and function calls to Java, C and Fortran are also available. MML is
+constructed so that model writers may intermix mathematics, events and
+procedural code as needed.</p>
+
+<div class="jsimleft50">
+
+<h2>Basic MML</h2>
+<ul>
+  <li><a href="MML_Intro.html">Introductory Survey</a></li>
+  <li><a href="MML_Units.html">Physical units</a></li>
+</ul>
+
+<h2>Specific MML Topics</h2>
+<ul>
+  <li><a href="MML_Ref.html#algebra">Built-in constants, operators & functions</a></li>
+  <li><a href="MML_ODE.html">Ordinary differential equations</a></li>
+  <li><a href="MML_PDE.html">Partial differential equations (PDEs)</a></li>
+  <li><a href="MML_Integrals.html">Integrals & Summations</a></li>
+  <li><a href="MML_Implicit.html">Implicit Equations</a></li>
+  <li><a href="MML_Delay.html">Delay Lines</a>
+</li>
+  <li><a href="MML_VarFunc.html">Variable Functions</a></li>
+  <li><a href="MML_Events.html">Events (discrete state changes)</a></li>
+  <li><a href="MML_Func_Intro.html">Functions & Procedures (embedded 
+Java, C, Fortran, Matlab)</a></li>
+  <li><a href="MML_Templates.html">Templates (reusable model components)</a>
+    <ul>
+    <li><a href="MML_MFAX_Intro.html">MFAX templates</a></li>
+    <li><a href="MML_XSim_Intro.html">XSIM templates</a></li>
+    </ul>
+  </li>
+  <li><a href="MML_Topics.html">Miscellaneous short topics</a></li>
+</ul>
+
+<h2>Example Models</h2>
+<ul>
+  <li><a href="../models/examples">MML Examples Archive</a></li>
+</ul>
+
+<h2><a href="/Models/modeling_info.html">JSim Model Standards</a></h2>
+<ul>
+<li><a href="/Models/modelStandards.html">Modeling Standards checklists </a>  </li>
+<li><a href="/Models/modelDB/JSim_modelguidelines.txt">JSim model template</a> </li>
+<li><a href="/Models/WebModelPub_Guide.pdf">Guidelines for submitting a model to physiome.org (pdf) </a>  </li>
+<li><a href="/jsim/models/webmodel/NSR/Compliant_bronchioloe_compliant_alveolus/">Example Model Web page on physiome.org</a> </li>
+</ul>
+</div>
+
+<div class="jsimright50">
+
+<h2>Reference guides</h2>
+<ul>
+  <li><a href="MML_Ref.html">MML Reference Manual</a></li>
+  <li><a href="MML_MFAX_Ref.html">MFAX Reference Manual</a></li>
+  <li><a href="MML_Debug.html">Debugging guide</a></li>
+  <li><a href="glossary.html">Glossary</a></li>
+</ul>
+
+<h2>Connecting JSim to other software products</h2>
+<ul>
+<li><a href="MML_Antimony.html">Antimony</a></li>
+<li><a href="MML_Matlab.html">Matlab</a> <img src="../pics/new.png" /></li>
+<li><a href="MML_SBML.html">SBML</a></li>
+<li><a href="MML_CellML.html">CellML</a></li>
+<li><a href="MML_MathML.html">MathML</a></li>
+<li><a href="MML_XSim_Intro.html">XSIM</a></li>
+<li><a href="MML_XMML.html">XMML</a></li>
+</ul>
+
+<h2>RTML</h2>
+<p> RTML is a graphic description language used to customize the 
+appearance of models in the JSim GUI</p>
+<ul>
+<li><a href="MML_RTML_Intro.html">Introduction</a>
+<li><a href="MML_RTML_Ref.html">Reference Manual</a></li>
+</ul>
+
+<p><a href="../index.html">JSim Home Page</a></p>
+
+</div>
+
+<div class="jsimleft100">
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>
+
+</div>
+

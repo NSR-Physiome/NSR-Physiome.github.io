@@ -1,0 +1,575 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using Function Generators in JSim</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p> Function generators allow JSim models to be driven by test signals 
+or experimental reference data.</p>
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a>(required)</li>
+<li><a href="User_DataSets.html">Data Files and Project Data Sets</a> 
+(recommended)</li>
+</ul>
+
+<p> Contents: </p>
+
+<ul>
+<li><a href="#simple">Adding a function generator to a model</a></li>
+<li><a href="#preview">Function generator preview</a></li>
+<li><a href="#advanced">Advanced Usage</a></li>
+<li><a href="#pulses">Pulses and Wave Trains</a></li>
+<ul>
+<li><a href="#pulse1">Pulse1</a></li>
+<li><a href="#pulse2">Pulse2</a></li>
+<li><a href="#pulse3">Pulse3</a></li>
+<li><a href="#extended">ExtendedPulse3</a></li>
+<li><a href="#ramp">Ramp</a></li>
+<li><a href="#square">SquareWaveTrain</a></li>
+<li><a href="#sawtooth">SawtoothTrain</a></li>
+<li><a href="#sine">SineTrain</a></li>
+</ul>
+<li><a href="#common">Probability Density Functions (PDFs)</a></li>
+<ul>
+<li><a href="#expon">Exponential</a></li>
+<li><a href="#gauss">Gaussian</a></li>
+<li><a href="#lagnormal">LagNormal</a></li>
+<li><a href="#longtail">LongTail</a></li>
+<li><a href="#gamma">GammaVar</a></li>
+<li><a href="#poisson">Poisson</a></li>
+<li><a href="#random">RandomWalk</a></li>
+</ul>
+<li><a href="#data">DataCurve</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="simple">Adding a Function Generator to a model</a></h2>
+
+<p>Here is a simple example of a JSim model to which we will add a Function 
+Generator:</p>
+
+<?php jsTextDownApp("examples/User/fgen1.proj"); ?>
+
+<p>First select the model tab.  The main "Run Time" page will appear which shows all 
+input and output variables.  The variable Cin is eligible for function generator 
+assignment, as denoted by the icon to the right of the assigment field.  Click on this 
+icon.  A dialog will open allowing you create a function generator and assign it to 
+Cin.  Modify the default name (fgen_1) if you desire, then press OK.  The new function 
+generator page will appear.  Modify parameters of the function as you desire.  
+Clicking on the "Function" control, whose default value is "Pulse1", will show a 
+complete list of available functions. Functions and parameters are described in the 
+remainder of this document. After you have set the function generator to a desirable 
+wave-shape, return to the main run-time page by using the "Pages" menu, or the "Next" 
+button.  You will note that Cin assignment box now contains the name of the new 
+function generator.  From now on, clicking on the icon next to Cin will take you 
+directly to the associated function generator page.</p>
+
+<p><strong>Completed version:</strong> If you follow the above instructions correctly, the result will 
+be similar to the model below:</p>
+
+<?php jsDownApp("examples/User/fgen2.proj"); ?>
+
+
+<h2><a name="preview"> Function Generator Preview </a></h2>
+
+<p>In the JSim GUI,  a preview graph is provided with JSim <em>best
+guess</em> as to the shape of the curve to be generated at run-time.
+This allows the user to get quick feedback from changes in parameter
+settings without having to wait for a full model run.  However, the 
+proper domain range is only available to the preview graph if the
+domain minimum and maximum values are model input variables,  that
+is, they are neither <a href="MML_Topics.html#public">private</a> nor
+calculated from other variables.  If the domain minimum or maximum is not 
+available to the preview graph,  the graph makes a arbitrary choice
+for them,  and so the graph may differ in shape from that calculated
+during a subsequent model run.</p>
+
+
+
+<h2><a name="advanced"> Advanced Usage </a></h2>
+
+<p>    Function are described with reference to the time domain, but
+they can be used for any independent variable domain (length, voltage,
+etc.) Example:</p>
+
+<ul>
+<li><a href="/jsim/models/webmodel/NSR/Diffusion1DpdeConsumption">WebModel
+0364</a>: Uses function generators over spatial domain x to provide initial
+concentrations,  and to generate a spatially dependent consumption profile G(x).</li>
+</ul>
+
+<p>    Each function generator can also generate a train of the same
+function--i.e.,the function can be repeated after some specified interval
+as many times as necessary.</p>
+
+<p>    You may create any number of function generators in a model.  If you
+have more than one when you click on the function generator icon for an
+unassigned variable, you will be asked if you wish to reuse one of the
+existing generators, or create a new one.</p>
+
+<p>    Input variables may be assigned to any algebraic expression involving
+function generators, e.g. "fgen_1", "2*(fgen_1-3)", "fgen_1+fgen_2". This
+allows you to build very complex input functions, should you so desire.
+You may create additional function generators for this purpose with the
+"New function generator" item in the "Pages" menu.  If there are multiple
+domains in your model (e.g. time and length), you will need to make sure
+function generator "Domain" control is set appropriately.</p>
+
+<h2>Function generators available under JSim</h2>
+
+<h3><a name="pulses">  Pulses and Wave Trains</a>:</h3>
+
+<ul>
+<li><a href="#pulse1">Pulse 1</a> Generate a single pulse </li>
+<li><a href="#pulse2">Pulse 2</a> Generate two different pulses </li>
+<li><a href="#pulse3">Pulse 3</a> Generate three different pulses </li>
+<li><a href="#ramp">Ramp</a> Generate a power function ramp </li>
+<li><a href="#squareWave">Square Wave Train</a> Generate a square wave train</li>
+<li><a href="#sawtooth">Sawtooth Wave Train</a> Generate a sawtooth wave train</li>
+<li><a href="#sine">Sine Wave Train</a> Generate a sine wave train</li>
+
+</ul>
+<p>  A variety of Probability Density Functions (PDFs) are available in the JSim
+function generator. They can be used to generate a train of such
+functions. All are unimodal (with the exception of Longtail). The PDF provides
+the shape of the function which is then scaled to be an appropriate model
+input.
+<ul>
+<li><a href="#common">Common Parameters for PDF's</a> Common Parameter's for PDF's</li>
+<li><a href="#exponential">Exponential</a> Generate a decaying exponential PDF</li>
+<li><a href="#gaussian">Gaussian</a> Generate a Gaussian PDF</li>
+<li><a href="#lagnormal">LagNormal</a> Generate a Lagged Normal PDF (similar to
+Gaussian)</li>
+<li><a href="#longtail">Longtail</a> Generate a long tailed PDF (unimodal or bimodal)</li>
+<li><a href="#gammavar">GammaVar</a> Generate a gamma variate PDF</li>
+<li><a href="#poisson">Poisson</a> Generate a Poisson-like PDF</li>
+<li><a href="#randomwalk">RandomWalk</a> Generate a first traversal of a random walk
+PDF</li>
+
+</ul>
+</p>
+<h3>  <a name="pulse1">Pulse 1</a></h3>
+<p>    This function is a single pulse or a train of pulses.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>startTime: The start time, when the function has the value
+"amplitude+offset." </li>
+<li>duration: Duration of the pulse.</li>
+<li>amplitude: Value added to offset during the duration of the pulse.</li>
+<li>offset: The offset or base value for the function for all time.</li>
+<li>timeToRepeat: If timeToRepeat is greater than zero, the signal
+generated from time equals 0 to timeToRepeat is repeated every timeToRepeat 
+interval. Hence, this function can be used to generate a train of
+pulses.</li>
+
+</ul>
+<h3>  <a name="pulse2">Pulse 2</a></h3>
+<p>    This function is a double pulse or mixed pulse train. It is similar to
+Pulse1 with two sets of parameters, but only one offset parameter.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>p1Start: The start time of the first pulse. The function has the value
+"p1Amplitude+offset+contribution from the second pulse." </li>
+<li>p1Duration: Duration of the first pulse.</li>
+<li>p1Amplitude: Value added to p1offset during the duration of the pulse.</li>
+<li>offset: The offset or base value for the function for all time.</li>
+<li>p1TimeToRepeat: If p1TimeToRepeat is greater than zero, the first
+pulse signal generated from time equals 0 to p1TimeToRepeat is repeated every 
+p1TimeToRepeat interval. Hence, this function can be used to generate a train 
+of mixed pulses.</li>
+<br>
+<li>p2Start: The start time of the second pulse, when the function
+has the value "p2Amplitude+contribution of the first pulse." </li>
+<li>p2Duration: Duration of the second pulse.</li>
+<li>p2Amplitude: Value added to the function during the duration of the 
+second pulse.</li>
+<li>p2TimeToRepeat: If p2TimeToRepeat is greater than zero, the second
+pulse generated during time equals 0 to p2TimeToRepeat is repeated every 
+p2TimeToRepeat interval. Hence, this function can be used to generate a 
+train of mixed pulses. </li>
+
+</ul>
+<h3>  <a name="pulse3">Pulse 3</a></h3>
+<p>    This function is a triple pulse or mixed pulse train. It is similar to
+Pulse2, but has three sets of parameters, but only one offset parameter.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>p1Start: The start time of the first pulse. The function has the value
+"p1Amplitude+offset+contribution from the second and third pulses." </li>
+<li>p1Duration: Duration of the first pulse.</li>
+<li>p1Amplitude: Value added to p1offset during the duration of the pulse.</li>
+<li>offset: The offset or base value for the function for all time.</li>
+<li>p1TimeToRepeat: If p1TimeToRepeat is greater than zero, the first
+pulse signal generated from time equals 0 to p1TimeToRepeat is repeated every 
+p1TimeToRepeat interval. Hence, this function can be used to generate a train 
+of mixed pulses.</li>
+<br>
+<li>p2Start: The start time of the second pulse, when the function
+has the value "p2Amplitude+contribution of the first and third pulses." </li>
+<li>p2Duration: Duration of the second pulse.</li>
+<li>p2Amplitude: Value added to the function during the duration of the 
+second pulse.</li>
+<li>p2TimeToRepeat: If p2TimeToRepeat is greater than zero, the second
+pulse generated during time equals 0 to p2TimeToRepeat is repeated every 
+p2TimeToRepeat interval. Hence, this function can be used to generate a 
+train of mixed pulses. </li>
+<br>
+<li>p3Start: The start time of the third pulse, when the function
+has the value "p3Amplitude+contribution of the first and second pulses." </li>
+<li>p3Duration: Duration of the third pulse.</li>
+<li>p3Amplitude: Value added to the function during the duration of the 
+third pulse.</li>
+<li>p3TimeToRepeat: If p3TimeToRepeat is greater than zero, the third
+pulse generated during time equals 0 to p3TimeToRepeat is repeated every 
+p3TimeToRepeat interval. Hence, this function can be used to generate a 
+train of mixed pulses. </li>
+
+</ul>
+
+<h3>  <a name="extended">Extended Pulse 3</a></h3>
+
+<p>    This function is used to generate up to three different pulses in a
+set. When the set is repeated, the amplitude of each pulse can be
+increased or decreased. The amplitudes of the pulses in each set depend 
+on all the parameters. </p>
+
+<h4>    Parameters:</h4>
+<ul>
+<li> offset: The constant offset of this function. The value of the 
+function is "offset + a function( of the other specified parameters)."
+</li>
+<li> timeToRepeat: How often to repeat a sequence of three pulses. The
+duration and start time of each pulse relative to the timeToRepeat does not change .</li>
+<br>
+<li> p1Start: The start time of pulse 1.</li>
+<li> p1Amplitude: The initial amplitude of pulse 1.</li>
+<li> p1Duration: The duration of pulse 1.</li>
+<li> p1LoopCnt: Number of times pulse 1 amplitude will be incremented or
+decremented. A value of 0 is treated as 1.</li>
+<li> p1AmpIncr: Amplitude Increment or decrement for pulse 1.</li>
+<br>
+<li> p2Start: The start time of pulse 2.</li>
+<li> p2Amplitude: The initial amplitude of pulse 2.</li>
+<li> p2Duration: The duration of pulse 2.</li>
+<li> p2LoopCnt: Number of times pulse 2 amplitude will be incremented or
+decremented. A value of 0 is treated as 1. A value of p2LoopCnt>1 
+causes the amplitude of the first pulse to be repeated p2LoopCnt times in the 
+first p2LoopCnt sets before it is incremented.</li>
+<li> p2AmpIncr: Amplitude Increment or decrement for pulse 2.</li>
+<br>
+<li> p3Start: The start time of pulse 3.</li>
+<li> p3Amplitude: The initial amplitude of pulse 3.</li>
+<li> p3Duration: The duration of pulse 3.</li>
+<li> p3LoopCount: Number of times pulse 3 amplitude will be incremented or
+decremented. A value of 0 is treated as 1. A value of p3LoopCount>1 causes
+the amplitude of the second pulse to be repeated p3LoopCnt times before
+being incremented, and the amplitude of the first pulse to be repeated
+p3LoopCnt multiplied by p2LoopCnt times before being incremented.</li>
+<li> p3AmpIncr: Amplitude Increment or decrement for pulse 3.</li> 
+</ul>
+
+<h3>  <a name="ramp">Ramp</a></h3>
+<h4>    This function is a power function ramp of the form:</h4>
+<p>        Value=offset+amplitude*[(startTime-t)/(tdur)]^exponent</p>
+<p>    when t is greater than startTime and less than or equal to duration.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>startTime: Start time of the ramp.</li>
+<li>duration: Duration of the ramp.</li>
+<li>amplitude: Height of ramp when exponent greater than or equal to zero.
+Amplitude may be negative.</li>
+<li>offset: The offset or base value for the function during the duration
+off the ramp (similar to usage in square wave, but different from usage in
+Pulse1, Pulse2, and Pulse3.</li>
+<li>exponent: The exponent for the power function of the ramp. Negative
+exponents can cause large magnitudes at beginning of ramp. Value of zero
+resembles Pulse1 but treatment off offset is different.</li>
+<li>timeToRepeat: If timeToRepeat is greater than zero, the signal
+generated from time equals 0 to timeToRepeat is repeated every timeToRepeat 
+interval. Hence, this function can be used to generate a train of ramps.</li>
+
+</ul>
+<h3>  <a name="square">Square Wave Train</a></h3>
+<p>    This function is generates a train of square waves and can be used to
+generate a single pulse. It's usage overlaps with Pulse1, but has some
+significant differences as noted below.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>startTime: The start time, when the Square Wave train begins. </li>
+<li>duration: Duration of the square wave train.</li>
+<li>amplitude: Value = amplitude+offset during duration when square wave
+train is "on"</li>
+<li>offset: The offset or base value for the function during duration
+when square wave train is in "off" mode. This is different from the offset
+in Pulse1, Pulse2, and Pulse3 which is present for all time.</li>
+<li>shapeFactor: 1 for "on" for entire period (value=amplitude+offset), 
+0 for "off" for entire period (value=offset), 0.25 "on" for the first quarter 
+of the period followed by "off" for the last three quarters of the period. Any
+value less the zero will be defaulted to zero. Any value greater than 1 will
+be defaulted to 1.</li>
+<li>phase: fraction of period to shift wave train. All integer values
+have same effect (specifically, no effect). </li>
+<li>timeToRepeat: If timeToRepeat is greater than zero, the signal
+generated from time equals 0 to timeToRepeat is repeated every timeToRepeat 
+interval. Hence, this function can be used to generate a train of square wave
+trains.</li>
+
+</ul>
+<h3>  <a name="sawtooth">Sawtooth Wave Train</a></h3>
+<p>    This function is generates a train of sawtooths. It's parameters are
+the same as the <a href="#squareWave">Square Wave</a> , where shapeFactor controls the fraction of
+the period the sawtooth is rising and falling.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>startTime: The start time, when the sawtooth train begins. </li>
+<li>duration: Duration of the sawtooth train.</li>
+<li>amplitude: Value = amplitude*(startTime-t)/tdur +offset during 
+period when sawtooth is rising.</li>
+<li>offset: The offset or base value for the function during duration of
+sawtooth.</li>
+<li>shapeFactor: 1 for sawtooth always rising over entire period, 
+0 for always falling over entire period, 0.25 sawtooth rises in maximum
+value in 1st quarter of period, falls to offset value over last three quarters
+of period. A value less the zero will be defaulted to zero. Any value greater 
+than 1 will be defaulted to 1.</li>
+<li>phase: fraction of period to shift wave train. All integer values
+have same effect (specifically, no effect). </li>
+<li>timeToRepeat: If timeToRepeat is greater than zero, the signal
+generated from time equals 0 to timeToRepeat is repeated every timeToRepeat 
+interval. Hence, this function can be used to generate a train of sawtooth wave
+trains.</li>
+
+</ul>
+<h3>  <a name="sine">Sine Wave Train</a></h3>
+<p>    This function generates a train of sine waves. It has all but one of
+the parameters used for the square and sawtooth wave trains (doesn't use
+ShapeFactor.)</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>startTime: The start time, when the sine train begins. </li>
+<li>duration: Duration of the sine train.</li>
+<li>amplitude: Amplitude of the sine wave.</li>
+<li>offset: The offset or base value for the function during duration</li>
+<li>phase: fraction of period to shift sine wave. All integer values
+have same effect (specifically, no effect). A value of -0.25 makes this a
+cosine wave.</li>
+<li>period: Period of 1 cycle of the sine wave.</li>
+<li>timeToRepeat: If timeToRepeat is greater than zero, the signal
+generated from time equals 0 to timeToRepeat is repeated every timeToRepeat 
+interval. Hence, this function can be used to generate a train of sine wave
+trains.</li>
+
+</ul>
+
+<h3>  <a name="common">Common Parameters for PDF's</a></h3>
+<p>    There are several parameters that are used for most of the PDF's.
+They include area, tMean, rd, skewn, frPeak, and timeToRepeat. 
+<ul>
+<li>area: The area of the PDF function. If less than or equal to zero, it
+is defaulted to a value of 1. Formally it is the integral from start time
+(usually take to be zero) to infinity
+of PDF(t)*dt where t is the independent variable and PDF(t) is a function of
+the independent variable. area is used to scale the PDF so it is an
+appropriate model input.</li>
+<li>tMean: The mean transit time of the PDF relative to the start time,
+t.min, where t is the independent realDomain variable. It is approximately the
+difference between the start time and when the peak of the PDF occurs.
+Formally, it is the integral from start time to infinity of PDF(t)<em>t</em>dt/area 
+where t is the independent variable and PDF(t) is the PDF as a function of 
+the independent variable</li>
+<li>rd: Relative dispersion of the PDF is the standard deviation of the 
+PDF divided by the mean transit time. Formally, it is the square root of 
+the integral from the start time (usually taken to be zero) to infinity 
+(usually taken to be some large finite time) of PDF(t)<em>(t-tMean)</em>(t-tMean)*dt, 
+all of which is divided by tMean.</li>
+<li>skewn: The skewness of the PDF.</li>
+<li>frPeak: fraction of the peak or maximum value of a PDF after which the
+PDF is truncated (set to zero). Normally defaulted to 1.0E-06. It causes 
+truncation only after the peak. Usage is different for the Longtail
+PDF.</li>
+<li>timeToRepeat: If not zero, the curve from time=0 to timeToRepeat is
+repeated every timeToRepeat interval. This parameter is used to generate a 
+train of PDF pulses.</li>
+
+</ul>
+</p>
+
+<h3>  <a name="expon">Exponential</a></h3>
+<p>    This function generates an exponential PDF which abruptly rises from zero to its
+maximum value, then decays. </p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>area, tmean, rd, frPeak, timeToRepeat  see <a href="#common">Common Parameters for
+PDF's</a> .</li>
+
+</ul>
+<h3>  <a name="gauss">Gaussian</a></h3>
+<p>    This function generates a Gaussian PDF.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>area, tmean, rd, frPeak, timeToRepeat  see <a href="#common">Common Parameters for
+PDF's</a> .</li>
+
+</ul>
+<h3>  <a name="lagnormal">LagNormal</a></h3>
+<p>    This function generates a  Lagged Normal PDF. It is similar to a
+<a href="#gaussian">Gaussian</a> , but
+with positive skewness (skewness of  a <a href="#gaussian">Gaussian</a> is zero.) See model <a href="/jsim/models/webmodel/NSR/lndc/">lndc (lagged normal density curve) model<a/> for more information.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>area, tmean, rd, skewn, frPeak, timeToRepeat  see <a href="#common">Common Parameters 
+for PDF's</a> . </li>
+<li>upslope: choice of Regular or Linear (early part of rise of PDF
+replaced by linear approximation.</li>
+<li>CAVEATS: 2 < skewn <= 0. When skewn = 0, the  <a href="#gaussian">Gaussian</a> PDF will be used
+and no Linear upslope. When skewn approaches 2, the <a href="#exponential">Exponential</a>
+PDF will be
+used.</li>
+</ul>
+
+<h3>  <a name="longtail">Longtail</a></h3>
+
+<p>    This function is a combination of one of the several of the other PDFs
+to which on the down slope side of the PDF is joined either a sum of decaying
+exponentials or power law functions.
+
+<h4>    Parameters:</h4>
+<ul>
+<li> PDF: The PDFs which may be selected are
+ <a href="#lagnormal">LagNormal</a>, <a href="#gaussian">Gaussian</a>,
+<a href="#poisson">Poisson</a>, <a href="randon">Random Walk</a>,
+and <a href="#gamma">Gamma Variate</a>.
+
+<li>area, tmean, rd, skewn, frPeak, upslope, timeToRepeat: See  the individual
+PDFs for usage and limitations. skewn is not used by either
+<a href="#gaussian">Gaussian</a> or <a href="#poisson">Poisson</a>.
+upslope is only used by <a href="#lagnormal">LagNormal</a>.
+Appropriate value for frPeak is 1E-06.
+<br> <strong>SPECIAL NOTE:</strong> These parameters are used to define the PDF before
+the long tail replaces the end of the curve. The total curve, PDF+long tail,
+will be normalized to area. frPeak is also the cutoff for the long tail. </li>
+
+<li> tORfr, tJoin, frJoin: This is a choice between either setting the time,
+tJoin, where the long tail
+will join the PDF or setting the fraction of the peak, frJoin, where the long
+tail will join the PDF. For convenience, the time when frJoin occurs will be
+referred to also as tJoin in the following two formulas.</li>
+
+<li> expORpow: This is a choice between either using a sum of decaying exponentials or a
+sum of decaying power law functions.</li>
+
+<li> nexp, w1, w2, w3, w4, k1, k2, k3, and k4 are the parameters for a sum of decaying
+exponential functions which comprise the long tail.
+
+<pre>
+                           /nExp                           \
+                           |-----                          |
+                           | \                             |
+                  T(t) = a |  )   w  exp(-b k  (t - tJoin))|
+                           | /     i         i             |
+                           |-----                          |
+                           \i = 1                          / 
+for t>=tJoin</pre>
+where a and b are parameters which scale the sum of exponentials and are
+calculated so
+that the above function matches the PDF value and derivative at tJoin (or the
+time when frJoin occurs). Note that the wi's and the ki's are relative weights
+and decay rates. It is customary to list the k<sub>i</sub>'s in decreasing
+value. </li>
+
+<li> nPow, wpow1, wpow2, wpow3, wpow4, beta1, beta2, beta3, and beta4 are the
+parameters for a sum of decaying power law functions which comprise the long
+tail.
+<pre>
+                           /nPow                               \
+                           |-----                              |
+                           | \                           -beta |
+                  T(t) = a |  )   wpow  (t - tJoin + ts )     i|
+                           | /        i                i       |
+                           |-----                              |
+                           \i = 1                              / 
+for t>=tJoin</pre>
+
+where a and ts<sub>i</sub> are calculated so that the above function matches
+the PDF value and derivative at tJoin (or the time when frJoin occurs). Note that
+the wpow<sub>i</sub>'s are relative weights. </li>
+</ul>
+
+
+<h3>  <a name="gamma">GammaVar</a></h3>
+<p>    This function generates a gamma variate PDF. It has some similarities to
+the <a href="#lagnormal">LagNormal</a> PDF.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>area, tmean, rd, skewn, frPeak, timeToRepeat  see <a href="#common">Common Parameters for PDF's</a> .</li>
+<li>CAVEATS: skewn is defaulted from a minimum of 0.267 to a maximum of
+1.999 if it exceeds these limits. The actual rd used 
+is the smaller of rd and skewn/2.01.</li>
+
+</ul>
+<h3>  <a name="poisson">Poisson</a></h3>
+<p>    This function generates a Poisson-like PDF using a scaled Poisson
+equation in which lambda is allowed to vary continuously and n is fixed. This
+curve represents the transport of a tracer through n identical well mixed
+compartments.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>area, tmean, rd, frPeak, timeToRepeat  see <a href="#common">Common Parameters for
+PDF's</a> .</li>
+
+</ul>
+<h3>  <a name="random">Random Walk</a></h3>
+<p>    This function generates a first traversal of a random walk PDF.</p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>area, tmean, rd, skewn, frPeak, timeToRepeat  see <a href="#common">Common Parameters for
+PDF's</a> .</li>
+<li>CAVEAT: The actual skewness used is the maximum of skewn and 3.001*rd.</li>
+
+</ul>
+<h3>  <a name="data">Data Curve</a></h3>
+<p>    This function is an interpolation of a Data Curve. It is imported as a
+file using the Project tab, then the Add button, selecting Import data file
+(.tac +). </p>
+<h4>    Parameters:</h4>
+
+<ul>
+<li>dataSet: a choice button listing tac files.</li>
+<li>name: the curve designation in the tac file.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

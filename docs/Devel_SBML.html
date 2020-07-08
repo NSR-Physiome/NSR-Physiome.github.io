@@ -1,0 +1,574 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Obtaining dependent libraries and programs for JSim</h1>
+
+<ul>
+<li><a href="#intro">Introduction</a></li>
+<li><a href="#binaries">Extracting from binaries</a></li>
+<li><a href="#source">Building from source</a>
+<ul>
+  <li> <A HREF="#libsbml">Building libsbml</a></li>
+  <li> <A HREF="#antimony">Building sbtranslate/antimony</a></li>
+  <li> <A HREF="#sbmltomatlab">Building SBMLtoMatlab code generator</a></li>
+</ul>
+</li>
+<?php jscoqli() ?>
+</ul>
+
+<h2><a name="binaries">Introduction</a>: what is needed</h2>
+
+<p>JSim version 2.03 and above require the main libraries and java 
+bindings from <A HREF="http://sbml.org/Software/libSBML">libSBML</a>, 
+ the utility program <code>sbtranslate</code> from the <A 
+HREF="http://antimony.sf.net/">Antimony</a> package, and <a href="http://stanley-gu.github.com/sbml2matlab/">sbml2matlab</a> program (JSim v2.07 and above) for full functionality.  This document describes how to obtain what you need from 
+those packages.</p>
+
+<P>The core JSim program requires libsbml to perform its SBML/MML translations and Matlab code generation.  This means that we need:
+<UL>
+<LI><code>libsbml</code>, the core C++ library; 
+<LI><code>libsbmlj</code>, the SWIG-based wrapper Java-to-C++ library; and 
+<LI><code>libsbmlj.jar</code>, the java code that calls the SWIG library. 
+</UL>
+
+By default, libsbml distributions will statically link the libsbml 
+library and the libsbmlj library (plus any dependent XML-reading 
+libraries and compression libraries), so there is only a single library 
+file that you need (libsbmlj), plus the jar file.  If space is not an 
+issue, it is highly recommended that this be used directly.  However, if 
+space is an issue, it is possible to compile the library yourself.</p>
+
+<p>In addition, the Antimony program <code>sbtranslate</code> is used to 
+perform the Antimony/MML translation, as well as (potentially) 
+Antimony/MML/CellML translations.  This is an external executable that 
+also uses libsbml internally, as well as (potentially) the CellML API.  
+Antimony binary distributions can also be used in any form, as long as 
+'sbtranslate' works.  Again, if space is an issue, you may wish to 
+ensure that sbtranslate uses the same version of libsbml that you use 
+above.  However, if the binary distribution of libsbml is being used, 
+this will not use the libsbml library at all (as it is statically linked 
+to libsbmlj instead), so it is not even necessary to ensure that the 
+version of libsbml being used is the same!  If space is indeed an issue, 
+you'll need to compile from source, and at that point, you might as well 
+compile libsbml at the same time.</p>
+
+<h2>  <a name="binaries">Extracting from binaries</a></h2>
+
+<p>Visit the <A HREF="http://sbml.org/Software/libSBML">libSBML</a> home 
+page, and follow the 'Download libSBML' link (which currently (September 
+2011) points to the <A 
+HREF="https://sourceforge.net/projects/sbml/files/libsbml/5.0.0/">5.0.0 
+version</a>).  Assuming you are assembling binaries for distribution in 
+the 'canonical' JSIMAUXLIB folders, you can get the two files you need 
+(the libsbmlj library and the libsbmlj.jar file) from these 
+distributions: follow the instructions for installation, and copy any of 
+the libsbml.jar files (they should be functionally identical, if not 
+actually identical) into $JSIMSRC/third/server/, and 
+[libsbmlj.dll|libsbmlj.dylib|libsbmlj.so] into 
+$JSIMAUXLIB/[win32|macos|linux]/.</p>
+
+<P>Next, visit the <A HREF="http://antimony.sf.net/">Antimony</a> home 
+page, and download any binary installers you find there (there will 
+almost certainly be one for Windows, there may be one for MacOSX, and 
+there probably will not be one for linux).  Again, follow the 
+instructions provided, and find the 'sbtranslate' executable.  Copy this 
+and *all* associated libraries into $JSIMAUXLIB.  Assuming the version 
+you download works with CellML, this will include several different 
+libraries for that (including libxml2), plus the libsbml library, plus 
+(on windows) two dll's needed to work with Visual Studio-compiled 
+programs.  Assuming you downloaded the binaries for libsbml, the libsbml 
+library provided here may be the same or it may be different from the 
+other; it won't matter, as libsbmlj is completely self-contained.</p>
+
+<h2> <a name="source">Building from source</a></h2>
+
+<P>Assuming either that space is an issue, or that the above binaries do 
+not work or are not provided on your platform, you may need to build 
+things from source.  This should actually be fairly straightforward, as 
+libSBML, Antimony, and even the CellML API now use CMake as their build 
+system. </p>
+
+<p>The first step, then, is to obtain CMake for all platforms on which 
+you wish to build from source.  If it is not already available on your 
+system, you can get it from <A HREF="http://cmake.org/">cmake.org</a>.  
+libSBML requires CMake version 2.8.0 or higher. </p>
+
+<p>Next, get the libsbml source from <A 
+HREF="https://sourceforge.net/projects/sbml/files/libsbml/">https://sourceforge.net/projects/sbml/files/libsbml/</a>.  
+As of this writing, the most recent was 5.0.0.  </P>
+
+<p> Unzip the file and cd into that directory.  Now we need to change 
+the java bindings from linking to the static version to linking to the 
+dynamic version.  Edit 
+<code>[libsbml]/src/bindings/java/CMakeLists.txt</code> and search for 
+'-static'.  In 5.0.0, this line looked like: 
+<pre>
+   target_link_libraries(binding_java_lib ${LIBSBML_LIBRARY}-static )
+</pre>
+Delete the '-static' bit, so it looks like:
+<pre>
+   target_link_libraries(binding_java_lib ${LIBSBML_LIBRARY} )
+</pre>
+
+The deal here is that the name of the static libsbml library is 
+'libsbml-static.a' and the name of the dynamic libsbml library is 
+'libsbml.so' (or whatever)--deleting '-static' will make it look for the 
+dynamic one.  This will save space, but will require that you always 
+update both libsbml and sbtranslate at the same time in the future</P>
+
+<p>Next, we need a few programs and libraries: SWIG, and an XML 
+parser--I went with 'expat'; other options are 'libxml' and 'xerces'.  
+As of this writing, a bug in the CellML API makes using CellML and 
+libsbml-with-libxml together impossible, so if a goal is to use 
+sbtranslate's CellML translation capabilities, you should use expat or 
+xerces. </p>
+
+<p>SWIG came pre-installed on most systems on which I tested, but 
+version 1.3.31 (which came on baggins) had a bug in it that prevented 
+compiling ('buffer overflow error'); the more recent 2.0.3 worked fine 
+for me.  I compiled it from source; the only warning here is that it 
+will also need something called 'pcre', available from <A 
+HREF="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/">ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/</a>.  
+'Configure' in the SWIG directory gave me easy-to-follow directions; I 
+downloaded PCRE into the SWIG working directory, then ran, from that 
+directory, Tools/pcre-build.sh and this configured and compiled pcre.  
+Then I ran 'configure', 'make', and 'make install' from that same 
+directory to get SWIG up and running, with <pre>configure 
+--prefix=/User/lpsmith/swig/</pre> so it would compile into where I 
+wanted it. </p>
+
+<p>One word of caution here: If you want to be able to use a single 
+libsbml.jar file, you will need the <b>same</b> version of SWIG 
+everywhere you build.  Otherwise, the bindings can end up being 
+different from one another.  So I would recommend going with 2.0.3 (or 
+whatever the latest is) on all three systems. </p>
+
+<p>expat and libxml came preinstalled on baggins; the only issue is that 
+it's a dynamic library so you'd have to bundle it up with everything 
+else.  If you wanted to compile it static and link that into libsbml 
+instead, you'd have one less file to deal with in distributing. </p>
+
+<h3> <a name="libsbml">Building libsbml</a></h3>
+
+<p>So!  Assuming you have all that, we're ready to compile.  We're going 
+to run cmake--if you're in a console window you'll want to run 
+'<code>ccmake</code>' (cmake for consoles); if you're actually at the 
+computer in question, you can run '<code>cmake-gui</code>' which is 
+prettier and has a slightly better UI. </p>
+
+<p>In any event, cd into the libsbml directory (libsbml-5.0.0/, *not* 
+libsbml-5.0.0/src/), then create a new directory in which to build; I 
+usually use the creative name 'build':
+<pre>
+cd libsbml-5.0.0/; mkdir build; cd build
+</pre>
+Then from that working directory, run ccmake or cmake-gui with the 
+argument '..' for 'up one directory':
+<pre>
+cmake-gui ..
+</pre>
+(you're pointing at the root 'CMakeLists.txt' file)
+</p>
+
+<p>Now hit the 'configure' button (cmake-gui) or 'c' (ccmake) and it'll 
+churn a bit and make you a list of options.  If you're on Windows, it'll 
+ask which type of build system you want to use--I tend to use Visual 
+Studio for my projects, but cygwin is also available, if you have that 
+installed.  For me, using ccmake on baggins, I see:
+<pre>
+ CMAKE_BUILD_TYPE                *Release
+ CMAKE_INSTALL_PREFIX            */usr/local
+ CMAKE_OSX_ARCHITECTURES         *                                             
+ CMAKE_OSX_DEPLOYMENT_TARGET     *                                             
+ CMAKE_OSX_SYSROOT               */Developer/SDKs/MacOSX10.5.sdk
+ ENABLE_LAYOUT                   *OFF
+ ENABLE_UNIVERSAL                *OFF
+ EXTRA_LIBS                      *                                             
+ LIBBZ_INCLUDE_DIR               */usr/include
+ LIBBZ_LIBRARY                   */usr/lib/libbz2.dylib
+ LIBXML_INCLUDE_DIR              */usr/include/libxml2
+ LIBXML_LIBRARY                  */usr/lib/libxml2.dylib
+ LIBZ_INCLUDE_DIR                */usr/include
+ LIBZ_LIBRARY                    */usr/lib/libz.dylib
+ SWIG_EXECUTABLE                 */usr/bin/swig
+ WITH_BZIP2                      *ON
+ WITH_CHECK                      *OFF
+ WITH_CPP_NAMESPACE              *OFF
+ WITH_CSHARP                     *OFF
+ WITH_DOXYGEN                    *OFF
+ WITH_EXAMPLES                   *OFF
+ WITH_EXPAT                      *OFF
+ WITH_JAVA                       *OFF
+ WITH_LIBXML                     *ON
+ WITH_MATLAB                     *OFF
+ WITH_OCTAVE                     *OFF
+ WITH_PERL                       *OFF
+ WITH_PYTHON                     *OFF
+ WITH_RUBY                       *OFF
+ WITH_SWIG                       *ON
+ WITH_XERCES                     *OFF
+ WITH_ZLIB                       *ON
+</pre>
+with instructions on how to change these at the bottom.  In the GUI, all 
+the 'ON/OFF' options are check marks.  We do indeed want to change some 
+of the options here: from the top: </p>
+
+<p>The first thing you probably should do is change the compiler from 
+'c++' to 'g++', since that's more likely to be what was used for other 
+projects.  So switch to the 'advanced view'--this is a button in the 
+GUI, and the 't' button (for 'toggle') in ccmake.  Find 
+CMAKE_CXX_COMPILER and switch it to g++ (probably /usr/bin/g++) and hit 
+'compile' again.  (When you change the compiler, all the other options 
+get reset, so we have to do this first).</p>
+
+<p>Next, if you're on a 64-bit system, you'll need to compile to a 
+32-bit architecture to be compatible with the rest of JSim.  To do this, 
+you'll again need to be in the 'advanced view'.  Find 'CMAKE_CXX_FLAGS' 
+and add '-m32', and find 'CMAKE_C_FLAGS' and add '-m32' there, too.  
+(Note: if you compiled libexpat yourself, you'll need to do the same 
+thing there.  I edited the Makefile after running 'configure' and just 
+added '-m32' to all the various CFLAGS and CXXFLAGS.)  After changing 
+these options, my ccmake screen here looks like:
+<pre>
+ CMAKE_AR                         /usr/bin/ar                                  
+ CMAKE_BUILD_TYPE                 Release                                      
+ CMAKE_COLOR_MAKEFILE             ON                                           
+ CMAKE_CXX_COMPILER               /usr/bin/g++                                 
+ CMAKE_CXX_FLAGS                  -m32                                         
+ CMAKE_CXX_FLAGS_DEBUG            -g                                           
+ CMAKE_CXX_FLAGS_MINSIZEREL       -Os -DNDEBUG                                 
+ CMAKE_CXX_FLAGS_RELEASE          -O3 -DNDEBUG                                 
+ CMAKE_CXX_FLAGS_RELWITHDEBINFO   -O2 -g                                       
+ CMAKE_C_COMPILER                 /usr/bin/gcc                                 
+ CMAKE_C_FLAGS                    -m32                                         
+ CMAKE_C_FLAGS_DEBUG              -g                                           
+ CMAKE_C_FLAGS_MINSIZEREL         -Os -DNDEBUG                                 
+ CMAKE_C_FLAGS_RELEASE            -O3 -DNDEBUG                                 
+ CMAKE_C_FLAGS_RELWITHDEBINFO     -O2 -g                                       
+</pre>
+After you've done this, toggle back to the regular view.
+</p>
+
+<p>Next, set CMAKE_INSTALL_PREFIX to where you want libsbml installed.  
+I tend to use '../install', which will build it in [libsbml]/install/ 
+</p>
+
+<p>If your installed version of SWIG is old, you'll need to change 
+'SWIG_EXECUTABLE' to the version you compiled.  For me, this was 
+/Users/lpsmith/swig/bin/swig </p>
+
+<p>Since space is an issue, we're going to turn off the automatic 
+reading of .zip and .bz files: turn off both WITH_BZIP2 and WITH_ZLIB. 
+</p>
+
+<p>If you're compiling on a mac and want universal binaries (which you 
+probably do), set ENABLE_UNIVERSAL to ON. </p>
+
+<p>To get the java bindings, turn on WITH_JAVA.  (note: 'WITH_SWIG' is 
+required if you want Java; it's on by default and you can and should 
+leave it on.) </p>
+
+<p>There are three options for using a particular xml library: 
+WITH_LIBXML, WITH_EXPAT, and WITH_XERCES.  Exactly one of these should 
+be turned on, and the other two should be turned off.  By default, 
+WITH_LIBXML is on, but CellML also uses libxml in a way that's 
+incompatible with libsbml's use of it, so if you want CellML 
+translation, turn that off, and turn on either expat or xerces.  For me, 
+this was 'WITH_EXPAT'. </p>
+
+<p>Now hit the Configure button (or 'c') again.  This will pop up new 
+options if you changed the xml parsing library, namely, the directory 
+where it found it.  For me when compiling on linux, it found expat 
+installed, but I went ahead and changed it to a version I compiled 
+myself:
+<pre>
+ LIBEXPAT_INCLUDE_DIR             /user3/lpsmith/expat/include                 
+ LIBEXPAT_LIBRARY                 /user3/lpsmith/expat/lib/libexpat.so         
+</pre>
+It will also find SWIG_DIR and SWIG_VERSION based on the version of 
+SWIG_EXECUTABLE you set. </p>
+
+<p>f you're on a mac, you'll also want to change 
+CMAKE_OSX_ARCHITECTURES.  JSim doesn't handle 64-bit yet, and jbb is 
+moving away from his ppc, so for now we only need the i386: delete the 
+amd64 and ppc option and just leave 'i386'.  This kind of defeats the 
+purpose of the 'ENABLE_UNIVERSAL' option, but I'd use it anyway as it's 
+more explicit--if you don't, you might end up with a 64-bit version. 
+</p>
+
+<p>Hit 'configure' again, and if there are no further issues, you will 
+now be able to hit 'g'/the 'Generate' button.  If no such option 
+appears, try hitting 'configure' again and looking for unset variables 
+you think sound important.  My final version on a mac looked like:
+<pre>
+ CMAKE_BUILD_TYPE                 Release                                                    
+ CMAKE_INSTALL_PREFIX             ../install                                                 
+ CMAKE_OSX_ARCHITECTURES          i386;
+ CMAKE_OSX_DEPLOYMENT_TARGET                                                                 
+ CMAKE_OSX_SYSROOT                /Developer/SDKs/MacOSX10.5.sdk                             
+ ENABLE_LAYOUT                    OFF                                                        
+ ENABLE_UNIVERSAL                 ON                                                         
+ EXTRA_LIBS                                                                                  
+ LIBBZ_INCLUDE_DIR                /usr/include                                               
+ LIBBZ_LIBRARY                    /usr/lib/libbz2.dylib                                      
+ LIBEXPAT_INCLUDE_DIR             /usr/include                                               
+ LIBEXPAT_LIBRARY                 /usr/lib/libexpat.dylib                                    
+ LIBXML_INCLUDE_DIR               /usr/include/libxml2                                       
+ LIBXML_LIBRARY                   /usr/lib/libxml2.dylib                                     
+ LIBZ_INCLUDE_DIR                 /usr/include                                               
+ LIBZ_LIBRARY                     /usr/lib/libz.dylib                                        
+ SWIG_DIR                         /Users/lpsmith/swig/share/swig/2.0.3                       
+ SWIG_EXECUTABLE                  /users/lpsmith/swig/bin/swig                               
+ SWIG_VERSION                     2.0.3                                                      
+ WITH_BZIP2                       OFF                                                        
+ WITH_CHECK                       OFF                                                        
+ WITH_CPP_NAMESPACE               OFF                                                        
+ WITH_CSHARP                      OFF                                                        
+ WITH_DOXYGEN                     OFF                                                        
+ WITH_EXAMPLES                    OFF                                                        
+ WITH_EXPAT                       ON                                                         
+ WITH_JAVA                        ON                                                         
+ WITH_LIBXML                      OFF                                                        
+ WITH_MATLAB                      OFF                                                        
+ WITH_OCTAVE                      OFF                                                        
+ WITH_PERL                        OFF                                                        
+ WITH_PYTHON                      OFF                                                        
+ WITH_RUBY                        OFF                                                        
+ WITH_SWIG                        ON                                                         
+ WITH_XERCES                      OFF                                                        
+ WITH_ZLIB                        OFF                                                        
+</pre>
+Note that it doesn't matter that LIBBZ_LIBRARY etc. are set: since 
+'WITH_BZIP2' is off, it won't use it.  If you didn't have it on your 
+system and it's set to something like NOTFOUND this is OK. </p>
+
+<p>After you've generated output, you'll then have Makefiles in your 
+build/ directory.  If you configured it for Visual Studio, you can load 
+it up there; otherwise, you'll probably want to type 'make' now.  If you 
+want to see what's going on, type:
+<pre>
+   make VERBOSE=true
+</pre>
+If you leave off the VERBOSE bit, it'll still work, just be more 
+mysterious. </p>
+
+<p>Finally, install!
+<pre>
+   make install
+</pre>   
+and it'll put it in ../install or wherever you pointed it!
+</p>
+
+<p>For Windows/visual studio, the above instructions can still be 
+followed.  The only thing to keep in mind is that once you are in VS, 
+you'll need to change the project to 'Release' yourself, since by 
+default it'll always come up 'Debug'.  Hitting 'build' will build 
+everything, and building the INSTALL target will install it. </p>
+
+<p>The files we will actually need in JSim are three:
+<pre>
+[install]/share/libsbml/bindings/java/libsbmlj.jar
+[install]/share/libsbml/bindings/java/libsbmlj.dylib (or .so or .dll)
+[install]/lib/libsbml.dylib (or .so or .dll)
+</pre>
+Note that on a Mac, the 5.0.0 CMake build would create 
+bindings/java/libsbmlj.dylib, but this was changed in svn (so presumably 
+for all future versions of the library) to create 
+bindings/java/libsbmlj.jnilib It is the exact same file, and it is fine 
+if you rename one to the other. </p>
+
+<p>The .jar file goes in <code>[JSim]/third/server/</code>
+</p>
+
+<p>And the other two go in <code>[jsimauxlib]/[system]/</code>
+</p>
+
+<p>You'll need to re-run jsbuild.j to get the new .jar file (I think) 
+and after that, you're good to go! </p>
+
+<p><b>MacOS application issues:</b>  For libsbml to work properly
+in the MacOS double-click application,  the reference to
+libsbml*.dylib in libsbmlj.jnilib must be changed. This is
+accomplished via $JSIMSRC/build/jsset_libsbmlj.  This does not 
+affect command-line launch of JSim on MacOS,  only double-click
+launch.  jssetup_libsbmlj requires you environment be set
+properly for a <a href="Devel_Build.html">JSim source build</a>.</p>
+
+<pre>
+# first set you enviromnent for a JSim source build (JSIMSRC, etc)
+# then issue the following command in the MacOS libsbml build directory
+
+jssetup_libsbmlj libsbmlj.jnilib
+
+# pay attention to any error messages 
+</pre>
+
+
+<h3>  <a name="antimony">Building sbtranslate (Antimony)</a></h3>
+
+<p>Instructions for building sbtranslate are available on Antimony's 
+website: <A 
+HREF="http://antimony.sourceforge.net/antimony-installation.html">http://antimony.sourceforge.net/antimony-installation.html</a>.  
+You should already have everything you need from building libsbml, with 
+the exception of the <A 
+HREF="http://www.cellml.org/tools/downloads/cellml_api/releases/1.10">CellML 
+SDK</a>.  I'm not going to try to tell you how to build CellML here, 
+because that's too complicated.  My advice is to try downloading the SDK 
+for your platform, and if it works, great, and if not, turn off 
+Antimony's ability to translate CellML (by turning off 'WITH_CELLML' in 
+CMake).  If I recall correctly, the current version of JSim doesn't even 
+attempt to use sbtranslate to translate CellML anyway. </p>
+
+<p>A few other things of note:
+<ul>
+<LI>Point LIBSBML_INCLUDE_DIR to wherever you installed libsbml/include/
+<LI>Point LIBSBML_LIBRARY to wherever you installed libsbml/lib/libsbml.[whatever]
+<LI>Point CELLML_API_INSTALL_DIR to wherever you copied the CellML SDK.
+<LI>You don't need WITH_COMP_SBML, WITH_QTANTIMONY, WITH_SBW, or WITH_SBW_TRANSLATOR:  turn all of these off.
+</ul>
+</p>
+
+<p>Once you build sbtranslate, you'll need to put that plus all its 
+dependencies into <code>[jsimauxlib]/[system]/</code>.  The dependencies 
+are:
+<ul>
+<li>sbtranslate
+<LI>libantimony
+<LI>libsbml (which should already be there)
+<li>If you have included CellML:
+<ul>
+<li>libannotools</li>
+<li>libceleds</li>
+<li>libcellml</li>
+<li>libcevas</li>
+<li>libcuses</li>
+<li>libmalaes</li>
+<li>libtelicems</li>
+</ul>
+</li>
+</ul>
+<strong>Mac users:</strong> You may have to update the following script (sbtranslate.sh):
+<pre>
+#!/bin/sh
+
+# wrapper for sbtranslate
+#  needed since forked process from JSim does not autoset DYLD_LIBRARY_PATH
+
+DIR=`echo $0 | sed s/sbtranslate.sh//`
+
+cd $DIR
+
+export DYLD_LIBRARY_PATH=$DIR
+
+./sbtranslate $*
+</pre>
+ due to name changes, etc. This script is necessary when users start JSim using the point and click method (as opposed to command line start-up) so that when JSim calls sbtranslate it can find the dependent libraries (libsbml.dylib libantimony.dylib).
+
+<h3> <a name="sbmltomatlab">Building SBML to Matlab code generator (sbml2matlab)</a></h3>
+<p>sbml2matlab is a translator program that converts an SBML model into a MATLAB function and it is used by JSim to convert JSim MML models(converted to SBML) into Matlab code. See <a href="http://stanley-gu.github.com/sbml2matlab/">sbml2matlab web site</a> for up-to-date, detailed, build instructions. The sbml2matlab executable is dependent on the libSBML library.
+<br /><br />
+Dependencies:
+<ul>
+<li>libsbml - library of SBML APIs, built above.</li>
+<li>cmake - used to generate platform specific 'make' files and/or MS Visual Studio solution.</li>
+</ul>
+First download source code from <a href="http://stanley-gu.github.com/sbml2matlab/">sbml2matlab web site</a>. Next, generate platform specific build instructions for sbml2matlab by creating a build directory and cd into it:
+<pre>
+cd dir_where_sbml2matlab_code_is; mkdir build; cd build
+</pre>
+Now run cmake ('ccmake ..' or 'cmake-gui') and fill out necessary information to generate build scripts for the particular platform. Below is an example from the MacOS:
+<pre>
+ CMAKE_BUILD_TYPE                                                              
+ CMAKE_INSTALL_PREFIX             ../install                                   
+ CMAKE_OSX_ARCHITECTURES          i386                                         
+ CMAKE_OSX_DEPLOYMENT_TARGET                                                   
+ CMAKE_OSX_SYSROOT                /Developer/SDKs/MacOSX10.6.sdk               
+ LIBSBML_BIN                      /Users/bartj/SBML/libsbml-5.4.1/install/lib  
+ LIBSBML_INCLUDE                  /Users/bartj/SBML/libsbml-5.4.1/install/include
+ LIBSBML_LIB                      /Users/bartj/SBML/libsbml-5.4.1/install/lib  
+</pre>
+Advanced page of cmake ('t' toggle between pages):
+<pre>
+ CMAKE_AR                         /usr/bin/ar                                  
+ CMAKE_BUILD_TYPE                                                              
+ CMAKE_COLOR_MAKEFILE             ON                                           
+ CMAKE_CXX_COMPILER               /usr/bin/c++                                 
+ CMAKE_CXX_FLAGS                  -m32                                         
+ CMAKE_CXX_FLAGS_DEBUG            -g                                           
+ CMAKE_CXX_FLAGS_MINSIZEREL       -Os -DNDEBUG                                 
+ CMAKE_CXX_FLAGS_RELEASE          -O3 -DNDEBUG                                 
+ CMAKE_CXX_FLAGS_RELWITHDEBINFO   -O2 -g                                       
+ CMAKE_C_COMPILER                 /usr/bin/gcc                                 
+ CMAKE_C_FLAGS                    -m32                                         
+ CMAKE_C_FLAGS_DEBUG              -g                                           
+ CMAKE_C_FLAGS_MINSIZEREL         -Os -DNDEBUG                                 
+ CMAKE_C_FLAGS_RELEASE            -O3 -DNDEBUG                                 
+ CMAKE_C_FLAGS_RELWITHDEBINFO     -O2 -g                                       
+ CMAKE_EXE_LINKER_FLAGS                                                        
+ CMAKE_EXE_LINKER_FLAGS_DEBUG                                                  
+ CMAKE_EXE_LINKER_FLAGS_MINSIZE                                                
+ CMAKE_EXE_LINKER_FLAGS_RELEASE                                                
+ CMAKE_EXE_LINKER_FLAGS_RELWITH                                                
+ CMAKE_INSTALL_NAME_TOOL          /usr/bin/install_name_tool                   
+ CMAKE_INSTALL_PREFIX             /usr/local                                   
+ CMAKE_LINKER                     /usr/bin/ld                                  
+ CMAKE_MAKE_PROGRAM               /usr/bin/make                                
+ CMAKE_MODULE_LINKER_FLAGS                                                     
+ CMAKE_MODULE_LINKER_FLAGS_DEBU                                                
+ CMAKE_MODULE_LINKER_FLAGS_MINS                                                
+ CMAKE_MODULE_LINKER_FLAGS_RELE                                                
+ CMAKE_MODULE_LINKER_FLAGS_RELW                                                
+ CMAKE_NM                         /usr/bin/nm                                  
+ CMAKE_OBJCOPY                    CMAKE_OBJCOPY-NOTFOUND                       
+ CMAKE_OBJDUMP                    CMAKE_OBJDUMP-NOTFOUND                       
+ CMAKE_OSX_ARCHITECTURES                                                       
+ CMAKE_OSX_DEPLOYMENT_TARGET                                                   
+ CMAKE_OSX_SYSROOT                /Developer/SDKs/MacOSX10.6.sdk               
+ CMAKE_RANLIB                     /usr/bin/ranlib                              
+ CMAKE_SHARED_LINKER_FLAGS                                                     
+ CMAKE_SHARED_LINKER_FLAGS_DEBU                                                
+ CMAKE_SHARED_LINKER_FLAGS_MINS                                                
+
+</pre>
+<strong>The important parts are: compiler flags (-m32) and the locations of libsbml and sbml header files</strong>. When happy with the information hit 'configure' again, and if there are no further issues, you will 
+now be able to hit 'g', the 'Generate' button to generate build information targeting the particular OS. Exit cmake.
+Now that the build files have been created then either type 'make' in the build directory or open up the MS visual studio .sln file with Visual Studio Express and build all (If building for MS Windows). Two files are generated which need to be copied over to jsimauxlib:
+<ul>
+<li>libNOM.so (NOM.dll)</li>
+<li>sbml2matlab(.exe) </li>
+</ul>
+<strong>Mac users:</strong> You may have to update the following script (sbml2matlab.sh):
+<pre>
+#!/bin/sh
+
+# wrapper for sbtranslate
+#  needed since forked process from JSim does not autoset DYLD_LIBRARY_PATH
+
+DIR=`echo $0 | sed s/sbml2matlab.sh//`
+
+cd $DIR
+
+export DYLD_LIBRARY_PATH=$DIR
+
+./sbml2matlab $*
+</pre>
+ due to name changes, etc. This script is necessary when users start JSim using the point and click method (as opposed to command line start-up) so that when JSim calls sbml2matlab it can find the dependent libraries (libsbml.dylib and libNOM.dylib).
+</p>
+
+<p>That's it!
+</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

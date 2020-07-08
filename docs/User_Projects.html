@@ -1,0 +1,361 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Projects</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+
+<p>    A JSim project is data structure that preserves a related set of
+models, parameter sets, data sets, plot pages, text-based notes and
+images.  This document discusses JSim projects and some basics of
+manipulating them in the JSim user environment, although no attempt is
+made to be exhaustive. </p>
+
+<p> Prerequisites:</p>
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim GUI</a></li>
+</ul>
+
+<p>    Contents:</p>
+
+<ul>
+<li><a href="#over">Overview</a></li>
+<li><a href="#contents">Project Content</a></li>
+<li><a href="#models">Models</a></li>
+<li><a href="#parsets">Parameter Sets</a></li>
+<li><a href="#datasets">Data Sets</a></li>
+<li><a href="#plotpages">Plot Pages</a></li>
+<li><a href="#notes">Notes</a></li>
+<li><a href="#project">The Project Tab</a></li>
+<li><a href="#caveats">Caveats</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="over">Overview</a></h2>
+
+<p>    Within the JSim user environment, a modeler may work with and
+manipulate several types of content when making an scientific analysis:</p>
+
+<ul>
+<li>computational models;</li>
+<li>sets of model parameter values;</li>
+<li>experiment results and reference data;</li>
+<li>notes and documentation about work in progress;</li>
+<li>graphic presentations of data.</li>
+</ul>
+
+<p>    Each top-level JSim window may contain one or many such items.  The
+JSim project file preserves all content for a single top-level window so
+that the window can be recreated at a later time in a single operation.
+Most user-initiated actions within JSim may be thought of as updating the
+associated project.  Users may open multiple top-level windows
+concurrently, each representing a separate project, and content may be cut
+and pasted between projects in a simple manner.</p>
+<p>    Project files are completely self-contained and ( with a few <a href="#caveats">caveats</a> )  
+contain no dependencies to other files on your system.  This allows you to
+ship an entire project to a collaborator without fear that a
+cross-referenced file might go missing.  Project files are stored in XML
+format, insuring open interchange, robustness, extensibility and future
+readability.</p>
+
+<h2>  <a name="contents">Project Content</a></h2>
+<p>    The project data structure is similar to a company organizational
+chart with major organizational blocks at the top, and minor content
+organized within major.  The top (1st) level is the project itself.  At
+the 2nd level, the following types of content are allowed:</p>
+
+<ul>
+<li><a href="#models">models</a> - contains model source code, compilation state,
+current parameter assignments, model run-time markup, and one or more
+function generators.</li>
+<li><a href="#parsets">parameter sets</a> - contains of a set input variable
+assignments, function generator settings and numberic solver settings for
+one model or for a set of related models.</li>
+<li><a href="#datasets">data sets</a> - contains of numeric results from experiments
+or simulations.</li>
+<li><a href="#plotpages">plot pages</a> - contains graphic presentation of data
+from one or more models or datasets.</li>
+<li><a href="#notes">notes</a> - contains free-form text-based notes for in-progress
+reminders or external documentation of the project.  Notes may also be 
+attached to specific models, parameter sets, data sets or plot pages.</li>
+
+</ul>
+<p>    A top-level window in the JSim user environment represents a single
+project.  Each 2nd level content item appears as a tab within the project
+window.  Plot page tabs appear on the righthand side of the window, all
+other 2nd level tabs (models, data sets, etc.) appear on the lefthand
+side.  In addition to the 2nd level content tabs, a tab named
+<a href="#project">Project</a> appears on the lefthand side and a tab named "Message"
+appears on the right. The Project tab allows operations on the project as
+a whole.  The Message tab display error and status messages as JSim runs.</p>
+<p>    Each 2nd level content item must be given a name that is unique within
+the project.  This name appears on the associated tab.  Naming is handled
+automatically, so the user usually doesn't need to worry about it.  
+However, in large projects, naming can be a useful organizational
+mechanism.  See <a href="#project">The Project Tab</a> for more information.</p>
+<h2>  <a name="models">Models</a></h2>
+<p>    A JSim model contains model source code, compilation state, current
+parameter assignments, model run-time markup, one or more function
+generators, and associated notes and images.  Model content is organized
+within a set of subtabs that appear at the bottom of the model tab.</p>
+<p>    Model source code may be edited within the "Source" subtab.  Source
+is normally written in JSim's <a href="MML.html">Mathematical Modeling
+Language</a> although other types of code may be used for
+debugging by JSim internals developers.  Historically, MML source code
+has been stored in free-standing model (.mod) files.  .mod files may be
+loaded into JSim projects in three ways:</p>
+
+<ul>
+<li>Pick "Import model file ..." from the <a href="#project">Project</a> tab's 
+"Add" menu.  This creates a new model within the project.</li>
+<li>Pick "Import (clear) ..." from the model's "Source" subtab "File" 
+menu.  This imports source code into an existing project model,  
+preserving other current properties.</li>
+<li>Start JSim with the "-f file ..." switch.  This is a shortcut 
+for the first method,  but is available only when you launch JSim from
+the command line.</li>
+
+</ul>
+<p>    .mod files remain useful in some circumstances, but most users will
+find it simpler to edit MML stored in project files via the JSim user
+environment.</p>
+<p>    The model's compilation state is stored in the project. When a project
+is reloaded, any models that were compiled previously are recompiled.  
+The model's run state is not recreated at project load because, for large
+models, a model run may often be time consuming and unnecessary.
+This means that plot pages refering to model data will not be displayed 
+until the associated model is run explicitly by the user.</p>
+<p>    The assignments of model input variables, function generator controls
+and numeric solver settings (collectively called parameters) are set in
+the "Run Time" subtab.  Current parameter assignments are stored in the
+project and restored at project load time.  Model inputs may be assigned
+to numeric constants or to algebraic expressions of other model inputs or
+function generators (see below) as long as no circular dependencies are
+created amoung the parameters.  Function generator controls and numeric
+solver settings may be set to numeric constants or selected values, but
+algebraic expressions are not supported.  Additional <a href="#parsets">Parameter
+Sets</a> may be stored in the project and restored as needed.</p>
+<p>    Model run-time markup ( <a href="MML_RTML_Ref.html">RTML</a> ) is a mechanism for
+customizing the appearance of a model's "Run Time" subtab.  This
+capability is similar that of the XSIM .cf file, but is considerably
+simplified and more extensible and will, in the future, support
+drag-and-drop layout. RTML source may be edited in the model's "Customize"
+subtab.</p>
+<p>    One or more <a name="fgen"><a href="User_Fgen.html">function generators</a></a> may be
+added to a model for assignment to dynamic input variables.  Function
+generators provide the ability to generate many standard wave forms more
+conveniently than directly in MML, and to import external data (from <a href="#datasets">Data
+Sets</a>) into a model run.  Users create function generators via
+the "New function generator" item in the "Pages" menu of the model "Run
+Time"  subtab.  Each function generator creates a variable in model
+namespace that can be used in model input assignments.  Function generator
+output is controlled by a set of associated parameters that are stored in
+the project as part of the current model parameter set or of stored
+parameter sets.</p>
+<p>    Numeric solver settings fine-tune the behaviour of JSim built-in
+ordinary differential equation (ODE) and partial differential equation
+(PDE) solver algorithms.  The default settings will be adequate for most
+circumstances, but advanced users may wish to tinker with them. The
+settings may be adjusted via the "Pages" menu of a model's "Run Time"  
+subtab. Numeric solver settings are stored in the project as part of the
+current model parameter set or of stored parameter sets.</p>
+<p>    Associated text-based notes (the "Notes" subtab) and images (the 
+"Images" subtab) are also stored with a model.  The model's image set
+may be used by any associated RTML for customized display.</p>
+<h2>  <a name="parsets">Parameter Sets</a></h2>
+<p>    When a JSim MML model is compiled, its variables are determined to be
+either "inputs" or "outputs".  Variables declared as "extern" or set equal
+to a constant numeric value become inputs. Those calculated from other
+variables become outputs. Model "parameters" are model input variables
+along with numeric solver settings and function generator controls.  A
+JSim "parameter set" is a collection of parameter names and associated
+values or assignments.  A parameter set may apply to a single model, or to
+a collection of related models.  Parameter assignments for numeric solver
+settings and function generator controls are constant values.  Assignments
+for model inputs may be either constant values or algebraic expressions 
+of other input values.  If algebraic assignments result in circular
+logic,  an appropriate error message will alert the user to the situation
+at model run time.</p>
+<p>    The set of parameter values shown in the model "Run Time" subtab are
+known as the "current parameter set" for that model.  When a model is run,
+the assignments from the current parameter set are used.  The "Run Time"
+tab allows users to modify parameters in a convenient way to examine the
+model behaviour for different parameter values. Users often find it useful
+to save a copy of the current parameter set for later recall.  This may be
+accomplished via the "Store parameter set..." action in a model's "ParSet"
+menu.  At a later time, the "Load parameter set..." action (in the same
+menu) will restore the current parameter set to the previous state.</p>
+<p>    Since models and parameter names evolve over time, it is possible
+that some names in a stored parameter set may not correspond to any
+parameter in the model it is loaded into.  In this case, JSim does as best
+it can, and alerts the user, via the Message tab, of any inconsistencies
+it finds.  Work continues to produce optimally useful messages in this
+situation.</p>
+<p>    <strong> Important note for new users:</strong> A model's current parameter set
+may be thought of as a work area that is constantly being modified be
+setting of individual values or reloading from stored parameter sets.  It
+is automatically preserved whenever a project file is saved, and also when
+a model is recompiled.  The latter functionality can be confusing for new
+JSim users.  When the MML for a previously compiled model is changed to
+reflect new constant values for input variables, these new values merely
+become the new default values for those inputs.  These new defaults are
+not automatically reflected in the current parameter set (or any other
+parameter sets).  If the user wants the current parameter set to reflect 
+the new model default values,  s/he should select "Revert to model 
+defaults" from the "ParSet" menu.  This behaviour is somewhat 
+controversial and may be changed at some future time.</p>
+<p>    Users creating parameter sets are typically contrasting several
+different parameter sets representing different physical/physiological
+situations.  Because of this,  judicious naming of parameter sets tends 
+to be more important that for other 2nd level content.  See <a href="#project">The Project
+Tab</a> for information on naming and renaming.</p>
+<p>    The "Notes" subtab within a parameter set provides ability to add 
+comments,  notes or text documentation relating to the parameter set.</p>
+<h2>  <a name="datasets">Data Sets</a></h2>
+<p>    Project data sets contains numeric results from experiments,
+simulations, or other sources.  Data sets are usually created by importing
+external data files, although they can also be created by saving plot page
+content.  A data set contains one or more data curves.  Each curve has a
+name, unique within the data set, by which it is known to the rest of
+JSim.  A curve may have a text description, and an physical unit (e.g.
+ml/sec).  Each curve's data may have any dimension, although 1-dimensional
+(e.g. time-course) data is most common.</p>
+<p>    JSim supports 
+several importable data
+formats.  See <a href="User_DataSets.html">here
+</a> for details.</p>
+<p>    A data set can also be created from a plot page via the "Store project
+dataset ..." item in the plot page's "File" menu.  Data set curves thus
+created will have the dimension of the data plotted, usually 1-D or 2-D.</p>
+<p>    Once data sets are created,  curves from them may be used in several
+ways:</p>
+
+<ul>
+<li>They can be fed to model inputs (via <a href="#fgen">function generators</a>)
+by selecting the "DataCurve" function within the function generator
+configuration page, which can be found under the "Pages" menu of a model's
+"Run Time" subtab.</li>
+<li>They can be graphed on plot pages for visual comparison to 
+model results.  See <a href="#plotpages">Plot Pages</a> for more information.</li>
+<li>Data sets may be used in <a href="User_Optim.html">parameter 
+optimization</a>.</li>
+
+</ul>
+<p>    The "Notes" subtab within a data set provides ability to add comments,
+notes or text documentation relating to the data set.</p>
+<h2>  <a name="plotpages">Plot Pages</a></h2>
+<p>    Plot pages display data from multiple models and/or data sets in
+several graphical styles.  XY line and symbol plots, contour and colormap
+plots are 
+currently available.  In the future, surface
+plots will also be available.  Each plot page contains one or more
+separately controllable plots.  The number of plots in a page is
+controlled by the "#rows" and "#columns" menus.  Initially, only a single
+plot is created within the page. A new project initially contains a single
+plot page.  Additional plot pages may be added via the "Project" tab "Add"
+menu.</p>
+<p>    The upper portion of a plot page,  called the "Plot Configurator"
+allows the user to select data to be plotted and control the rendering 
+characteristics of that data.  The lower portion,  shows the data either
+as graphics (the "Graph" subtab) or tabular text (the "Text" subtab).</p>
+<p>    The 2nd line of the configurator, starting with the label "Data"
+allows selection of the data to be plotted.  The first box to the right of
+"Data" selects the data source, which may be either a model or a data set.
+Further to the right is the data selection, where the user may enter the
+data item, from within the selected data source, to be plotted.  
+Algebraic expressions of data items (e.g. 2*a-b) may be used as well as
+simple variable or data curve names.</p>
+<p>    Some plot properties,  such as title, axis labels and legend placement
+can be edited in a point and click fashion within the plot graphics 
+window.</p>
+<p>    All plot configurator characteristics are stored in a project and 
+are reestablished when a project is reloaded.  As noted above,  model 
+output data is not available to a reloaded project until the model
+is explicitly rerun by the user.</p>
+<h2>  <a name="notes">Notes</a></h2>
+<p>    Free form text-based notes may be added to a project via the "Project"
+tab "Add" menu.</p>
+<h2>  <a name="project">The Project Tab</a></h2>
+<p>    Now that you understand the content of a JSim project, we'll examine
+the "Project" tab, which gives you overall control of project content.</p>
+<p>    The main body of the "Project" tab shows a tree structure representing
+the project content.  Currently,  only 2nd level content is shown,  each
+item by its assigned name.  A more detailed tree may be available in the 
+future.</p>
+<p>    The "File" menu allows the standard operations of opening an existing
+project, starting a new (empty) project, saving projects to disk, closing
+windows and exiting.  JSim automatically exits when the last project
+window closes.</p>
+<p>    The "Edit" menu allows you to cut/copy/paste content between projects
+in an intuitive way.  Select one or more items in the project tree before
+executing a cut or copy. Cut or copy before you paste.  Paste is most
+useful between two different projects, but only works with project windows
+that are part of the same executing program.  So if you need to paste,
+don't start a bunch of separate JSim instances, but rather open new
+project windows from existing ones. You can see the results of cut and
+paste operations reflected in the project tree.  Note that pasted items
+may be automatically renamed to insure name uniqueness within the project.  
+Selected items can also be renamed, as desired, from within this menu.</p>
+<p>    The "Add" menu allows you to add content to the project:</p>
+
+<ul>
+<li>"Import model file" and "Import data file"  allow you to import
+free-standing model (e.g. .mod, .sbml, .cellml) files or data files 
+(e.g. 
+.tac, .csv, .cdata, .jsml).  .flat and .java
+model imports are enabled here for JSim internal developers only.
+The imported content (model or data set) is initially named based on the
+file name.</li>
+<li>"New model" creates a new model with a blank source code area.  
+In the future,  a variety of initial templates will be offered to 
+assist the model development process.  Until that happens,  this option
+will probably be little used because model writers most often start 
+by copying in an existing model as a template.</li>
+<li>"New plot page" creates a new plot page,  not to be confused with
+adding a new plot to an existing plot page (see above).</li>
+<li>"New graphic (plugin)" create a new <a 
+href="Devel_Plugin.html">graphic plugin</a></li>
+<li>"New notes page" create a new project-level notes tab.</li>
+</ul>
+
+<p>    The "Help" menu provides pointers (via the "Message" tab) to various 
+information sources.</p>
+<h2>  <a name="caveats">Caveats</a></h2>
+<p>    In general, JSim project files preserve almost all information about
+the state of a JSim window so that it can be recreated by any user with
+access to the file and to the basic JSim distribution.  The following
+lists exceptions to that general rule:</p>
+
+<ul>
+<li>Models that have been run are not automatically rerun when the
+project is reloaded, due to performance concerns.</li>
+<li>Project window size, placement, font size and background color are
+not preserved.  These are viewed as user preferences that may not be
+shared by next person to view a project, which may not be the author.</li>
+<li>Models that use the MML "import" statement to import files that are
+not included with the basic JSim distribution will not recompile
+identically in their new destination unless the imported files are also
+present. Importable files included with the basic JSim distribution are
+nsrunit.mod, XSim.mod and MFAX.mod.</li>
+<li>Models that use functions and procedures to access procedural source
+code or libraries will not recompile identically in their new destination
+unless those libraries are present at reload time.  Any referenced native
+code libraries must compiled to match the new computer's architecture.</li>
+</ul>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

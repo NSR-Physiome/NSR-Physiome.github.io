@@ -1,0 +1,46 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>JSim Public API</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p>  The JSim Application Programmer Interface (API) is a set of
+documentation appropriate for creating Java code that interacts in useful
+ways with the JSim application.</p>
+
+<ul>
+<li>Creating JSim <a href="Devel_Plugin.html">plugins</a> ;</li>
+<li>Creating Java-based MML <a href="MML_Func_Intro.html">Functions and Procedures</a> 
+;</li>
+<li>Programmatic interaction with the JSim computational engine (planned
+but not yet available).</li>
+<?php jscoqli() ?>
+
+</ul>
+<p>  The JSim Public API is preliminary and most methods remain undocumented.
+Nevertheless,  we feel it may be somewhat useful in its current, 
+incomplete form.  Those who find this API documentation insufficient for
+their purposes,  may wish to get the <a 
+href="../download/source.html">JSim Source 
+code</a> .</p>
+<p>  <a href="/jsim/api">Click here for the JSim Public 
+API</a> (such as
+it is).</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

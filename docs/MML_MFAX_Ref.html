@@ -1,0 +1,551 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>MFAX BCL Reference</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p>    This is a reference manual for the MFAX Biological Component Library
+(BCL).  MFAX stands for a Metabolite Flow and Exchange, and contains a set
+of components appropriate for chemical network models in multiple
+compartments with convective flow and membrane transport between those
+compartments.  This manual provides concise and exact syntax and semantics
+for each component.</p>
+
+<p> Prerequisites: </p>
+<ul>
+<li> <a href="MML_Templates.html">Using Templates in MML</a></li>
+<li> <a href="MML_MFAX_Intro.html">Introduction to the MFAX BCL</a></li>
+</ul>
+
+<h2>  Overview</h2>
+<p>    Each BCL component is declared in the following manner in a BCL model:
+<pre>
+      component_type name(arguments) unit;
+</pre>
+</p>
+<p>    where the unit declaration is present only when unit conversion is on 
+and the component type requires it. </p>
+<p>    Details provided here for each component type include</p>
+
+<ul>
+<li>Name</li>
+<li>Description</li>
+<li>Declaration arguments</li>
+<li>Compatible unit</li>
+<li>Sub-variables</li>
+<li>Notes</li>
+
+</ul>
+<p>    The component types described in this manual are</p>
+
+<ul>
+<li><a href="#chem">Chem</a></li>
+<li><a href="#compartment">Compartment</a></li>
+<li><a href="#consumption">Consumption</a></li>
+<li><a href="#fastreaction">FastReaction</a></li>
+<li><a href="#flow">Flow</a></li>
+<li><a href="#flowjunc">FlowJunc</a></li>
+<li><a href="#flowsink">FlowSink</a></li>
+<li><a href="#flowsource">FlowSource</a></li>
+<li><a href="#fluxreaction">FluxReaction</a></li>
+<li><a href="#inject">Inject</a></li>
+<li><a href="#massbalreaction">MassBalReaction</a></li>
+<li><a href="#membrane">Membrane</a></li>
+<li><a href="#production">Production</a></li>
+<li><a href="#time">Time</a></li>
+<li><a href="#transportflux">TransportFlux</a></li>
+<li><a href="#transportps">TransportPS</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="chem">Chem</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Chem </dd>
+<dt>    Description</dt>
+<dd>Chemical Species </dd>
+<dt>    Declaration arguments</dt>
+<dd>NONE</dd>
+<dt>    Compatible unit</dt>
+<dd>mole/sec</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Chem A mM;
+</pre>
+</p>
+<dl>
+<dt>    Sub-variables</dt>
+<dd>NONE</dd>
+<dt>    Notes</dt>
+<dd>The name of a chemical species.  Concentrations and 
+production and consuption rates for species in system is reflected in 
+sub-variables in many other components,  but the Chem component itself
+has no sub-variables.  In order to avoid name conflicts in concentration
+sub-variables,  Chem names must start with a capital letter.</dd>
+</dl>
+<h2>  <a name="compartment">Compartment</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Compartment</dd>
+<dt>    Desc</dt>
+<dd>Uniformly mixed volume</dd>
+<dt>    Declaration Arguments</dt>
+<dd>NONE</dd>
+<dt>    Compatible unit</dt>
+<dd>liter</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Compartment region1 ml;
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real vol ml; // volume of compartment
+      real X(t) molar;  // concentration of species X in compartment
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>A volume over which all chemical species have uniform
+concentration.  The BCL author must set the volume subvariable "vol". The
+concentration variables X may be set (forced) explicitly, or vary
+based on the dynamics of the model.  If the latter, the initial
+concentrations default to zero, but may be set otherwise via the MML when
+construct.  If a compartment has any attached flow components (FlowSource,
+Flow, FlowSink), it must have exactly one inflow and exactly one outflow.</dd>
+</dl>
+<h2>  <a name="consumption">Consumption</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Consumption </dd>
+<dt>    Desc</dt>
+<dd>Consumption of a chemical species in a compartment</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Compartment, Chem</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Consumption Q1(C1, A);
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real flux(t) mole/sec; // consumption rate
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>Consumption of a Chem within a Compartment as determined
+the sub-variable flux, which has no default and must be constrained by the
+BCL author.  JSim attempts to protect concentrations from going 
+negative by forcing zero consumption at zero concentration.  However, 
+numeric instabilities in the ODE solvers may sometimes result in negative
+concentrations.  To avoid this,  it is recommended that "flux" values
+ramp smoothly to zero at zero concentration.  Negative "flux" values
+will result in production the species within the compartment.  Exact units
+of the rate variable depend on the units for the related Chem, Compartment
+and Time variables.</dd>
+</dl>
+<h2>  <a name="fastreaction">FastReaction</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>FastReaction</dd>
+<dt>    Desc</dt>
+<dd>Fast Chemical Reaction</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Compartment, Equation</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      FastReaction R1(C1, "X+Y=2Z");
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real k(t); // equilibrium constant
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>A reaction that equilibrates instantaneously compared to any
+MassBalReactions, FluxReactions and intercompartmental exchanges in the
+system.  The sub-variable k may be thought of as equivalent to kf/kb in a
+MassBalReaction.  k has no default value, and must be constrained by the
+BCL author. Multiple FastReactions may be specified, however, the instant
+equilibration constraint makes it possible to overspecify a system in this
+way, so the BCL author must be careful.  JSim will reject overspecified
+models.  JSim can run into numeric trouble in cases where there are
+multiple molecules on both sides of a FastReaction and one or more of the
+concentrations become zero, however this problem is probably more
+theoretical than practical.  Nevertheless, work on this issue continues.</dd>
+</dl>
+<h2>  <a name="flow">Flow</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Flow</dd>
+<dt>    Desc</dt>
+<dd>Flow between two Compartments or FlowJunctions</dd>
+<dt>    Declaration Arguments</dt>
+<dd>two Compartments and/or FlowJunctions</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Flow F2(C1, C2);
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real flow(t) liter/sec;   // rate of flow
+      real X(t) mole/liter;     // conc. of Chem X in this flow
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>Flow from 1st argument into 2nd argument.  The flow and
+concentration sub-varibles are informational only, and should not be
+constrained by the BCL author.</dd>
+</dl>
+<h2>  <a name="flowjunc">FlowJunc</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>FlowJunc</dd>
+<dt>    Desc</dt>
+<dd>Flow Junction</dd>
+<dt>    Declaration Arguments</dt>
+<dd>none</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      FlowJunc J1 liter;
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real Xwgt(t);     // output flow fraction in flow X
+      real Y(t) molar; // outflow concentraion of Chem Y
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>A volumeless junction of 2 or more flows, useful for
+splitting or combining flows.  At least one input flow and at least one
+output flow must be attached.  The Xwgt variables (where X is the name of
+an output Flow, FlowSource or FlowSink), collectively determine the
+fraction of flow to each output.  All Xwgts default to 1, so unless the
+BCL author constrains them, flow will be distributed equally to all
+outputs.</dd>
+</dl>
+<h2>  <a name="flowsink">FlowSink</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>FlowSink </dd>
+<dt>    Desc</dt>
+<dd>Flow Sink</dd>
+<dt>    Declaration Arguments</dt>
+<dd>one Compartment or FlowJunction </dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      FlowSink F3(C2);
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real flow(t) liter/sec;   // rate of flow
+      real X(t) molar;  // conc. of Chem X in this flow
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>Drainage of flow from component, flow disappears from system.  
+The flow and concentration sub-varibles are informational only, and should
+not be constrained by the BCL author.</dd>
+</dl>
+<h2>  <a name="flowsource">FlowSource</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>FlowSource </dd>
+<dt>    Desc</dt>
+<dd>Flow Source and/or regulator</dd>
+<dt>    Declaration Arguments</dt>
+<dd>one or two Compartments or FlowJunctions</dd>
+<dt>    Compatible unit</dt>
+<dd>liter/sec</dd>
+</dl>
+<p>    <strong>Examples</strong>:
+<pre>
+      FlowSource F1(C1) liter/sec;
+      FlowSource F2(C2,C1) liter/sec;
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real flow(t) liter/sec;   // rate of flow
+      real X(t) mole/liter;     // conc. of Chem X in this flow
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>With one argument, provides system flow source.  With two
+arguments, provides system flow regulator.  The "flow" sub-variable must
+be constrained by the BCL author.  The concentration variables are
+informational only, and should not be constrained.  Introducing a
+concentration in a FlowSource is usually done by attaching one or more
+Inject components to it.</dd>
+</dl>
+<h2>  <a name="fluxreaction">FluxReaction</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>FluxReaction</dd>
+<dt>    Desc</dt>
+<dd>Flux-based Chemical Reaction</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Compartment, Equation</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      FluxReaction R1(C1, "X+Y=2Z");
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real flux(t) mole/sec; // reaction flux
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>A chemical reaction whose actions are determined by a flux
+variable which may be positive or negative.  The flux variable has no
+default and must be constrained by the BCL author. Care should be taken so
+that the flux variable is not positive if the reactant concentrations are
+zero, and not negative if the product concentrations are zero.</dd>
+</dl>
+<h2>  <a name="inject">Inject</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Inject </dd>
+<dt>    Desc</dt>
+<dd>Injection</dd>
+<dt>    Declaration Arguments</dt>
+<dd>FlowSource, Flow or FlowSink plus a Chem</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Inject I1(F1, A);
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real flux(t) mole/sec;    // injection rate of the Chem
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>An injection of a Chem into a flow (FlowSource, Flow or
+FlowSink) as determined by the sub-variable "flux" which has no default
+and so must be constrained by the BCL author.  "flux" units are 
+calculated from those of Time and the specified Chem (e.g. if Time 
+has unit "hour" and Chem has unit "mM",  "flux" will have unit 
+"mmol/sec").  Neat, huh?</dd>
+</dl>
+<h2>  <a name="massbalreaction">MassBalReaction</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>MassBalReaction</dd>
+<dt>    Desc</dt>
+<dd>Mass Balance Chemical Reaction</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Compartment, Equation</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+       MassBalReaction R1(C1, "X+Y=2Z");
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real kf(t);  // forward equilibrium constant
+      real kb(t);  // backward equilibrium constant
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>A chemical reaction whose actions are determined by forward
+and backward rate constants (kf and kb).  Units for kf and kb will vary
+depending upon the form the chemical equation, which must be in quotes.  
+Spacing does not affect the chemical equation.  Both kf and kb must be
+constrained by the BCL author, since neither has a default value.</dd>
+</dl>
+<h2>  <a name="mem">Membrane</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Membrane</dd>
+<dt>    Desc</dt>
+<dd>Membrane between two compartments</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Compartment1, Compartment2</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Membrane M(C1, C2);
+</pre>
+</p>
+<dl>
+<dt>    Sub-variables</dt>
+<dd>NONE</dd>
+<dt>    Notes</dt>
+<dd>A Membrane defines the topologic relationship between two
+compartments.  A membrane implies no calculations in itself, but serves as
+an attahchment point for Transport components.</dd>
+</dl>
+<h2>  <a name="production">Production</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Production  </dd>
+<dt>    Desc</dt>
+<dd>Production of a chemical species in a compartment</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Compartment, Chem</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Production Q2(C2, A);
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real fluw(t) mole/sec; // production rate
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>Production of a Chem within a Compartment.  This is the
+same as the Consumption component,  except with the sign of the rate 
+subvariable reversed.  See <a href="#consumption">Consumption</a> .</dd>
+</dl>
+<h2>  <a name="time">Time</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>Time</dd>
+<dt>    Desc</dt>
+<dd>Time, that eternal, ever-unfolding stream of existence.</dd>
+<dt>    Declaration Arguments</dt>
+<dd>NONE</dd>
+<dt>    Compatible unit</dt>
+<dd>second</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      Time t second;
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real min second;    // minimum value for time
+      real max second;    // maximum value for time
+      real delta second; // time grid spacing
+      int ct;            // # points in time grid
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>Defines the name for system time, which is represented as an
+evenly spaced grid. There must be exactly one Time declaration in a MFAX
+model, and it must be the first declared component.  Units for min, max
+and delta sub-variables are same as for Time component itself.  The model
+must constrain min, max and either delta or ct.  For those familiar with
+MML,  Time is a realDomain component with additional semantics.</dd>
+</dl>
+<h2>  <a name="transportflux">TransportFlux</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>TransportFlux </dd>
+<dt>    Desc</dt>
+<dd>Flux mediated Transport across a Membrane</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Membrane, Chem</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      TransportFlux T1(M, A);
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real flux(t); // flux in moles/time
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>Cross-membrane transport as determined by sub-variable flux.</dd>
+</dl>
+<h2>  <a name="transportps">TransportPS</a></h2>
+<dl>
+<dt>    Name</dt>
+<dd>TransportPS </dd>
+<dt>    Desc</dt>
+<dd>PS mediated Transport across a Membrane</dd>
+<dt>    Declaration Arguments</dt>
+<dd>Membrane, Chem</dd>
+<dt>    Compatible unit</dt>
+<dd>NONE</dd>
+</dl>
+<p>    <strong>Example</strong>:
+<pre>
+      TransportPS T1(M, A);
+</pre>
+</p>
+<p>    <strong>Sub-variables</strong>:
+<pre>
+      real PS(t) liter/sec;  // permiability*surface area
+</pre>
+</p>
+<dl>
+<dt>    Notes</dt>
+<dd>Cross-membrane transport as determined by sub-variable PS,
+which has units compatible with liter/sec that are determined by those
+of Time and the first Compartment attached to the Membrane.</dd>
+</dl>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

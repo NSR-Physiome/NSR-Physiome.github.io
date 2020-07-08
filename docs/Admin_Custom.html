@@ -1,0 +1,129 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Customizing a JSim Installation</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p>  This document discusses various customizations you may wish to to a JSim
+installation.  It assumes you have successfully installed JSim on your
+system and are familiar with <a href="User_Ref.html#env">JSIM Environment Variables</a> 
+.</p>
+
+<p>  The various customization options described here require either
+modifying user environment variables or installing scripts within
+JSIMPATH so that they can be found at run-time.  Environmental variable
+customization is typically done at login time, and may affect single users
+or all users.  See your system's documentation on how this is done.</p>
+
+<p>  When scripts must be placed in JSIMPATH,  this is typically done in 
+JSIMHOME/local for system-wide customization,  or HOME/.jsim/local for
+user-specific customizations.  Both these directories are in the default
+JSIMPATH.</p>
+
+<h2>  Customization topics:</h2>
+
+<p>    <a href="#finder">MacOS finder behavior</a></p>
+
+<p>    <a href="#secure">Security issues in customization</a></p>
+
+<p>    <a href="#c">Setting up a C compiler for use with JSim</a></p>
+
+<p>    <a href="#cplus">Setting up a C++ compiler for use with JSim</a></p>
+
+<p>    <a href="#fortran">Setting up a Fortran compiler for use with JSim</a></p>
+
+<p>    <a href="#matlab">Setting up Matlab for use with JSim</a></p>
+
+<p>  Note that a Java compiler is distributed with JSim,  so no customization
+is required for MML models that contain functions or procedures in Java.</p>
+
+<h2>  <a name="finder">Mac OS Finder Behavior</a></h2>
+
+<p>On the Macintosh, data files can be opened in the Finder by 
+double-clicking. By default, .jsml, .tac, .csv, .cdata and .bul files 
+will open in JSim. This behavior can be changed on an individual file 
+basis or for a particular user on a particular Mac. For example, if you 
+want all .tac files to open with TextEdit, do the following:</p>
+
+<ol>
+
+<li>Select any .tac file in the Finder.</li>
+
+<li>Select "Get Info" from the File menu.</li>
+
+<li>In the pulldown menu labeled "Open with:", select "TextEdit". 
+Then skip to step 7 below.</li>
+
+<li>If "TextEdit" does not appear, select "Other..."</li>
+
+<li>Navigate to "TextEdit" (it will be found in the Applications 
+folder).</li>
+
+<li>Click on "Add".</li>
+
+<li>Click on "Change All...".</li>
+
+<li>Click on "Continue".</li>
+
+</ol>
+
+
+<h2>  <a name="secure">Security issues is customization</a></h2>
+
+<p>    Before doing any local JSim customization, make sure you understand
+basic <a href="User_Sandbox.html">the JSim Sandbox</a> .  Never place untrusted
+files in either JSIMHOME/local or HOME/.jsim/local.  Such files can be
+accessed via JSim models <strong>EVEN IN THE SANDBOX</strong>, possibly resulting in
+a compromised system.</p>
+
+<h2>  <a name="c">Setting up a C compiler for use with JSim</a></h2>
+
+<p>    MML models may contain functions or procedures that require a C compiler.  See
+<a href="MML_Func_C.html">Calling C Code From MML</a> for details.   JSim does not
+contain an internal C compiler, but calls a local script for that purpose.  The
+script is named jscompile_c (formerly jscompile_c.sh)   for Linux and MacIntosh, and
+jscompile_c.bat for Windows.  A default version of jscompile_c(.bat) is provided in
+$JSIMHOME/local for all  distribution. This is a shell script uses the makefiles in
+$JSIMHOME/lib.   Administrators will normally need to modify those makefiles to
+reflect compiler locations on their local systems.  gcc version 4 is assumed,  the
+Cygwin version in the Windows distribution.  You will need to edit jscompile_c(.bat)
+and/or the relevant Makefiles for it to work properly on your system.  Instructions
+for installing compilers and modifying makefiles is beyond the scope of the JSim
+documentation set.  Consult an expert system administrator if required. Users may
+override the $JSIMHOME/local compile script by placing one somewhere in JSIMPATH.</p>
+
+<p>    The calling arguments for jscompile_c and jscompile_c.bat are:</p>
+
+<ol>
+<li> JSIMHOME;</li>
+<li> directory in which compilation is to take place;</li>
+<li> name of C module minus the .c extension, e.g. "test" for test.c.</li>
+
+</ol>
+<h2>  <a name="cplus">Setting up a C++ compiler for use with JSim</a></h2>
+<p>     JSim support for C++ is planned for the future,  but is not yet 
+available.</p>
+<h2>  <a name="fortran">Setting up a Fortran compiler for use with JSim</a></h2>
+<p>     JSim support for Fortran is planned for the future,  but is not yet 
+available.</p>
+<h2>  <a name="matlab">Setting up Matlab for use with JSim</a></h2>
+<p>     JSim support for Matlab is planned for the future,  but is not yet 
+available.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

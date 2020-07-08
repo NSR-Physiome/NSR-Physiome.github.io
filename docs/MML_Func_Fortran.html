@@ -1,0 +1,27 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>Calling Fortran Code from MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p>  Currently there is no direct path from JSim MML to Fortran.  Until such a time
+as there is, model writers should <a href="MML_Func_C.html">call C functions from MML</a> and
+call Fortran functions from C using pre-compiled native libraries.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

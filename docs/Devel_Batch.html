@@ -1,0 +1,571 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim Batch Processing Manual</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p> JSim users normally use the Graphic User Interface(GUI) for routine modeling 
+work.  However, for debugging and batch processing, it is sometimes useful to run 
+JSim models via the command line.  The program jsbatch provides this 
+functionality and is described in this document.</p>
+
+<p> Prerequisites: </p>
+<ul>
+<li><a href="User_Intro.html">Introduction to the JSim GUI</a> (required)</li>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a> (required)</li>
+<li><a href="User_Projects.html">JSim Projects</a> (recommended)</li>
+<li><a href="User_DataSets.html">Data Files and Project Data Sets</a> 
+(recommended)</li>
+<li>Familiarity with command-line tools in Unix user 
+environment (recommended).</li>
+</ul>
+
+<p> Contents: </p>
+<ul>
+<li><a href="#over">Overview</a></li>
+<li><a href="#synopsis">Command line synopsis</a></li>
+<li><a href="#switch">Switches</a></li>
+<li><a href="#func">A detailed example using jsbatch</a></li>
+<li><a href="#env">Environment Variables</a></li>
+</ul>
+<?php jscoqli() ?>
+
+<h2> <a name="over"> Overview </a> </h2>
+
+<p> jsbatch is a command-line driven, text-based program that loads JSim
+projects, builds and runs models and writes results in various formats.  
+This approach to modeling can be useful for batch processing, or for
+debugging models or JSim internals.  jsbatch provides no graphics or
+data-analysis facilities.  Users requiring those abilities should use the
+JSim GUI. This document describes running jsbatch on Unix systems.  Microsoft
+Windows users should make appropriate translations for that operating
+system.</p>
+
+<p> The general sequence of jsbatch operation follows.  This general
+sequence may be altered somewhat by switch selection.</p>
+
+<ol>
+<li> If a project file (extension .proj) is specified via the -f switch,  the 
+project file is loaded.  Otherwise,  a new, empty project is created.</li>
+<li>Any additional files specified via the -f, -func or -plot switches 
+are loaded into the project.</li>
+<li>The first model within the project is selected (unless 
+overridden by the -model switch).</li
+<li>The selected model is built. </li>
+<li>Any model inputs and other project variables values specified
+via the -i switch, are assigned.</li>
+<li>The selected model is run.</li>
+<li>Values for all model variables are printed on the standard output;</li>
+</ol>
+
+<h2> <a name="synopsis"> Command line synopsis</a></h2>
+
+<p> The following switches modify standard program behavior before the
+models are run.</p>
+
+<pre>
+<?php readfile("jsbatchUsage.txt") ?>
+</pre>
+
+<h2> <a name="switch">Switches</a></h2>
+
+<h3><a name="f">    -f file ...</a></h3>
+
+<p> Loads project, model and data files or URL contents into the current project.  
+Only a single project file is allowed.  Files are loaded based on their 
+extensions:</p>
+
+<ul>
+<li>Project files: .proj</li>
+<li>Model files:  .mod .xml .cellml .sbml .txt .java </li>
+<li>Data files: various, see recommended data file extensions <a 
+href="User_DataSets.html">here</a></li>
+</ul>
+
+<h3><a name="userurl">-userurl url</a></h3>
+
+<p>Process command line files relative to this URL.</p>
+
+<h3><a name="userdir">-userdir dir</a></h3>
+
+<p>Process command line files relative to this directory.</p>
+
+<h3><a name="path">-path path</a></h3>
+
+<p>Overrides default value of environment variable JSIMPATH.</p>
+
+<h3><a name="server">-server name</a></h3>
+
+<p>Use a remote computational <a href="Admin_Server.html">server</a> 
+instead of the local one.</p>
+
+<h3><a name="plugin">-plugin file ...</a></h3>
+
+<p>Load one or more optional <a href="Devel_Plugin.html">plugins</a> .</p>
+
+<h3><a name="usage">-usage</a></h3>
+
+<p>Print usage message and exit.</p>
+
+<h3><a name="stack">-stack</a></h3>
+
+<p>Print stack trace if program aborts.</p>
+
+<h3><a name="noscrub">-noscrub</a></h3> <p>Do not delete work files in temporary 
+build directory ($HOME/.jsim/work*) after use (developers only).</p>
+
+<h3><a name="builddirsfx">-builddirsfx SUFFIX</a></h3> 
+<p>Specify the temporary build directory as $HOME/.jsim/workSUFFIX.  The specified build directory must NOT EXIST, or else JSim will exit with 
+an error. This switch is for expert
+use only. It was added to prevent large numbers of simultaneous JSim jobs
+getting confused about whose build directory is whose.  When using this switch,
+the user is responsible that no two JSim jobs are using the same build directory at
+the same time, lest unexpected (read bad) results occur.  This switch is available 
+in JSim 2.09 and above.</p>
+
+<h3><a name="sandbox">-sandbox [ path [ path ] ]</a></h3>
+
+<p>Run application in the <a href="User_Sandbox.html">JSim sandbox</a> .</p>
+
+<h3><a name="nosandbox">-nosandbox</a></h3>
+
+<p>Run application without the JSim sandbox (default).</p>
+
+<h3><a name="securityMgr">-securityMgr class-name</a></h3>
+
+<p>Install custom security manager (developers only).</p>
+
+<h3><a name="sbwregister">-sbwregister</a></h3>
+
+<p>Register JSim with SBW broker and exit.</p>
+
+<h3><a name="sbwmodule">-sbwmodule</a></h3>
+
+<p>Run JSim as an SBW module, allowing the SBW broker to send 
+models to it.</p>
+
+<h3><a name="v">-v</a></h3>
+
+<p>Run in verbose mode.  Writes a multitude of fascinating arcana to the
+standard error while jsbatch is working (developers only).</p>
+
+<h3><a name="mp">-mp N</a></h3>
+
+<p>Use a maximum of N processors for parallizable run-time
+calculations.  If N is greater that the number of system processors, the
+lower number is used.</p>
+
+<h3><a name="i">-i var=expr ...</a></h3> <p>Assigns model input or project 
+variables to constants or algebraic expressions. Extern variables have no 
+default, and so must be set via this switch or the model will not run.  Input 
+variables are assigned to algebraic expressions of numeric constants, domain 
+variables and/or other input variables.  The order of input assignments in the 
+command line does not matter, so long they create no circular dependencies. MML 
+algebraic expression syntax is used.  Since some MML operators will be 
+interpreted by the Unix shell, the user must make use of quotes when appropriate.  
+In the following example1, u, v(t), w(t) are input parameters:</p>
+
+<pre>
+jsbatch -i u=5 "w=u*v" "v=t^2" -f example1.mod
+</pre>
+
+<p>JSim (version 2.01 and above) replaces at signs (@) in -i arguments 
+by spaces.  This is helpful when specifying united constants which 
+require spaces, because embedded spaces are not well preserved 
+by jsbatch:</p>
+
+<pre>
+jsbatch -i "u=(1@meter)" -f example1.mod # processed as u=(1 meter)
+</pre>
+<p>
+Conditional expression:
+</p>
+<pre>
+jsbatch -i "P_t=(if(t<1@or@t>5)fvalue@else@0)" -f example1.mod 
+   processed as: "P_t=(if(t<1 or t>5)fvalue else 0)" where P_t is a function of domain t 
+</pre>
+
+<h3><a name="func">-func name ...</a></h3>
+
+<p>Creates one of more function generators within the 
+selected model(s).</p>
+<p>A complicated example to give you a sense of the overall usage of jsbatch. This example simulation uses a data file (data.csv) as input for the function generator and the JSim model 'myModel.mod':</p>
+<pre>
+jsbatch -o Cout -f data.csv myModel.mod -func f1 -i t.max=10 Cin=f1 f1.domain0=t f1.which=DataCurve <br /> f1.DataCurve.dataSet=data f1.DataCurve.name=exp1
+</pre>
+</p>
+<p>
+Details:
+<ul>
+<li> '-o Cout': Only output variable Cout. </li>
+<li>'-f data.csv myModel.mod' :  Use data file 'data.csv' and model 'myModel.mod' for the simulation </li>
+<li>'-func f1' : define function 'f1' , this is used next to specify values for the input parameters.</li>
+</ul>
+What follows are values assigned to parameters (inputs):
+<pre>-i t.max=10 Cin=f1 f1.domain0=t f1.which=DataCurve f1.DataCurve.dataSet=data f1.DataCurve.name=Cin</pre>
+<ul>
+<li>'t.max=10' : specify run time of 10 (domain is t).</li>
+<li>'Cin=f1' : Sets the external input variable 'Cin' to the function 'f1'</li>
+</ul>
+For the input function (uses a Function generator as input):
+<ul><li>'f1.which=DataCurve' : Specifies that you want to use a data curve for the function generator.</li>
+<li>'f1.domain0=t' : specifies the domain to use (corresponds to the first column of data)</li>
+<li>'f1.DataCurve.dataSet=data' : Name of data set, corresponds to file name without extension.</li>
+<li>'f1.DataCurve.name=exp1' : name of the second column of data set.</li>
+</ul>
+</p>
+<p>
+The two example files can be downloaded here: <a href="../models/examples/JSBATCH/myModel.mod">myModel.mod</a> and <a href="../models/examples/JSBATCH/data.csv">data.csv</a>.
+</p>
+
+<h3><a name="plot">-plot name ...</a></h3>
+
+<p> Creates one or more plot pages within the project.  Note that
+this does not generate graphics,  which are not currently part of
+jsbatch.</p>
+
+<h3><a name="rtml">-rtml file</a></h3>
+
+<p>Imports custom RTML from the named file into the selected model.</p>
+
+<h3><a name="iproj">-iproj projfile:name ...</a></h3>
+
+<p>Imports content from other project files. "projfile" here refers to
+the name of a project file.  If the optional "name" and preceding colon
+are present, only the top-level project content (e.g. model, parameter
+set, plot page, data set, notes) with the corresponding name is imported,
+otherwise all top-level project content is imported.  If imported content
+has the same name as existing content, the existing content is removed
+before import.</p>
+
+<h3><a name="c">    -c name=value ...</a></h3>
+
+<p> Sets various model compilation options.  Options available are:</p>
+
+<ul>
+
+<li>maxBuildTime (integer): maximum compile time, in seconds. Default
+=120;</li>
+
+<li>initNaN (boolean): if true, initialize all variable caches with NaNs
+instead of zeroes.  Useful to developers for compiler debugging.  
+Default=false;</li>
+
+<li>traceNaN (boolean): if true, print message to console whenever a model
+variable is calculated as NaN.  Option supported only on a local JSim
+server.  Default=false;</li>
+
+<li>abortNaN (boolean): if true, abort model run whenever a model variable
+is calculated as NaN. Default=false;</li>
+
+<li>traceVars (String): Comma separated list of model variables to trace.
+Trace messages are printed on console as model runs. Default=empty;</li>
+
+</ul>
+
+<h3><a name="img">-img file ...</a></h3>
+
+<p> Load one or more images into the selected model's image set.  Image
+formats supported include GIF, JPEG and PNG.  </p>
+
+<h3><a name="lmod">-lmod file</a></h3>
+
+<p> Load model source code from file.</p>
+
+<h3><a name="lpar">-lpar parset</a></h3>
+
+<p> Load the named parameter set into the selected model before running
+the model or processing the -i switch.</p>
+
+<h3><a name="lxpar">-lxpar file</a></h3>
+
+<p> Load the named XSim parameter file into the selected model before
+running the model or processing the -i switch.</p>
+
+<h3><a name="spar">-spar parset</a></h3>
+
+<p> Save the specified model parameters, after the -i switch has been
+processed, into the named parameter set.</p>
+
+<p>The following switches affect the output printed by the program after the models
+have been run.</p>
+
+<h3><a name="model">-model name</a></h3>
+
+<p> Selects the named model to run.  If not specified,  the first
+model in the project (if any) is selected.  This switch is needed only
+for projects with more than one model.</p>
+
+<h3><a name="q">-q [var ...]</a></h3>
+
+<p> Variable query.  Queries properties and constraints of named 
+variables.  If no variables specified,  all variables are queried.
+jsbatch then exits without running the model.</p>
+
+<h3><a name="loops">-loops</a></h3>
+
+<p>Run loops instead of single model run.  </p>
+
+<h3><a name="sens">-sens</a></h3>
+
+<p>Run sensitivity run instead of a single model run.  </p>
+
+<h3><a name="optim">-optim</a></h3>
+
+<p>Run optimizer instead of single model run.</p>
+<p>
+A detailed example (all one line):
+<br />
+<pre>jsbatch -oreport -f myModel.mod data.csv -optim -func f1 -i f1.which=Gaussian 
+f1.domain0=t Cin=f1 Vp=0.2 myModel.optim.optpar0.par=Vp myModel.optim.optpar0.min=0.1 
+myModel.optim.optpar0.max=2 myModel.optim.optpar0.step=0.01 myModel.optim.maxCalls=10 
+myModel.optim.optpar0.enabled=true myModel.optim.optmatch0.src=data 
+myModel.optim.optmatch0.data=exp1 myModel.optim.optmatch0.expr="Cp(t,L)" 
+myModel.optim.optmatch0.enabled=true</pre>
+</p>
+<ul>
+<li><pre> -oreport</pre> Generates an optimization report </li>
+<li><pre> -f myModel.mod data.csv</pre> Optimization uses JSim mml model file 'myModel.mod' and data set 'data.csv' </li>
+<li><pre> -optim</pre> Run an optimization in JSim.</li>
+<li><pre> -func f1 -i f1.which=Gaussian f1.domain0=t Cin=f1 Vp=0.2 </pre> Create a function 'f1'. Specifiy the inputs using '-i' flag. Specify the value of the inputs. Here we describe the function, f1, then assign it to variable Cin. Parameter 'Vp' is assigned a value of '0.2'. </li> 
+<li><pre>myModel.optim.optpar0.par=Vp myModel.optim.optpar0.min=0.1 
+myModel.optim.optpar0.max=2 myModel.optim.optpar0.step=0.01</pre> Vary parameter 'Vp' between 0.1 and 2 with step size '0.01'. Note: to specify optimization parameters you must prefix them with 'model name' followed by label 'optim'.</li> 
+<li><pre> myModel.optim.maxCalls=10 </pre> Run optimization 10 times.</li>
+<li><pre>myModel.optim.optpar0.enabled=true </pre>Confirm you want to use specified parameter.  </li>
+<li><pre>myModel.optim.optmatch0.src=data myModel.optim.optmatch0.data=exp1 </pre>Specify dataset and dataset curve </li>
+<li><pre>myModel.optim.optmatch0.expr="Cp(t,L)" myModel.optim.optmatch0.enabled=true</pre> This specifies which model expression to minimize against the data curve. In this case it is variable 'Cp' for all 't' at x=L. Cp is a function of domains t and x.</li>
+
+</ul>
+<p>
+The two example files can be downloaded here: <a href="../models/examples/JSBATCH/myModel.mod">myModel.mod</a> and <a href="../models/examples/JSBATCH/data.csv">data.csv</a>.
+</p>
+<p>For more optimization parameter names that you may want to vary, please set up an optimization in the JSim gui then save the parameter set. Next, view the plain-text parameter set from within JSim. This lists all of the parameter names available.
+</p>
+<h3><a name="monte">-monte</a></h3>
+
+<p>Run Monte Carlo analysis instead of single model run. In this case,
+the default output is the values of the optimized parameters.  Alternative
+output is available via the -oreport or -oreports switches.</p>
+
+<h3><a name="">-nruns # </a></h3>
+
+<p>Specify number of times to run each model or to run models
+loops job.  This is useful for developers checking for numeric agreement 
+between runs.</p>
+
+<h3><a name="fwdIC">-fwdIC [ domain=value ... ]</a></h3>
+
+<p>Forward ODE ICs after (each) model run.  Forwarding applies only to 
+1-dimensional ODE state variables with user-set ICs. With no arguments, the 
+previous run value at the domain maximum is forwarded.  </p>
+
+<h3><a name="o">-o expr ...</a></h3>
+
+<p> Specifies variables and algebraic expressions to write to the standard
+output.  In its absence, all variables are output.  Comments on algebraic
+expressions for the -i switch apply here as well.  For example:</p>
+
+<pre>
+        jsbatch -o u v "u*v" example1.mod
+</pre>
+
+<p>JSim (version 2.01 and above) replaces at signs (@) in -o arguments 
+by spaces.  This is helpful when specifying united constants which 
+require spaces, because embedded spaces are not well preserved 
+by jsbatch:</p>
+
+<pre>
+jsbatch -o "u/(1@meter)" -f example1.mod # processed as u/(1 meter)
+</pre>
+
+
+
+<h3><a name="oplot">-oplot </a></h3>
+
+<p>Output project plot page data.  Overrides -o.</p>
+
+<h3><a name="osensmat">-osensmat </a></h3>
+
+<p> Output sensitivity correlation coefficients for expressions specified by -o 
+switch.  If -o not present, uses all output variables from selected model.  
+Requires -sens.</p>
+
+<h3><a name="fgenprev">-fgenprev </a></h3>
+
+<p>Output function generators preview data (developers only).  Overrides -o.</p>
+
+<h3><a name="odataset">-odataset name</a></h3>
+
+<p>Output data are taken from the project data set of the name 
+specified.  Overrides -o.</p>
+
+<h3><a name="ortml">-ortml</a></h3>
+
+<p>Output the RTML from the selected model.  Overrides -o.</p>
+
+<h3><a name="out">-out filename</a></h3>
+
+<p>Writes output data to a file,  instead of standard output.</p>
+
+<h3><a name="odim">-odim number</a></h3>
+
+<p>Selects only data of specified dimension.  Useful for format such
+as TacFileFormat,  which only supports 1-D curves.</p>
+
+<h3><a name="ofmt">-ofmt format</a></h3>
+
+<p>Writes output data in various formats. Values for format follow.  See
+<a href="User_DataSets.html">Data Files and Project Data Sets</a> for the details 
+about supported data
+formats.</p> 
+
+<ul>
+<li>line = Line Data Format (default)</li>
+<li>column = Columnar  Data Format</li>
+<li>csv = Comma Separated Value Data Format</li>
+<li>pretty = Pretty Data Format</li>
+<li>TAC = TAC Data Format</li>
+<li>jsml = JSML Data Format</li>
+<li>matlab = Matlab Data Format</li>
+<li>i4bull = I4 Bullseye Data Format</li>
+</ul>
+
+<h3><a name="oblocked">-oblocked min max</a></h3>
+
+<p>Writes subset of output lines.  This options is valid only if the 
+DataWriter supports blocking.  Currently,  only PrettyDataFormat supports
+blocking.</p>
+
+<h3><a name="osingle">-osingle</a></h3>
+
+<p>Writes output variables in single precision format (default).</p>
+
+<h3><a name="odouble">-odouble</a></h3>
+
+<p>Writes output variables in double precision format instead.</p>
+
+<h3><a name="oprec">-oprec #</a></h3>
+
+<p> Writes output variables to precision specified by 
+user.  -oprec 8 is equivalent to -osingle.  -oprec 19
+is equivalent to -odouble.</p>
+
+<h3><a name="ozero">-ozero #</a></h3>
+
+<p>Writes output variables with absolute values less than # as 0. This can be 
+useful when comparing two data sets.</p>
+
+<h3><a name="oencoding">-oencoding code</a></h3>
+
+<p>Changes DataWriter output encoding from default.  Currently, this is supported 
+only by JSMLDataFormat.</p>
+
+<h3><a name="ocrash">-ocrash</a></h3>
+
+<p>Writes output even if model run crashes.  Many values 
+will be NaN's,  but other values can help model debugging.</p>
+
+<h3><a name="oreport">-oreport</a></h3>
+
+<p>Prepends optimization report to output (requires -optim).</p>
+
+<h3><a name="oplan">-oplan</a></h3>
+
+<p>Writes model planning information, rather than output variables.  Models are 
+not run.</p>
+
+<h3><a name="omathml">-omathml</a></h3>
+
+<p>Writes <a href="MML_MathML.html">MathML</a> translation of model to output. 
+Models are not run.</p>
+
+<h3><a name="omml">-omml</a></h3>
+
+<p>Writes model MML source code,  if available. Overrides -o.</p>
+
+<h3><a name="oxmml">-oxmml [variant]</a></h3>
+
+<p>Writes model <a href="MML_XMML.html">XMML</a> model output.  Overrides
+-o.</p>
+
+<h3><a name="osbml">-osbml</a></h3>
+
+<p>Outputs the model translated into <a href="MML_SBML.html">SBML</a>.  Overrides 
+-o.</p>
+
+<h3><a name="ocellml">-ocellml</a></h3>
+
+<p>Outputs the model translated into <a href="MML_CellML.html">CellML</a>.  Overrides 
+-o. Available in JSim version 2.06 and above.</p>
+
+<h3><a name="oantimony">-oantimony</a></h3>
+
+<p>Outputs the model translated into <a
+href="MML_Antimony.html">Antimony</a>.  Overrides 
+-o. Available in JSim version 2.03 and above.</p>
+
+<h3><a name="omatlab">-omatlab</a></h3>
+
+<p>Outputs the model translated into a Matlab .m file.  Overrides 
+-o. Available in JSim version 2.07 and above.</p>
+
+<h3><a name="ographml">-ographml</a></h3>
+
+<p>Writes model browser <a href="User_Browser.html#graphml">GraphML</a> output.  
+Overrides -o.</p>
+
+<h3><a name="oflat">-oflat</a></h3>
+
+<p>Writes flattened model MML code (developers only). Overrides -o.</p>
+
+<h3><a name="ojava">-ojava</a></h3>
+
+<p>Writes JSim model Java code (developers only). Overrides -o.</p>
+
+<h3><a name="oproj">-oproj [name ...]</a></h3>
+
+<h3><a name="oproj">-oproj [name ...]</a></h3>
+
+<p> Write final project content to output.  Overrides -o. "name" here refers to 
+the name of top-level project content (e.g. model, parameter sets, ...).  If no 
+names are specified, all project output is written.</p>
+
+<h3><a name="oprofile">-oprofile</a></h3>
+
+<p>Write run-time profile report to output.</p>
+
+<h3><a name="opar">-opar filename</a></h3>
+
+<p> Write parameter file (.par) to output.  Overrides -o. This feature 
+availabe in JSim 2.05 and above.</p>
+
+<h3><a name="sdata">-sdata name</a></h3>
+
+<p>Stores output variables in the named project data set.  Use with -oproj.</p>
+
+<h2> <a name="env">  Environment Variables </a> </h2>
+
+<p>JSIMPATH specifies the set of directories used when searching for 
+files during the MML import command (e.g. import nsrunit).  If not 
+specified,  the default is 
+$HOME/.jsim/local:$JSIMHOME/local:$JSIMHOME/common:.</p>
+
+<p>JSIMHOME specifies JSim's installation directory. On a Macitosh, 
+JSIMHOME specifies the Resources directory inside the JSim application 
+bundle.  This is important to JSIMPATH, see above.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

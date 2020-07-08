@@ -1,0 +1,213 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Using JSim Multiprocessing</h1>
+
+<?php include "topmsg.php"; ?>
+
+<p>  This page talks about JSim multiprocessing (MP), the ability for a
+single JSim session to take advantage of multiple computer processors to
+increase calculation speed.</p>
+
+<h2> Contents:</h2>
+
+<ul>
+<li><a href="#current">Current JSim MP Support</a></li>
+<li><a href="#active">Activating JSim MP Support</a></li>
+<li><a href="#future">Future JSim MP Support</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<h3>  <a name="current">Current JSim MP Support</a></h3>
+
+<p>    Most (but not all) JSim models support MP. JSim models support MP
+unless they contain the following:</p>
+
+<ul>
+
+<li>Non-reentrant <a href="MML_Func_Intro.html">functions and 
+procedures</a> : this restriction applies to all <a 
+href="User_Fpack.html">Fpack</a> (legacy XSIM) models.</li>
+
+</ul>
+
+<p> JSim MP support is currently limited to multirun analyses (loops,
+sensitivity analysis, optimization, Monte Carlo, functional imaging) on shared memory
+multi-processors. JSim multi-run analyses take advantage of MP by running
+up to N model runs in parallel, assuming N system processors are
+available.  Benchmark tests indicate near 100% processor utilization up to
+4 system processors, with progressively more modest gains for additional
+processors.  The actual speed gain you realize will depend upon the
+specifics of your computer hardware and operating system.  On a system of
+N processors, ideal speed gains would be as follows:</p>
+
+<ul>
+<li><a href="User_Loops.html">loops</a> : all requested runs (M in number) are
+dispatched at once, realizing a speedup factor of N when N divides evenly 
+into M.</li>
+<li><a href="User_Sens.html">sensitivity analysis</a> : the first (unperturbed) run
+utilizes only one processor.  All subsequenct perturbed runs (P in 
+number) are dispatched at once,  realizing a speedup factor of N when N 
+divides
+evenly into P.  No speedup is realized when only a single perturbed run
+is requested (but see <a href="#future">future plans</a> ).</li>
+<li><a href="User_Optim.html">optimization</a> : speed gain depends upon the algorthm
+selected. Speed gains are realized only when using the MP-capable
+algorithms ( see <a href="Solver_Optim_Ref.html">JSim Optimization Algorithms</a> for
+current details, but also see <a href="#future">future plans</a> ).  Users should note
+that optimization MP requires more memory than single-processor
+optimization because storage must be allocated for multiple parallel runs.</li>
+<li><a href="User_Monte.html">Monte Carlo analysis</a> : noisy 
+optimizations (M in number) are dispatched to all N processors.  Since
+M is typically much larger than N,  this results in a speedup factor of 
+N.</li>
+<li><a href="User_Fim.html">functional imaging</a> : segment 
+optimizations (M in number) are dispatched to all N processors.  Since
+M is typically much larger than N,  this results in a speedup factor of 
+N.</li>
+
+</ul>
+
+<h3>  <a name="active">Activating JSim MP</a></h3>
+
+<p>    JSim MP support may be activated via the -mp command line switch (in
+jsim, jsfim or jsbatch), or via Preferences menu in the JSim GUI.</p>
+
+<p>    JSim MP operates by creating parallel computational threads (when
+possible) which Java distributes evenly over available system processors (N in
+number). The maximum useful number of parallel threads is N. Using more is
+counter-productive because the threads will compete with each other for
+resources.  Users configure JSim MP by specifying the maximum number of parallel
+computate threads to be used. JSim enforces that this number is between 1 and N
+(inclusive).</p>
+
+<p>    The following example activates JSim using a maximum of 4 compute
+threads.  If the system running the command does not have that many
+processors, then the number of processors actually present is used.  This
+means you can't hurt yourself by specifying too many processors:
+<pre>
+      jsim -mp 4 [other arguments]
+</pre>
+</p>
+
+<p>    In the JSim GUI, MP is activated/deactivated via the "Multiprocessing
+configuration..." item in the Preferences menu of the Project tab.  This
+configuration box is not available for single-processors systems or for sessions
+using a remote server (such as JSim applets).  Note that this JSim Preference is
+not currently preserved between sessions, due to the experimental nature of JSim
+MP.  Once MP is considered stable, this Preference will be preserved between
+sessions.</p> 
+
+<p>    Regardless of activation method above, MP is actually used only on models
+that support it (no PDEs or non-reentrant F&P, see above).  JSim recognizes
+MP-unsupported models automatically. Therefore, you do not normally need to
+worry about toggling MP on and off during a session depending on the model
+(however, see exceptions below).  To determine whether a JSim model supports MP,
+select "View plan text" in the model's Debug tab or specify -oplan in jsbatch. A
+boolean attribute labeled "Allow MP Runs:" gives this information.</p> 
+
+<p>    There are two reasons you might choose to deactivate MP  once it has been
+activated:</p>
+
+<ol>
+
+<li> MP is still somewhat experimental.  If you encounter unstable behavior
+under MP, you should report the bug to NSR and run deactivate MP until the
+problem is resolved.</li>
+
+<li> MP optimization requires more memory than single-processor optimization
+because storage must be allocated for parallel model runs. If you are running a
+large model, this may potentially exhaust system memory.   Alternatives are to
+<a href="User_Memory.html">increase JSim's memory allocation</a> or deactivate
+MP during the optimization.</li>
+
+</ol>
+
+<h3>  <a name="future">Future JSim MP Support</a></h3>
+
+<h4>    Non-reentrant F&P</h4>
+<p>      JSim allows embedded procedural code, however this code must be
+reentrant in order to work properly on multiple processors.  This
+restriction is not expected to be lifted, except possibly in the case of
+future cluster support (see below).  Model writers interested in writing
+reentrant F&P should consult <a href="MML_Func_Intro.html">this document</a> .</p>
+
+<h4>    Fpack (legacy XSIM) models</h4>
+<p>      Fpack models rely on procedural code in Fortran common blocks,  and 
+are not-reentrant.  See comments above regarding non-reentrant F&P.</p>
+
+<h4>    Sensitivity analysis</h4>
+<p>      Currently, the unperturbed run in a sensitivity analysis must
+complete before additional perturbed runs are done in parallel.  In the
+future, this situation will be improved so that all runs (perturbed and
+unperturbed) are done in parallel.</p>
+
+<h4>    Optimization algorithms</h4>
+<p>      The Simplex and GGopt optimization algorithms do not support 
+MP.  However, JSim's other optimization algorithms do.
+</p>
+
+<h4>    Single run MP</h4>
+<p>      In future JSim versions, the calculations in a single model run may
+be parallelizable, allowing multiple processors to be utilized.  Whether a
+single model can utilize MP for effective speedup depends upon the nature
+of the equations.  Some possible candidates for parallelization are:</p>
+
+<ol>
+<li> Models that use parallel pathways,  for example a blood tissue 
+exchange model with multiple parallel arterioles in which each arteriole
+is calculated independently.</li>
+<li> Models that use parallel PDE solver algorithms.  Currently, JSim
+does not provide any such algorithms, but they exist and may be
+incorporated into future versions of JSim.</li>
+<li> Large ODE models may be seperable into fast and slow interaction
+blocks (for example, two organs separated by a blood flow).  It is
+possible such blocks could be recognized by the JSim compiler and made to
+calculate in parallel.  This is a difficult problem, however, and so
+should be viewed as a future goal.</li>
+
+</ol>
+
+<h4>    Distributed-memory computation (clusters)</h4>
+
+<p> A compute cluster is a set of networked computers running common 
+software for a particular task.  Cluster nodes do not share a common 
+memory, so message passing protocols between nodes must be implemented 
+to coordinate computations on common models and datasets.  Such message 
+passing induces overhead, meaning clusters are inherently less efficient 
+at closely coupled parallel computation than shared memory systems.  
+However, clusters can be very efficient and economical for loosely 
+coupled parallel computation because an N-node cluster is usually 
+cheaper than an N-processor shared memory system (for large N).</p>
+
+<p> JSim cluster support is under consideration. The most likely 
+scenario is that <a href="Admin_Server.html">jsserver</a> will updated 
+to allow separate model runs to be farmed out to available cluster nodes 
+automatically.  Prospects for multi-run MP analyses (loops, sensitivity 
+analysis, optimization) on clusters are very good, since such 
+computations are loosely coupled.  Single-run MP speedup via clusters is 
+more problematic because the parallel threads are more closely coupled.  
+While single-run cluster MP is possible, it must be considered a long 
+term objective at this point.</p>
+
+<p> It is possible that future JSim cluster support would allow MP 
+support for models containing non-reentrant F&P, such as Fpack models. 
+More information will be available on this topic once clustering becomes 
+available.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

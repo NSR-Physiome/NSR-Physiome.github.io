@@ -1,0 +1,250 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim User Reference Manual</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+<p>    This reference describes options for launching JSim and controlling
+its appearance and basic behaviour.  It assumes the user is somewhat
+familiar with JSim.  Contents:</p>
+
+<ul>
+<li><a href="#start">Starting JSim</a></li>
+<li><a href="#help">Getting help</a></li>
+<li><a href="#prefs">The user preferences file</a></li>
+<li><a href="#switch">Command-line switches</a></li>
+<li><a href="#env">JSim environmental variables</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<h2>  <a name="start">Starting JSim</a></h2>
+<p>    JSim may be launched in three ways:</p>
+
+<ol>
+<li> Double-clicking on the JSim icon.  In this case, you may control 
+JSim's launch behavior only through <a href="#env">environmental variables</a> .</li>
+<li> Typing "jsim" at the command line.  In this case, you may control
+JSim's launch behaviour through either <a href="#env">environmental variables</a> or
+<a href="#command">command line switches</a> .</li>
+<li> Pointing your browser to a JSim-enabled web-site.  In this case,  
+the web-site administrator,  not the user, has control of JSim's launch 
+behavior.  See <a href="Admin_server.html">Administering a JSim Web Site</a> for further
+information.</li>
+
+</ol>
+<h2>  <a name="help">Getting help</a></h2>
+
+<p> The JSim documentation set, of which this document is but a small part,
+provides the most detailed description of JSim's functionality. In addition,
+context-sensitive popup help is available for many of JSim's menus and
+controls.  When the help system is activated, pointing the mouse at many JSim
+menus, controls or model variables will pop up a small window containing a
+brief description. <p>
+
+<p>"Hover" help (activated by default) pops up after ~1.5 seconds
+without mouse motion over a documented item.  Hover help may be toggled on and
+off via the F1 key.  "Fast" help (inactive by default)  appears immediately
+when the mouse is over a documented item.  Fast help may be toggled on and off
+via the shift-F1 key.  Fast help can be useful if you're looking at lot of help
+popups and get impatient waiting for hover help to appear.</p>
+
+<p> JSim applet users should note that the (plain) F1 keystroke is intercepted
+by most browsers for their internal help systems.  In this case, once hover
+help is deactivated by the user (via shift-F1), it may not be reactivated
+within that JSim session. </p>
+
+<h2>  <a name="prefs">The user preferences file</a></h2>
+<p>   Some JSim appearance issues are inherently individual.  An optimal font
+size will be larger for those with less acute vision, smaller for those
+with more acute.  Preferred background color may be affected by
+aesthetics, color-blindness, eye contrast sensitivity, or monitor
+brightness.  Such user preferences are stored in a JSim user's preferences
+file.</p>
+<p>   When JSim starts, user preferences from the file
+$USERHOME/.jsim/local/preferences.xml are loaded.  If the file is missing
+or corrupt, default settings are used. User preferences may be reset at
+run-time in the "Project" tab's "Preferences" menu. Currently available
+preferences are:
+<ul>
+<li><strong>Background color:</strong>  This is a light blue by default.  Several
+fixed colors are available in the "Preferences" menu,  as well as 
+a "Custom color" option for picking any possible color.  If the selected
+color is too dark,  it will be rejected and the default color reinstated.
+This preference may be overridden via the <a href="#switch">-rgb switch</a> .</li>
+<li><strong>Base font size:</strong> This is a 12-point font by default.  Several
+font sizes are used in JSim for clarity.  All are scaled relative to this
+base font size.  This preference may be overridden via the <a href="#switch">-fs
+switch</a> . Keyboard shortcuts Cntl-Plus and Cntl-Minus (Command-
+for MacOS) for increasing and decreasing the current font size are
+available not only in the "Project" tab, but throughout the application.</li>
+<li><strong>Window size:</strong> This is the initial size of a project window
+(900x600 pixels by default).  A project window may be resized using
+standard GUI mechanisms.  When preferences are saved, the current window
+size is stored.  This preference may be overridden via the <a href="#switch">-ws
+switch</a> .</li>
+<li><strong>Backup project file:</strong> (JSim v2.19 and above) When set it will backup the last successfully run project file and store it in the current working directory labeled as "modelName_LastRun.proj", where "modelName" was the original project file name.  
+</ul>
+<p>    Modified preferences are not automatically saved.  Selecting "Save
+preferences"  from the "Preferences" menu will save your currently active
+settings (also note "Window size", above).  The <a href="#switch">-noprefs switch</a>
+represses loading of the preferences file.  If your preferences file
+causes unworkable JSim behavior, restarting JSim with the -noprefs
+switch and then saving preferences will get you back to the default
+settings.</p>
+</p>
+<h2>  <a name="switch">Command-line switches</a></h2>
+<pre>
+<?php readfile("jsimUsage.txt") ?>
+</pre>
+
+<h3><a name="f">    -f file ...</a></h3>
+<p>      Loads a project file or one or more files into the current project.  
+Only a single project file is allowed.  Files are loaded based on their
+extensions:</p>
+
+<ul>
+<li>JSim project files - extension .proj;</li>
+<li>JSim model files - extensions .mod .flat and .java ;</li>
+<li>JSim <a href="User_DataSets.html#loadfile">importable data files</a> -
+extensions .tac .jsml .csv .cdata and .bul.</li>
+</ul>
+<p>      Load -f switch files relative the the specified URL,
+rather than from the local file system.</p>
+<p>      This switch also accepts complete URLs.</p>
+<h3><a name="v">    -v</a></h3>
+<p>Verbose mode.  Write lots of tedious detail to standard error</p>
+<h3><a name="userdir">    -userdir directory</a></h3>
+<p>      Overrides the environmental variable <a href="#env">JSIMUSERDIR</a> .</p>
+<h3><a name="path">    -path path</a></h3>
+<p>      Overrides the environmental variable <a href="#env">JSIMPATH</a> .</p>
+<h3><a name="server">    -server name</a></h3>
+<p>      Perform model calculations on a remote 
+<a href="Admin_Server.html">JSim server</a> rather than on the local machine.</p>
+<h3><a name="plugin">    -plugin file ...</a></h3>
+<p>      Load one of more JSim <a href="Devel_Plugin.html">plugins</a> .</p>
+<h3><a name="usage">    -usage</a></h3>
+<p>      Prints a list of available command line switches,  and exits.</p>
+<h3><a name="stack">    -stack</a></h3>
+<p>      Prints a complete stack dump if any unexpected errors occur. This 
+information can be useful when forwarding bug reports to the JSim 
+development team.</p>
+<h3><a name="maxBuildTime">    -maxBuildTime number</a></h3>
+<p>      Specifies the model compile timeout in seconds.
+The default is 120 seconds.</p>
+<h3><a name="securityMgr">    -securityMgr class-name</a></h3>
+<p>Installs custom security manager (for developers only).</p>
+<h3><a name="sandbox">    -sandbox [ path [ path ] ]</a></h3>
+<p>      Run application in the <a href="User_Sandbox.html">JSim sandbox</a> .</p>
+<h3><a name="nosandbox">    -nosandbox</a></h3>
+<p>      Run application without the JSim sandbox (default).</p>
+<h3><a name="mp">    -mp N</a></h3>
+<p>      Use a maximum of N processors for parallizable run-time
+calculations.  If N is greater that the number of system processors, the
+lower number is used.  By default,  only one processor is used.</p>
+<h3><a name="noprefs">    -noprefs</a></h3>
+<p>      Ignore the <a href="#prefs">user preferences file</a> .  User preferences
+are set to system defaults.</p>
+<h3><a name="rgb">    -rgb REDxGREENxBLUE    </a></h3>
+<p>      Sets the background color of JSim project windows where RED, 
+GREEN and BLUE are integers between 0(darkest) and 255(brightest).
+If not specified,  the color is drawn from the <a href="#prefs">user preferences 
+file</a> .</p>
+<h3><a name="fs">    -fs size</a></h3>
+<p>      Sets the base font size (in points) for all windows.  If not 
+specified,  the font size is drawn from the <a href="#prefs">user preferences
+file</a> .</p>
+<h3><a name="ws">    -ws WIDTHxHEIGHT</a></h3>
+<p>      Sets the initial size of project windows,  in pixels.  If not
+specified,  the window size is drawn from the <a href="#prefs">user preferences
+file</a> .</p>
+<h3><a name="popout"> -popout</a></h3>
+<p> Create initial project in new frame rather than the HTML page itself.
+Valid for applet usage only.  JSim icon will appear in HTML page 
+applet or object tag while applet is running.  When JSim terminates,
+the JSim icon will be cleared.</p>
+<h3><a name="demo"> -demo [ expr ... ]</a></h3>
+
+<p> Demo mode.  At program launch first model and first plotpage tabs are
+pushed forward and the model is compiled.  If optional expressions are
+specified, a plotpage containing those expressions is pushed forward
+instead.  If the expressions are not found in any existing plot page, they
+are added to an existing blank plotpage or a new plotpage is created to
+hold them.  If single numeric expression (N) is specified, the first N
+1-dimensional model output variables are plotted.  Switch can be useful
+for web tutorials, especially those for new users unfamiliar with
+navigating the JSim GUI.</p>
+
+<h2>  <a name="env">JSim environmental variables</a></h2>
+<p>    Environmental variables that control JSim are listed below. These are
+normally set to installation appropriate values by the system
+administrator.  However, the user may <a href="#setenv">override these values</a> by
+various operating system specific mechanisms.</p>
+<p>    JSIMUSERDIR - points to the directory from which user will initially 
+select files to import into or export from JSim.  This directory then changes 
+dynamically as the user operates the program.  Two special values are:<p>      HOME - sets JSIMUSERDIR to the user's home directory.  This is the default
+when double-clicking on the JSim icon.</p>
+<p>      CURRENT - sets JSIMUSERDIR to the current directory.  This is the default
+when launching JSim from the command line.</p>
+</p>
+
+<p> JSIMHOME - points to the directory where JSim is installed.  On a 
+Macintosh, JSIMHOME points to JSim.app/Contents/Resources.  This is 
+normally not changed, unless you have multiple JSim installations on 
+your system. </p>
+
+<p>    JSIMPATH - describes an ordered set of directories where JSim searches 
+for files it needs during a model build.  These files include:<p>      model files specified by the MML import command;</p>
+<p>      java class libraries and native libraries specified in MML 
+functions and procedures;</p>
+<p>      scripts allowing access to native compilers,  such as C and Fortran.</p>
+</p>
+<p>      The directory components in a path are separated by colons under Linux
+and semi-colons under Windows.  If JSIMPATH is not explicitly set,  it 
+defaults to:<p>         USERHOME/.jsim/local</p>
+<p>         JSIMHOME/local</p>
+<p>         JSIMHOME/common</p>
+<p>         .  (the current directory at launch time)</p>
+
+<h2>  <a name="setenv">Setting environment variables</a></h2>
+<h3>    Under Linux</h3>
+<p>      Under Linux, or other Unix-like operating systems, the syntax depend
+on the Unix shell you are using.<p>         For Bourne shell and derivatives (sh, bash, ...):
+<pre>
+           VARIABLE=VALUE; export VARIABLE
+</pre>
+</p>
+<p>         For C-shell and derivatives (csh, tcsh, ...):
+<pre>
+           setenv VARIABLE VALUE
+</pre>
+</p>
+</p>
+<p>      Each Unix shell has initialization files that allow you to set
+environmental variables automatically each time you login.  Mechanisms
+vary by shell and installation.  See documentation for your shell, or
+contact your system administor for further information.</p>
+<h3>    Under Windows</h3>
+<p>      No information yet available.</p>
+<h3>    Under MacOS</h3>
+<p>      No information yet available.</p>
+</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

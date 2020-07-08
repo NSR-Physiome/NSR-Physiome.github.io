@@ -1,0 +1,66 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>JSim XMML (Extensible MML)</h1>
+
+<h2>  Introduction</h2>
+
+<p>XMML is an XML representation of a compiled JSim MML model.  It 
+is designed to enable JSim to communicate will language translators
+and Bioinformatics tools.  The XMML is nearing completion and a full
+release is expected with JSim 2.01.  Until then,  the following
+rough outline may be helpful to XMML tool writers.</p>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#2.00">XMML specification - version 2.00</a> (current)</li>
+<li><a href="#2.01">XMML specification - version 2.01</a> (under 
+development)</li>
+<?php jscoqli() ?>
+</ul>
+
+<h3><a name="2.00">XMML Specification - version 2.00</a></h3>
+
+<p>This XMML specification applies to output from JSim version 2.00 
+only.</p>
+
+<pre>
+<?php readfile("xmml_spec_2_00.txt"); ?>
+</pre> 
+
+<h3><a name="2.01"> XMML Specification - version 2.01</a></h3>
+
+<p>This XMML specification applies to output from JSim version 2.01
+and above.</p>
+
+<p>Automatically generated schema documents (via <a 
+href="http://www.thaiopensource.com/relaxng/trang.html">trang</a>):</p>
+
+<ul>
+<li><a href="XMML_schema.xsd">XML schema</a></li>
+<li><a href="XMML_schema.rnc">Relax-NG</a></li>
+</ul>
+
+<p>Manually generated outline:</p>
+
+<pre>
+<?php readfile("xmml_spec_2_01.txt"); ?>
+</pre> 
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

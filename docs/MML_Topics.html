@@ -1,0 +1,166 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Miscellaneous Short Topics in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<p> Prerequisites: </p>
+
+<ul>
+<li><a href="MML_Intro.html">Introductory Survey of MML</a>
+(required)</li>
+<li><a href="User_Intro.html">Introduction to the JSim
+GUI </a> (recommended)</li>
+</ul>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#public">Public, Private and Extern variables</a></li>
+<li><a href="#choice">Choice Variables</a></li>
+<li><a href="#deriv">Symbolic Derivatives</a></li>
+<li><a href="#help">Variable Properties</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<h2>  <a name="public">Public, Private and Extern variables</a></h2>
+<p>    To make models adequately general, JSim allows some variables to be
+specified as "extern", which means they are not calculated by the model,
+but are provided to the model externally by the JSim user environment.  
+The run-time environment requires that explicit values be assigned to all
+externs before a model can be run.  Extern variables are considered
+completely constrained, so no additional MML constraints are required.  A
+sample voltage inverter follows:</p>
+
+<?php jsTextDownApp("examples/MML_Topics/inverter.proj"); ?>
+
+<p>    MML variables may be designated as "private", which means they are not
+visible to the run-time interface.  This can be useful in reducing clutter
+if a variable is uninteresting at run-time.  Extern variables may not be
+private. Variable neither private nor extern are considered public.:</p>
+
+<?php jsTextDownApp("examples/MML_Topics/rabbit.proj"); ?>
+
+<p>    Run-time output:</p>
+<pre>
+a=5
+c=30
+</pre>
+
+<p>    Public variables may be redeclared as extern or private.  This is
+accomplished with the keywords extern or private followed immediately by
+the variable name and can be useful when sub-variables are created
+automatically as public, as with domains.  The following example makes
+t.min private,  making it unchangable at run-time (see following section).:
+</p>
+
+<?php jsTextDownApp("examples/MML_Topics/startzero.proj"); ?>
+
+<h2>  <a name="choice">Choice variables</a></h2>
+
+<p> Choice variables are integer variables whose value is set by the
+user via a menu of defined values.  For example:</p>
+<pre>
+choice fruit("apple", "banana", "cherry") = 2;
+</pre>
+
+<p>    Above,  the label "apple" is associated with the value 1, "banana"
+with 2, and "cherry" with 3.  "banana" will be the default value.</p>
+<p>    You may arbitrarily assign associated numeric values by using
+integers as arguments:</p>
+<pre>
+choice zork(0, "zero", "one", "two", 10, "ten", "eleven") = 10;
+</pre>
+
+<p>    Here the numeric values correspond in the natural way to the text
+labels.  Only the values 0, 1, 2, 10 and 11 will be allowed.</p>
+<p>    If a choice variable is calculated from other 
+variables,  it becomes an output variable.  In this case,  it behaves 
+no differently than any other integer variable.  Example:
+<pre>
+int n = 3;
+choice fruit("apple", "banana", "cherry");
+fruit = n;
+</pre>
+
+<p>    At this time,  choice variables are all scalars,  and have no 
+associated domains.  </p>
+
+<h2>  <a name="deriv">Symbolic Derivatives</a></h2>
+<p>    JSim can solve some variables via symbolic differentiation of other
+fully constrained variables.:</p>
+
+<?php jsTextDownApp("examples/MML_Topics/deriv1.proj"); ?>
+
+<p>    JSim currently can only differentiate variables which are constrained
+by explicit algebraic constraints.  It cannot take derivatives of extern
+variables, implicitly constrained variables, ODE variables, etc. Since the
+chain rule from calculus is used, the differentiated variable must depend
+only on other variables with explicit algebraic constraints.  In the
+following example, the attempt to differentiate c would generate an error
+due to c's nested dependence upon the extern variable a:</p>
+
+<pre>
+math deriv2 {
+  realDomain t;
+  t.min=0; t.max=10; t.delta=1;
+  extern a(t);
+  real b(t) = a^2 + t;
+  real c(t) = exp(b);
+  real d(t) = c:t;      // solve d by differentiating c
+}
+</pre>
+
+<p> The colon (derivative)  operator may also be applied to expressions.  
+It has high precedence, so this requires the use of paretheses:</p>
+
+<?php jsTextDownApp("examples/MML_Topics/deriv3.proj"); ?>
+
+<h2>  <a name="help">Variable Properties</a></h2>
+
+<p> Properties allow tagged values to be associated with a variable.  
+Currently, only string values are supported. The "desc" and "help" 
+properties are defined by default.  The "desc" property is a concise 
+one-line description of the variable.  The "help" property is free-form 
+text that may extend to multiple lines. Additional properties may be 
+specified on a model-by-model basis with the MML "property" command.  
+Additional properties, if defined, may be used to label variables for 
+various automated analyses currently under development.  For example, 
+the additional property "fma" might be defined that connects a variable 
+the Foundational Model of Anatomy ontology.  Properties are assigned by 
+optional assignments that should be clear from the following example: 
+</p>
+
+<?php jsTextDownApp("examples/MML_Topics/prop1.proj"); ?>
+
+<p>    If defined, the "desc" and "help" property values will appear in the
+help popup for a variable in the GUI.  The
+"desc" and "help" properties are normally defined as double-quoted
+strings, with "\n" being interpreted as a line separator for v.help::</p>
+<p>    If a property value text is extensive, it may be simpler to use the
+alternative double-brace specification for multi-line text:</p>
+
+<?php jsTextDownApp("examples/MML_Topics/prop2.proj"); ?>
+
+<p>    When adding customizable help to a model, remember that model help
+automatically includes the default value and unit (if any) for input
+variables and the relevant equations and unit (if any) for output
+variables.  Including such information in the customizable help is
+strongly discouraged.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

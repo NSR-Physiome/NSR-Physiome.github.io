@@ -1,0 +1,325 @@
+default namespace = ""
+namespace ns1 = "http://www.w3.org/1998/Math/MathML"
+
+start =
+  element xmml {
+    attribute jsimVersion { xsd:NMTOKEN }?,
+    attribute version { xsd:NCName }?,
+    attribute xmmlVersion { xsd:decimal }?,
+    element model {
+      element unitList {
+        element fundamentalUnit {
+          attribute id { xsd:NCName },
+          attribute unitType { xsd:NCName }?
+        }*,
+        element derivedUnit {
+          attribute id { text },
+          attribute unitType { text }?,
+          element realFactor {
+            attribute multiplier { xsd:double }
+          }?,
+          element unitFactor {
+            attribute exponent { xsd:decimal },
+            attribute unitID { xsd:NCName }
+          }*
+        }*
+      },
+      element variableList {
+        element variable {
+          attribute dataType { xsd:NCName },
+          attribute id { xsd:NMTOKEN },
+          attribute isDomain { xsd:boolean },
+          attribute isExtern { xsd:boolean },
+          attribute isPrivate { xsd:boolean },
+          attribute isState { xsd:boolean },
+          attribute unitID { text }?,
+          element domainList {
+            element domain {
+              attribute domainID { xsd:NCName }
+            }+
+          }?,
+          element propertyValueList {
+            element propertyValue {
+              attribute dataType { xsd:NCName },
+              attribute name { xsd:NCName },
+              text
+            }+
+          }?
+        }+
+      },
+      element equationList {
+        element equation {
+          attribute id { xsd:NCName },
+          expression
+        }+
+      },
+      element relationList {
+        element relation {
+          attribute id { xsd:NCName },
+          expression
+        }*
+      },
+      element eventList {
+        element event {
+          attribute id { xsd:NCName },
+          attribute timeDomainID { xsd:NCName },
+          element trigger {
+            attribute type { xsd:NCName },
+            debug,
+            ns1.math
+          },
+          element actionList {
+            element action {
+              attribute variableID { xsd:NCName },
+              expression
+            }
+          }
+        }*
+      },
+      element procedureCallList {
+        element procedureCall {
+          attribute procedureID { xsd:NCName },
+          element procedureCallArgument {
+            expression,
+            element loopDomainList {
+              element loopDomain {
+                attribute domainID { xsd:NCName }
+              }?
+            }
+          }+
+        }*
+      }
+    },
+    element toolList {
+      (stateTool
+       | element ODETool {
+           attribute id { xsd:NCName },
+           attribute timeDomainID { xsd:NCName },
+           attribute timeOrder { xsd:integer },
+           ((solvedVariables, requiredVariables, sequenceLoops)
+            | (solvedVariableList,
+               requiredVariableList,
+               sequenceLoopList)),
+           initialConditionList,
+           stateEquation
+         }
+       | element PDETool {
+           attribute id { xsd:NCName },
+           attribute timeDomainID { xsd:NCName },
+           attribute timeOrder { xsd:integer },
+           solvedVariableList,
+           requiredVariableList,
+           sequenceLoopList,
+           initialConditionList,
+           stateEquation,
+           spatialDomainList,
+           element boundaryConditionList {
+             element boundaryCondition {
+               attribute domainID { xsd:NCName },
+               attribute equationID { xsd:NCName }?,
+               attribute side { xsd:NCName },
+               attribute toolID { xsd:NCName }?
+             }+
+           }
+         }
+       | element domainTool {
+           attribute id { xsd:NCName },
+           ((solvedVariables, requiredVariables, sequenceLoops)
+            | (solvedVariableList,
+               requiredVariableList,
+               sequenceLoopList))
+         }
+       | element exprTool {
+           attribute id { xsd:NCName },
+           ((solvedVariables, requiredVariables, sequenceLoops)
+            | (solvedVariableList,
+               requiredVariableList,
+               sequenceLoopList)),
+           expression
+         }
+       | element externTool {
+           attribute id { xsd:NCName },
+           solvedVariableList,
+           requiredVariableList,
+           sequenceLoopList
+         }
+       | element implicitTool {
+           attribute id { xsd:NCName },
+           solvedVariableList,
+           requiredVariableList,
+           sequenceLoopList,
+           element zeroExpressionList { expression+ },
+           element boundList {
+             element bound {
+               attribute type { xsd:NCName },
+               variableUsage,
+               element expr { debug, ns1.math }
+             }*
+           },
+           element linearFactorList {
+             element linearFactor {
+               attribute column { xsd:integer },
+               attribute row { xsd:integer },
+               debug,
+               ns1.math
+             }+
+           }?
+         }
+       | element procedureTool {
+           attribute id { xsd:NCName },
+           solvedVariableList,
+           requiredVariableList,
+           sequenceLoopList
+         })+
+    },
+    element sequence {
+      element main { (item | loopBlock)+ }?
+    }
+  }
+expression =
+  element expression {
+    debug,
+    element subdomain {
+      attribute domainID { xsd:NCName },
+      attribute side { xsd:NCName }
+    }?,
+    ns1.math
+  }
+debug = element debug { text }
+ns1.math =
+  element ns1:math { ns1.apply | ns1.ci | ns1.cn | ns1.piecewise }
+solvedVariableList = element solvedVariableList { variableUsage+ }
+requiredVariableList = element requiredVariableList { variableUsage* }
+sequenceLoopList = element sequenceLoopList { sequenceLoop* }
+solvedVariables = element solvedVariables { variableUsage+ }
+requiredVariables = element requiredVariables { variableUsage* }
+sequenceLoops = element sequenceLoops { sequenceLoop? }
+initialConditionList =
+  element initialConditionList {
+    element initialCondition {
+      attribute toolID { xsd:NCName }
+    }
+  }
+stateEquation =
+  element stateEquation {
+    attribute equationID { xsd:NCName }?,
+    attribute toolID { xsd:NCName }?
+  }
+stateTool =
+  element stateTool {
+    attribute id { xsd:NCName }?,
+    attribute timeDomainID { xsd:NCName }?,
+    attribute toolID { xsd:NCName }?,
+    (text
+     | initialConditionList
+     | requiredVariableList
+     | sequenceLoopList
+     | solvedVariableList)+
+  }
+spatialDomainList =
+  element spatialDomainList {
+    element spatialDomain {
+      attribute domainID { xsd:NCName }
+    }
+  }
+variableUsage =
+  element variableUsage {
+    attribute id { text },
+    attribute status { xsd:NCName },
+    attribute variableID { xsd:NMTOKEN },
+    element domainUsage {
+      attribute domainID { xsd:NCName },
+      attribute domainStatus { xsd:NCName }?,
+      attribute qstatus { xsd:NCName }?
+    }*
+  }
+item =
+  element item {
+    attribute itemID { xsd:NCName },
+    text
+  }
+loopBlock =
+  element loopBlock {
+    attribute loopDomainID { xsd:NCName },
+    (item | loopBlock)*,
+    (element ODEBlock {
+       attribute timeDomainID { xsd:NCName },
+       stateToolList,
+       microSequence
+     }
+     | element PDEBlock {
+         attribute timeDomainID { xsd:NCName },
+         spatialDomainList,
+         stateToolList,
+         microSequence,
+         element PDEBlockBoundaryList {
+           element PDEBlockBoundary {
+             attribute domainID { xsd:NCName },
+             attribute side { xsd:NCName },
+             microSequence
+           }+
+         }
+       })*
+  }
+ns1.ci =
+  element ns1:ci {
+    attribute type { xsd:NCName }?,
+    xsd:NCName
+  }
+ns1.piecewise =
+  element ns1:piecewise {
+    (element ns1:otherwise {
+       ns1.piecewise*, ns1.apply?, (ns1.ci | ns1.cn)?
+     }
+     | element ns1:piece {
+         ns1.piecewise*, ns1.cn?, (ns1.apply | ns1.ci)+
+       })*
+  }
+ns1.cn = element ns1:cn { xsd:double }
+ns1.apply =
+  element ns1:apply {
+    element ns1:neq { empty }?,
+    (ns1.apply
+     | ns1.ci
+     | ns1.cn
+     | ns1.piecewise
+     | element ns1:abs { empty }
+     | element ns1:and { empty }
+     | element ns1:bvar {
+         ns1.ci,
+         element ns1:degree { ns1.cn }?
+       }
+     | element ns1:cos { empty }
+     | element ns1:diff { empty }
+     | element ns1:divide { empty }
+     | element ns1:eq { empty }
+     | element ns1:exp { empty }
+     | element ns1:floor { empty }
+     | element ns1:gt { empty }
+     | element ns1:int { empty }
+     | element ns1:ln { empty }
+     | element ns1:log { empty }
+     | element ns1:lowlimit { ns1.ci }
+     | element ns1:lt { empty }
+     | element ns1:minus { empty }
+     | element ns1:or { empty }
+     | element ns1:partialdiff { empty }
+     | element ns1:plus { empty }
+     | element ns1:power { empty }
+     | element ns1:rem { empty }
+     | element ns1:root { empty }
+     | element ns1:sin { empty }
+     | element ns1:sum { empty }
+     | element ns1:tanh { empty }
+     | element ns1:times { empty }
+     | element ns1:uplimit { ns1.ci })*,
+    (element ns1:op_67 { empty }
+     | element ns1:op_68 { empty }
+     | element ns1:pi { empty })?
+  }
+sequenceLoop =
+  element sequenceLoop {
+    attribute domainID { xsd:NCName }
+  }
+stateToolList = element stateToolList { stateTool+ }
+microSequence = element microSequence { item* }

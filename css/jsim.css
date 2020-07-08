@@ -1,0 +1,101 @@
+
+
+/* div classes */
+div.jslogo {
+  /*  background: url('pics/jsimlogo_doc.gif') no-repeat top center; */
+    height: 141px;
+    width: 100%;
+}
+div.jstoc {
+    background: url('pics/whiteBkgrd.png') no-repeat top center;
+    width: 100%;
+}
+div.jsimleft100 {
+    float: left;
+    clear: both;
+    width: 100%;
+}
+div.jsimleft50 {
+    float: left;
+    width: 50%;
+}
+div.jsimleft30 {
+    float: left;
+    width: 30%;
+}
+div.jsimright50 {
+    padding-left: 50%;
+}
+div.jsimright30 {
+    padding-left: 30%;
+}
+
+/* image tags */
+h1 img {
+    padding-right: 8px;
+    vertical-align: middle;
+}
+
+.jsright {
+  float: right;
+}
+
+/* jsim table of contents definition list */
+dl.toc {
+    display: inline;
+    list-style-type: none;
+	
+    /* margin-bottom: 6px; */
+}
+dl.toc dt {
+    display: inline;
+    float: left;
+    clear: both;
+    text-align: right;
+    margin-left: 10px;
+    margin-right: 8px;
+}
+dl.toc dd {
+    display: block;
+    margin-left: 8px;
+    line-height: 38px;
+    /* float: left; */
+}
+
+
+/* jsim glossary */
+dl.jsimglos dt {
+    font-weight: bold;
+}
+
+pre { background: rgb(230,230,230); font-size: 90%; }
+
+/* h1, h2, h3, h4, h5 { color: purple; } */
+
+/* playland */
+p.crush {
+    margin-bottom: 0em;
+}
+ul.crush {
+     margin-top: 0em;
+}
+ol.crush {
+     margin-top: 0em;
+}
+
+form.crush {
+     display: inline;
+}
+
+object.crush {
+     margin-top: 0em;
+     display:  inline;
+}
+
+/* papers */
+ol.alpha {
+  display: list-item; 
+  list-style-type: upper-alpha;
+}
+
+

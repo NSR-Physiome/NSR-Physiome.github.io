@@ -1,0 +1,63 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>Using BCLs in MML</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+<p>    This document is an introduction to Biological Component Librarys 
+(BCLs),  and their use in constructing JSim models.  </p>
+<h2>  Overview</h2>
+<p>    JSim's Mathematical Modeling Language (MML) is a human-readable
+language for describing a model in mathematical terms.  MML supports the
+definition of high-level Biological Component Libraries (BCLs) that
+describe a model in terms of physical or physiological entities (e.g.
+compartments, membranes, chemical species ...).  When a BCL-based model
+runs, the high-level, hierarchical components are translated into a flat
+namespace MML representation, a process called "flattening".  This MML
+representation is then translated by JSim's Planner into procedural code
+which is controlled within the JSim user environment for numerical
+calculation and analysis.</p>
+<p>    BCLs allow complex models to be assembled more quickly and accurately
+and lower the barrier of entry to modeling by removing the requirement
+that modelers derive the mathematical state equations for a system.
+Because BCLs incorporate domain specific knowledge, they are more compact
+than MML.  Because BCLs share the representation mechanisms of MML,
+modelers can intermix low-level MML constructs when the required 
+functionality is not present in the BCL per se.</p>
+<h2>  Available BCLs</h2>
+<p>    NSR currently distributes one BCL with JSim, the Metabolite Flow and
+Exchange (MFAX) BCL.  MFAX contains a set of components appropriate for
+chemical network models in multiple compartments with convective flow and
+membrane transport between those compartments:</p>
+
+<ul>
+<li><a href="MML_MFAX_Intro.html">Introduction to the MFAX BCL</a></li>
+<li><a href="MML_MFAX_Ref.html">The MFAX BCL Reference Manual</a></li>
+<?php jscoqli() ?>
+
+</ul>
+<p>    The BTex BCL,  which was supported under earlier JSim versions, has 
+been revised and supplanted by the MFAX BCL,  which contains a super-set
+of BTex BCL functionality.  The BTex BCL is no longer supported.</p>
+<p>    Creating a BCL is a fairly technical process, and should be undertaken
+by experienced Java programmers.  If you are interested in this, contact
+the NSR for more information.</p>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

@@ -1,0 +1,140 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+    <h1>JSim Source Code Standards</h1>
+
+<?php include "topmsg.php"; ?>
+
+<h2>  Introduction</h2>
+<p>    This document describes coding standards for JSim Java source code.
+It is intended for those contributing Java source code to the JSim CVS
+archive.  JSim is a large program (currently about 80,000 lines),  so 
+ensuring some uniformity of appearance is very helpful to those who 
+must read and understand the code.  </p>
+<p>    Since the present author (Erik Butterworth) wrote about 95% of the
+existing code, the coding conventions described here are I follow.  I do
+not to claim these to be the best of all possible conventions, only that
+by following these conventions, JSim's code base will be more consistent,
+and therefore more readable.</p>
+<p>    This a my first try at this document.  It will, no doubt, evolve over
+time.  Sun has done some <a href="http://java.sun.com/docs/codeconv/html/CodeConvTOC.doc.html">nice
+work</a> on Java
+conventions.  I urge readers to consider that document, which is much more
+complete that this one here.  I do differ in some particulars, however.  
+Ultimately,  JSim coding conventions will always be some blend of standard
+conventions and JSim-specific conventions.</p>
+<h2>  JSim Source Code Conventions</h2>
+<p>    General conventions:</p>
+
+<ul>
+<li>The ultimate is to produce efficient, readable and maintainable JSim
+code.  Following conventions is only a means to that end.  Abandon a
+convention if it obscures what is going on.  Writing clear code is an
+ongoing problem not amenable to prescriptive solutions.  Conventions help
+somewhat, however.</li>
+<li>Class names should be of mixed case,  starting with a capital. Static 
+final variables should be all caps.   Other variables should be
+mixed case,  starting with a non-cap.  For example:
+<pre>
+      public class DogHouse {
+          public final static int POLLFREQ = 200; //milliseconds
+          public DogHouse fleaHotel;   // for Fido
+          ...
+</pre>
+</li>
+
+</ul>
+<p>    Format and Indenting</p>
+
+<ul>
+<li>Code submitted to the JSim CVS archive should use Unix-style ASCII
+text files (N/L terminated, no CR).</li>
+<li>Line width should not exceed 80 characters. </li>
+<li>Indent the next line after a left-brace.  The left-brace itself is
+placed on the same line as the preceeding statement.  Close the brace
+at the same indentation level as the line of the opening brace.  </li>
+<li>Indent unbraced clauses after if(), while(), for(), etc. unless
+the entire clause fits easily on a single line.</li>
+<li>The first indentation is a single tab.  Further indentations are
+four spaces. 8 spaces are assumed to be equivalent to a tab. Set your
+editor's tab settings to 8 spaces when editing JSim code or it will
+not be well aligned.</li>
+<li>Long method bodies (over 50 lines) and highly indented code (e.g. 6 
+levels) inhibit readability.  One solution is to break the code into 
+manageable subroutines.  A better one is often to enhance the methods 
+in the classes called.</li>
+
+</ul>
+<p>    Comments</p>
+
+<ul>
+<li>Double-slash comments are preferred over C-style except for extended
+multiline comments.  This makes it easier to comment out large blocks of 
+code (using C-style comments).  javadoc style comments are not used in 
+JSim.</li>
+<li>Every method should have a preceding comment describing it.
+Most instance variables should have same-line comments describing them.
+Long methods should be broken into paragraphs with preceding comments.
+Comments should appear at least every 10 lines (or so) of a method.</li>
+<li>Trivial temporary variables (such as integer counters) should NOT be 
+commented.  Trivial comments clutter code and reduce readability.</li>
+
+</ul>
+<p>    JSim-specific conventions</p>
+
+<ul>
+<li>Become familiar with the general purpose utilities available in JSim
+and reuse (possible enhance) existing ones rather than duplicating code.  
+Especially useful are JSim.util.Util and JSim.util.StringList.  User 
+visible numeric formatting should use JSim.util.PrettyFormat.</li>
+<li>XML parsing is handled via Apache Xerces,  and is accessible via
+PServer.parseXML().  Do not introduce other XML parsers into the system.
+They are very bulky.  XML output can be handled by JSim.data.XMLWriter.</li>
+<li>If you need a general-purpose language parser,  use JLex and CUP,
+which are already packaged with JSim.</li>
+<li>JSim packages should contain no more that about 50 class files to be
+manageable.  A directory list of .java files in a package should produce
+no more than one page of output on a standard terminal.  If things are
+getting too large, consider combining classes, pruning, or making
+sub-packages.</li>
+<li>Java source files over 500 lines are difficult to read, and not
+really needed to meet JSim design requirements.  Java class files under 50
+lines are usually trivial, unless they are placeholders for future code,
+or simple extensions to more substantive classes.  Ideally readable files
+hover between 50 and 300 lines.</li>
+<li>Class names should be chosen unique enough so that they can be 
+called without qualification (e.g. MyClass not JSim.mypackage.MyClass)
+within the JSim code base.</li>
+<li>Consult with the programming lead before introducing any third
+party software into the JSim base to make sure license terms are 
+compatible with JSim's distribution requirements.</li>
+<li>JSim should run indentically (so far as possible) on all platforms.
+Java provides mechanisms for doing things (e.g. File names) in a platform
+independent way.  Use them.  Avoid native methods and underlying operating 
+system calls except when absolutely necessary.</li>
+<li>Do not use deprecated methods or classes.  Exceptions are made for
+essential features that are not available elsewhere: Thread.kill() and
+Sun's embedded java compiler sun.tools.javac.Main.</li>
+<li>If you are not an NSR employee,  a license agreement must be made
+between your institution and the University of Washington,  to allow NSR
+to distribute your code with JSim.  It is not sufficient for you to give
+your personal agreement.  The agreement must be made between institutions.</li>
+
+</ul>
+
+
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

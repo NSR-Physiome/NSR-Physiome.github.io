@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ $# -eq 0 ]
+then
+  HTMLS=`ls *.html`
+else
+  HTMLS="$*"
+fi
+
+for html in $HTMLS
+do
+  WC=`fgrep '"'$html'"' *.html | wc -l`
+  if [ $WC -eq 0 ]
+  then
+    echo ==== $html $WC xrefs
+  fi
+done

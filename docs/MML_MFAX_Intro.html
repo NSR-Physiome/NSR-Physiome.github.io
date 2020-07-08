@@ -1,0 +1,396 @@
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Introduction to the MFAX BCL</h1>
+
+<?php include "topmsg.php"; ?>
+
+
+<h2>  Introduction</h2>
+
+<p>    This document is a tutorial for writing JSim models using the MFAX
+Biological Component Library (BCL).  MFAX stands for a Metabolite Flow and
+Exchange, and contains a set of components appropriate for chemical
+network models in multiple compartments with convective flow and membrane
+transport between those compartments.</p>
+
+<p> Prerequisites: </p>
+<ul>
+<li> <a href="MML_Templates.html">Using Templates in MML</a></li>
+</ul>
+
+<p> Contents: </p>
+<ul>
+<li><a href="#simple">A Simple Example</a></li>
+<li><a href="#units">Using Physical Units</a></li>
+<li><a href="#mml">Incorporating MML into BCL Models</a></li>
+<li><a href="#conc">Setting Concentrations</a></li>
+<li><a href="#more">More Compontent Types</a></li>
+<li><a href="#reac">Reaction Types</a></li>
+<li><a href="#cons">Consumption and Production</a></li>
+<li><a href="#mem">Membrane and Transport</a></li>
+<li><a href="#flow">Convective Flow</a></li>
+<li><a href="#branch">Branching Flows</a></li>
+<li><a href="#recirc">Recirculating Flows</a></li>
+<li><a href="#inject">Injections</a></li>
+<li><a href="#private">Privatizing Sub-variables</a></li>
+<?php jscoqli() ?>
+</ul>
+
+<p> See also: </p>
+<ul>
+<li> <a href="MML_MFAX_Ref.html">MFAX Reference Manual</a></li>
+</ul>
+
+<h2>  <a name="simple">Simple example</a></h2>
+<p>    The following model uses the MFAX BCL to describe the dimerization of
+a chemical species A in a single compartment:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax01.mod"); ?>
+
+<p>    The
+line "import MFAX" loads the MFAX BCL so that is can be used in this
+model.  The block beginning "MFAX example1" gives the MFAX BCL model
+specifics.  A BCL block must be given a name (here, example1) and is
+delimited by curly braces.  Note that MML and BCLs are case sensitive and
+that white space (spaces, tabs, line breaks) is ignored. Text following
+double slashes (//) or between /&#042; and &#042;/ is ignored as
+commentary as in Java or C++.</p>
+<p>    Within the example1 MFAX block, five components (t, A, B, C, R) are
+defined, each corresponding to a physical entity. Each component may have
+sub-variables (t.min, t.max, t.delta, C.vol, R.kf, R.kb) that must be
+constrained so that model is completely specified.  Here are short
+descriptions of the example1 components.</p>
+
+<ul>
+<li>Time:  The MFAX system requires you give a name to the variable
+representing time (here t).  Time is implemented as an equally-spaced
+grid.  The subvariables t.min and t.max represent the minimum and maximum
+values for t respectively and t.delta represents the time-point
+separation.</li>
+<li>Chem:  A and B here are names for the two chemical species of interest.
+Chems have no associated sub-variables that must be constrained.  Chem
+names must start with an upper-case letter.</li>
+<li>Compartment:  example1 has a single compartment named C.  
+Compartments in MFAX are assumed to be "well-stirred tanks" so that all
+chemical species are assumed to have uniform concentrations over C.  The
+associated sub-variable C.vol represents the volume of C.</li>
+<li>MassBalReaction: R here represents the reversible mass-balance reaction
+A=2B taking place in compartment C.  The associated sub-variables R.kf
+and R.kb represents the forward and backward equilibrium constants.</li>
+
+</ul>
+<p>    If you run example1 under JSim, the output shows variables C.A and
+C.B, which represent the concentrations of A and B in compartment C, to be
+uniformly zero.  More interesting results can be obtained by changing the
+initial concentrations (variables C.A__init and/or C.B__init) from their
+default values of zero and rerunning the model.</p>
+
+<h2>  <a name="units">Using physical units</a></h2>
+<p>    Example1 above is somewhat confusing because it is unclear what
+physical units are appropriate when assigning variables.  For instance, is
+C.vol 10 liters or 10 milliliters or what?  JSim supports, but does not
+require, attaching physical units to components and variables.  In BCLs,
+using physical units is normally recommended.  Example2 below adds
+physical units to the previous example:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax02.mod"); ?>
+
+<p>    JSim does not have a default units system or policy.  The line "import
+nsrunit"  imports the distributed NSR units file for use in this model.  
+The line "unit conversion on" turns on automated unit conversion.  The
+unit conversion line is optional in plain MML, but is required when using
+units with the MFAX BCL.  Additionally, four components (t, A, B and C)
+are declared with physical units.  This is done by declaring the units
+after the name of each component.</p>
+<p>    Time t is declared in seconds.  The sub-variables t.min, t.max and
+t.delta will also be in seconds.</p>
+<p>    Compartment C is declared in liters.  The sub-variable C.vol will be
+in liters.</p>
+<p>    Chem A and B units are molar.  The concentration variables 
+C.A and C.B will be molar. </p>
+<p>    MassBalReaction R requires no unit declaration.  The units for
+sub-variables R.kf and R.kb are calculated using the units for t, A and
+B.  Here R.kf will have units 1/sec and R.kb units 1/molar/sec.</p>
+<p>    JSim models support custom user-defined units, however importing the
+distributed NSR unit file is appropriate for most users.  In the JSim GUI,
+this file can be viewed in the Debug sub-tab of a model tab by selecting
+"View system units file" from the View menu. See <a href="MML_Units.html">Using Units in
+MML</a> for further information.</p>
+<p>    The BCL author may make a range of choices in defining physical units,
+so long as they are dimensionally compatible with the components internal
+unit.  These internal units for example2 components are:</p>
+
+<ul>
+<li>Time              sec</li>
+<li>Chem              molar</li>
+<li>Comparment        liter</li>
+<li>MassBalReaction   dimensionless</li>
+
+</ul>
+<p>    Thus Time t could have been defines as sec, min or hour, but not as
+meters.  Chem A could be defined as mM (millimolar), uM (micromolar), nM
+(nanomolar), pM (picomolar), but not moles/(gram*liter). Compartment C
+could have be defined as ml (milliliters), m^3 (cubic meters), foot^3
+(cubic feet) but not m^2.  MassBalReaction R requires a dimensionless
+unit, and the unit assigned has no effect on model calculations.</p>
+
+<h2>  <a name="mml">Incorporating MML into BCL models</a></h2>
+<p>    MML syntax allows tweaking a number of features of BCL models.  Examples
+  include:</p>
+
+<ol>
+<li> adding additional variable and sub-variables to the model;</li>
+<li> specifying custom calculations for variables;</li>
+<li> specifying external inputs to a model;</li>
+<li> cleaning up user interface by repressing some output variables.</li>
+
+</ol>
+<p>    This tutorial focuses on BCL,  so when a useful MML construct comes
+up it will be mentioned only briefly,  and the user referred to 
+<a href="MML_Intro.html">Writing a Simple MML Model</a> for further information.</p>
+<h2>  <a name="conc">Setting concentrations</a></h2>
+<p>    BCL authors may wish the initial concentrations in their models.  
+This is accomplished via the MML "when" clause (see "Basics of MML"
+for more info). In example2 above, the concentration variables were
+C.A and C.B.  Example3 below sets the initial concentrations:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax03.mod"); ?>
+
+<p>    Another possibility is having a particular concentration set over its
+entire time course.  In example4 below, the B concentration increases
+linearly because it is set by a pump in compartment C.  The A
+concentration is determined using the B concentration and the reaction R:
+</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax04.mod"); ?>
+
+<p>    Declaring additional real variables (again, see "MML Basics") can help
+to modularize BCL models:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax05.mod"); ?>
+
+<h2>  <a name="more">More Component Types</a></h2>
+<p>    In addition to the four component types so far described (Time, Chem,
+Compartment, MassBalReaction), MFAX BCL provides about another dozen for
+specification of other types chemical reactions and various methods of
+passing chemicals between compartments.  Each new component type is
+introduced in sections below.  Except as noted, a BCL model may declare
+any number of components of each type, allowing for creation of
+arbitrarily complex models.  Each new component's behavior in the model
+will depend on how the BCL author sets or constrains the sub-variables
+that are associated with the component.  To successfully incorporate a
+component, the BCL author must understand the physical meaning of the
+component, how to declare it in his model and the names and physical
+significance of its sub-variables.  <a href="MML_MFAX_Ref.html">MFAX BCL Reference</a>
+provides details each component type.</p>
+
+<h2>  <a name="reac">Reaction Types</a></h2>
+<p>    MFAX BCL provides three alternative components to specify chemical
+reactions MassBalReaction, FluxReaction and FastReaction.</p>
+<p>    MassBalReaction models a mass-balance reaction specified via forward
+and backward equilibrium constants (kf and kb).  This has been covered
+previously.</p>
+<p>    FluxReaction models an arbitrary reaction specified by the forward net
+flux variable (flux) whose units are compatible with moles/second.  For
+example, example6 below models the enzyme mediated dimerization of A using
+simple, irreversible, Michalis-Mentin kinetics:M</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax06.mod"); ?>
+
+<p>    Modelers must take care so that flux is non-negative when species on
+the right-hand side of the equation have zero concentration, and
+non-positive when species on the left have zero concentration.  
+Otherwise, negative values for the concentrations will result.  This is
+mathematically correct behavior, although (obviously) physically
+unrealistic.</p>
+<p>    FastReaction models a mass-balance reaction that equilibrates
+instantaneously relative to MassBalReactions and FluxReactions, specified
+by a single equilibrium constant (k).  Mathematically, it is equivalent to
+a MassBalReaction with very high kf and kb relative to other reactions,
+but much more numerically efficient and accurate.  In example7 below,
+there are two reactions R1 and R2, with R2 equilibrating much faster than
+R1:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax07.mod"); ?>
+
+<p>    Since FastReactions equilibrate instantaneously, it is possible to
+overspecify a system using them.  Care must be taken that there is always
+one "free" species that is not specified by a fast reaction or forced
+concentration.  For example, the following system is 
+over-specified:</p>
+
+<pre>
+import MFAX;
+import nsrunit;
+unit conversion on;
+MFAX example8 {
+  Time t sec;
+  t.min=0; t.max=10; t.delta=1;
+  Chem X molar, Y molar;
+  Compartment C liter;
+  C.vol = 10;
+  FastReaction R(C, "X=2Y");
+  R.k = 1;
+  real k = 2 molar/sec;
+  C.Xconc = k*t;
+  C.Yconc = 2*k*t;
+}
+</pre>
+
+<h2>  <a name="cons">Consumption and Production</a></h2>
+<p>    Consumption and Production are components that add or remove a
+chemical from a compartment.  The associated subvariable "flux" must be
+compatible with mole/second.  In the example below, A is produced by
+component Q1 in compartment C1 and is consumed by component Q2 in
+compartment C2:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax09.mod"); ?>
+
+<p>    Consumption and Production are both "slow" processes in that
+FastReactions equilibrate instantaneously relative to them.  If the rate
+variable goes negative, a Consumption component will function as a
+Production and vice-versa.  In order to prevent negative concentrations,
+Consumption components turn themselves off at zero concentrations.  
+However, due to unresolved numeric method issues, small negative
+concentrations may result.  This can be avoided by making Consumption
+rates fall continuously to zero with concentration.</p>
+
+<h2>  <a name="mem">Membrane and Transport</a></h2>
+<p>    The components so far described model concentrations in one or more
+compartments, but do not explicitly describe passage of molecules from one
+compartment to another.  There are two mechanisms to do this. Membrane and
+Transport components model transport across a membrane.  Various Flow
+components describe convective flow between compartments.</p>
+<p>    In the following example,  species A is produced in compartment C1
+and is transported through a membrane to compartment C2:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax10.mod"); ?>
+
+<p>    The Membrane construct requires two arguments, the two compartments it
+connects.  Membranes have no inherent functionality (and have no
+sub-variables), but serve as attachment points for Transports that pass
+species across the Membrane.  A Transport construct requires two
+arguments:  the membrane it's attached to, and the species transported.
+TransportPS, in which the transport rate is determined via a permiability
+surface-area product (sub-variable PS), is used in this example.  PS has
+dimension liter/sec (derived from units for C1 and t).  The other
+Transport currently available is TransportFlux, where the transport rate
+is determined via a flux rate.  See the example below:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax10f.mod"); ?>
+
+<p>  Other Transport components will be available in future JSim versions.</p>
+<h2>  <a name="flow">Convective Flow</a></h2>
+<p>    Flow, FlowSource, FlowSink and related components describe convective
+flow between compartments.  Convective flow starts at a FlowSource, may
+branch through any number of compartments, and must terminate at a
+FlowSink.  The following example describes flow through two compartments,
+with production of species A in the first:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax11.mod"); ?>
+
+<p>    The FlowSource component (F1) takes a single argument, the Compartment
+that it flows into.  The attached unit must be compatible with liter/sec.  
+The sub-variable flow describes the rate of flow and inherits its unit
+from the FlowSource.  "flow" may be time-variant, but negative values are
+not supported.</p>
+<p>    A Flow component (F2) describes flow between two compartments and thus
+takes two arguments, the input compartment (C1) and the output compartment
+(C2).  F2's rate of flow in a Flow component is determined by the rate of
+flow out of C1 (determined by FlowSource F1) and so does not need to be
+(and should not be) set explicitly.  Flow components do not require unit
+declarations.</p>
+<p>    Convective flow disappears from the system via FlowSink component, which
+takes as it's single argument the Compartment it drains.  As with the 
+Flow component,  FlowSink's rate of flow is not set explicitly, but is 
+determined from the inflow to the attached compartment.  FlowSink 
+components do not require unit declarations.</p>
+<p>    Any number of Compartment, Flow and FlowSink components may be
+specified, however currently JSim only supports a single FlowSource.  The
+network must be such that any Compartment with an attached Flow, FlowSink
+or FlowSource must have exactly one input flow and one output flow.</p>
+
+<h2>  <a name="branch">Branching Flows</a></h2>
+<p>    Diverging and converging flow streams are supported via the FlowJunc
+(flow junction) component.  FlowJunc represents a volumeless junction in
+which one or more input flows may be mixed and one or more output flows
+may be split.  A FlowJunc may be specified in place of a Compartment in
+FlowSource, Flow and FlowSink declarations.  FlowJunc components do not
+require unit declarations.  A FlowJunc must have at least one inflow and
+at least one outflow.  In the following example one FlowJunc (J1) splits
+the incoming flow to pass through two compartments (C1 and C2), and
+another FlowJunc (J2) merges the two compartment outflows before pass to a
+FlowSink (F6):</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax12.mod"); ?>
+
+<p>    Notice the two FlowJunc weighting variables J1.F2wgt and J1.F3wgt.  
+These specify what proportion of J1's output will pass to F2 and F3
+respectively.  The weights have a default value of 1, which results in an
+even split between all paths.  In example12 however, the weights are set
+so that twice as much (2/3 of the total) flow will pass through F2.</p>
+
+<h2>  <a name="recirc">Recirculating Flow</a></h2>
+<p>    The MFAX BCL supports recirculating flows, however a FlowSource is
+always required to specify the flow rate.  To allow this, a FlowSource may
+be declared with two arguments (input and output) instead of the one
+(output only) which has been used in previous examples.  Using FlowSource
+with two arguments makes it like a Flow component, but with the
+subvariable flow settable.  The following example shows recirculating flow
+between two compartments (C1 and C2).  Notice that a FlowSink is not
+required:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax13.mod"); ?>
+
+<h2>  <a name="inject">Injections</a></h2>
+<p>    The Inject component models an injection of a chemical species into a
+Flow or FlowSource.  The Inject component requires two arguments:  the
+Flow or FlowSource to inject into, and the Chem to inject.  The Inject
+component is specified without units.  The rate of injection is determined
+by the "fluw" subvariable whose units are compatible with moles/sec.  The
+exact units are dependent upon the units of the Chem and Time components.  
+The example below shows flow into and out of a single compartment (C1),
+with an injection of species A attached to the FlowSource:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax14.mod"); ?>
+
+<p> The injection rate variable (here I1.Arate) has no default value,
+and so must be constrained for the model to be completely specified.  
+It is often useful to allow the user to specify the injection rate
+function at run-time from an external data source.  The BCL author
+accomodates this via the general MML mechanism for specifying a
+variable as external (see <a href="MML_Intro.html">Writing a Simple
+MML Model</a> for further information):</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax15.mod"); ?>
+
+<h2>  <a name="private">Privatizing sub-variables</a></h2>
+<p>    A concentration sub-variable is created for each Chem inside each
+Compartment.  Depending on model dynamics, some of these concentrations
+may always be zero, and thus not useful to look at.  JSim is not yet smart
+enough to repress these variables in the run-time environment, however the
+BCL author may do this using the general MML mechanism for specifying a
+variable as private (see <a href="MML_Intro.html">Writing a Simple MML Model</a> ).  
+In the example below, species B never appears in Compartment C1, so the
+concentration there is privatized:</p>
+
+<?php jsTextDownApp("examples/MML_MFAX_Intro/mfax16.mod"); ?>
+
+<p>    This mechanism can be used to privatize any variable, not just
+concentration within compartments.</p>
+
+<?php jscoqfoot(); ?>
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>
