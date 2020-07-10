@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim MacOS download</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
+<h1>Installing JSim on Mac OS X</h1>
+
+<p><b>NOTE:</b><ul> <li>JSim's Macintosh version 2.17 requires Yosemite (10.10) or 
+better and Java 1.8 to be installed (See <a href="#mntn_lion"> below for further Java install details</a>).</li>
+  
+<li>JSim's Macintosh version 2.03 and above run only on Intel-based Macs and require Java 1.6.</li>  
+<li>JSim version 2.02 and below run on 
+both Intel-based and PowerPC-based Macs under OS X.</li>
+</ul>
+</p>
+<ol>
+
+<ul>
+<li><a href="../archive/JSim_macos_2_20.zip">Download JSim, version 2.20, zip file.  </a> </li>
+</ul>
+
+<br />
+<li> After unzipping the JSim file, you should now find a folder called JSim_macos_2_xx (where 'xx' is the minor version number) on your Desktop (or in your Downloads directory). Folder may possibly be labeled macos_2_xx. </li>
+
+<li> To run JSim, open the JSim_macos_2_xx folder and double-click on the JSim
+application icon to launch JSim.  If double-click launch does not work,
+see paragraphs below, <a href="macos.html#mntn_lion"> Java install notes</a>.
+
+<p><b> Apple Mac OS 10.8.5 (Mountain Lion) and higher (from 10.9.5 through 10.13, High Sierra):</b> With the release of OS X Mavericks 10.9.5, the way that OS X recognizes signed apps has changed. Signatures created with OS X Mountain Lion 10.8.5 or earlier (v1 signatures) will be
+obsoleted and Gatekeeper will no longer recognize them. For various versions of JSim, you may, upon running JSim for the first time, see the follow message: ' "JSim" can't be opened because the identity of the developer cannot be confirmed'. You must change your 'Security and Privacy' settings to allow 'Applications downloaded from anywhere' to be run on the computer. See <a href="#mntn_lion"> below for further details</a>. 
+
+</p>
+
+<p> Apple Mac OS 10.7 (Lion): By default Lion does not have Java installed. When starting JSim for the first time, a popup window will appear stating Java is not installed, and would you like to install it. If you click 'yes' Java will then be installed on your Lion machine. After the Java install you will have to restart JSim.<br />
+</p>
+<p>    If you do not find the JSim_macos_2_xx folder on your desktop, check the
+configuration of your browser. If you use
+<a href="http://www.apple.com/safari/">Safari</a> , you can find where downloaded
+files are saved by choosing Preferences from the Safari menu and clicking
+General. The Open "safe" files after downloading box has to be checked. If
+it is not, you should find a file named JSim_macos_2_xx.zip; double-click on
+its icon to create the JSim_macos file.</p>
+
+</li>
+
+<li>JSim 2.07 and above requests 1500MB of heap memory by default.  If 
+your system has less than 2GB of memory, you will probably need to <a 
+href="../docs/User_Memory.html#macos">reconfigure JSim to use less 
+memory</a> before JSim can launch properly.</li>
+
+
+<li><p>Most Macintosh users do not require running JSim 
+from the command-line, which requires some additional setup.  If you do,  do as follows
+(familiarity with Unix is assumed).  Inside your installation
+directory,  the sub-directory macos/bin contains the various
+programs in the JSim suite:</p>
+
+  <ul>
+  <li>    jsim     : the JSim GUI application;</li>
+  <li>    jsbatch  : the JSim text-based batch application;</li>
+  <li>    jsfim    : command-line based functional imaging application;</li>
+  <li>    jsserver : the JSim remote server computational engine.</li>
+  </ul>
+
+<p> You should either add this sub-directory to your PATH or copy the 
+program suite to a path-searchable directory on your system. You must also set
+the environment variable JSIMHOME to the absolute path JSim.app/Contents/Resources (to the absolute path of JSim_macos for version 1.6.93 and lower) 
+before starting one of these program. Consult a 
+Unix tutorial (for example, 
+<a href="http://www.ee.surrey.ac.uk/Teaching/Unix/unix8.html">here</a>) 
+to learn how to set environment variables.
+</li>
+
+
+<li>Optional advanced administration:
+<ul>
+<li><a href="../docs/Admin_Custom.html">Customizing a JSim 
+Installation</a> :  
+describes
+customization options,  appropriate for advanced installation.</li>
+<li><a href="../docs/Admin_Server.html">Administering a JSim Server</a> : 
+how to 
+set up 
+a network-accessible JSim computation server.</li>
+<li><a href="../docs/Admin_WWW.html">Administering a JSim-enabled Web 
+Site</a> : 
+how to 
+write web pages incorporating live JSim applets.</li>
+</ul>
+</li>
+</ol>
+
+<b><a name="mntn_lion">Getting JSim installed on Apple OS 10.8 (Mountain Lion) and above (10.9, 10.10, 10.11, 10.12)</a></b>
+<ol>
+<li> <strong>(JSim version 2.17 and up)</strong> After unzipping JSim, double click the JSim app.<br /> If you do not have Java 1.8 installed then you may see an error message. Regardless, JSim will not open without Java 1.8 installed, <br /> <br />
+<ul><li>Apple OS 10.10-10.12 (Yosemite through Sierra, earlier Mac OSes are not supported): <br /><em>You may or may not see an error message if Java 1.8 is not installed.</em><br />
+Go to the Oracle website to download Java 1.8 Runtime Environment (jre) . The Oracle link is <a href="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html"> here (Java SE Runtime Environment 8 Downloads). </a> You will need to restart JSim after the Java install.<br /><br /></li>
+
+</ul>
+
+
+<li>If you have not changed the default behavior of Gatekeeper, then you may see this message after clicking the JSim icon:<br />
+<em>"JSim" is damaged and can't be opened. You should move it to the Trash.</em><br />
+Pick 'cancel', do not move to trash.<br /><br />
+This message is apparently caused by JSim's distribution of JavaApplicationStub be improperly signed. Normally, unsigned applications get a nicer message like: "This app is from an unknown developer, go change your preferences to allow unsigned apps to be run". </li> <br />
+<li>On your computer, Open up 'System preferences' -> 'Security & Privacy' 
+</li>
+<li>Under 'General' in the section titled 'Application downloaded from:' Check 'Anywhere'</li>
+<li>Now go back and double click the JSim app icon. You should see the message:<br />
+<em>"JSim" is an application downloaded from the Internet. Are you sure you want to open it?</em> <br />
+ Select 'Open' and JSim will start up.</li>
+<li>After opening up and using JSim for the first time you can change the Gatekeeper security settings back to
+  "Mac App Store and identified developers" and still be able to use the installed version of JSim.
+</li>
+</ol>
+
+<p><b>NOTE:</b> JSim's Macintosh version 2.05 and up, requires Snow Leopard or 
+better and Java 1.6 to be installed (See <a href="#mntn_lion"> below for further Java install details</a>).  JSim's Macintosh version 2.03 and above run only on 
+Intel-based Macs.  Version 2.02 and below run on both Intel-based and 
+PowerPC-based Macs under OS X.</p>
+
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>

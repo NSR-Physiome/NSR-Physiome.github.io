@@ -1,0 +1,96 @@
+<?php
+  $plat = "linux";
+  global $plat;
+  require_once("download_head.php");
+?>
+
+<?php 
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
+    $pagtit = $matches[1];
+    require_once("phead.html"); ?>
+
+<h1>Installing JSim on Linux</h1>
+
+<p>JSim's Linux public release distribution (v2.16 and earlier) is currently a 32 bit version and runs on the i386 and x64 (aka amd64, em64t, 
+x86_64) hardware architectures. With the beta release of <strong>JSim version 2.17</strong>, only x64 (64 bit) OS and harware architectures are supported.   Users running Linux on other hardware 
+architectures (e.g. IA64, Sparc, PowerPC) should use the <a 
+href="source.html">JSim source distribution</a> instead. 
+If you are unsure of your hardware architecture,
+see the <em>uname</em> command on your Linux system ("man uname").</p>
+
+<ol> 
+<li><?php require_once("download_form.html"); ?></li>
+
+<li> Unpack the .zip file using your favorite zip utility ("unzip" is 
+often available) in a directory of your choice, called INSTALLDIR in this 
+document.</li>
+
+<li> JSim binaries are located in a sub-directory of INSTALLDIR:
+<b>linux/bin</b> for JSim 2.03 and above,  <b>linux_i386/bin</b> for JSim 2.02
+and below.  This sub-directory  contains four shell scripts:
+
+  <ul>
+  <li>    jsim     : the JSim GUI application;</li>
+  <li>    jsbatch  : the JSim text-based batch application;</li>
+  <li>    jsfim    : command-line based functional imaging application;</li>
+  <li>    jsserver : the JSim remote server computational engine.</li>
+  </ul>
+  <p>You should either add this sub-directory to your PATH or copy the
+executables themselves to a path-searchable directory on your system.  You
+must also set the environment variable JSIMHOME to INSTALLDIR before starting
+either program. See your local Linux documentation on how to do this.</p>
+</li>
+
+<li> <strong> JSim version  2.16 and older notes for 64 bit systems:</strong> JSim is built and tested at NSR under Linux CentOS 5, 6 and 7
+for 32 and 64 bit Intel processors, and is known to be compatible in some degree with some older
+versions of Redhat. On 64 bit systems you may be required to install 32 bit versions of some packages: 
+<ul>
+
+<li>If you see the following error while trying to start JSim: <em>lib/ld-linux.so.2: bad ELF interpreter: No such file or directory </em>, then install the 32 bit version of glibc (it contains 32 bit ld-linux).</li> 
+<li>On 64 bit RedHat EL6, 32 bit versions of libXext and libXtst packages are required.   Users of other Linux distributions may need to adjust
+appropriately.</li>
+<li>Some 64 bit systems will generate a generic "java: program not found" 
+message if they are not set up to run 32-bit binaries.</li>
+ </ul>
+</li>
+
+<li>JSim 2.07 and above requests 1500MB of heap memory by default.  If 
+your system has less than 2GB of memory, you will probably need to <a 
+href="../docs/User_Memory.html#linux">reconfigure JSim to use less 
+memory<a/> before JSim can launch properly.</li>
+
+<li>Optional advanced administration:
+<ul>
+<li><a href="../docs/Admin_Custom.html">Customizing a JSim 
+Installation</a> :  
+describes
+customization options,  appropriate for advanced installation.</li>
+<li><a href="../docs/Admin_Server.html">Administering a JSim Server</a> : 
+how to 
+set up 
+a network-accessible JSim computation server.</li>
+<li><a href="../docs/Admin_WWW.html">Administering a JSim-enabled Web 
+Site</a> : 
+how to 
+write web pages incorporating live JSim applets.</li>
+</ul>
+</li>
+
+
+</ol>
+
+
+
+<?php jscoqfoot() ?>
+
+<p class="moddate">[This page was last modified 
+<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
+    echo $moddatet; 
+    echo ".] ";
+?>
+</p>
+
+<?php require_once("ptail.html") ?>

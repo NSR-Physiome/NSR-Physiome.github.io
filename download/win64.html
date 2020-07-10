@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Page title</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
+<h1>Installing JSim under Microsoft Windows</h1>
+
+<p>JSim's Windows distribution runs on Windows 10, and Windows 7.</p>
+<p>64 bit OS supported, 32 bit versions are no longer supported.</p>
+
+<ul><li><a href="../archive/JSim_win64_2_20.zip">JSim Windows, version 2.20, zip file</a>
+</ul>
+
+<ol>
+
+
+ 
+<li> Unpack the .zip file using your system's ZIP utility in a
+folder of your choice.
+<ul><li>
+<strong>Note:</strong> You may need administrator privileges to install JSim into certain system directories such as 'Program Files'
+</li></ul>
+</li>
+
+<li> Inside your installation folder, you will find a sub-folder win64\bin (win32\bin) 
+containing the following
+executable files:
+  <ul>
+  <li>jsim.bat : the JSim GUI application (First-time users use this one).</li>
+  <li>jsbatch.bat : the JSim text-based batch application.</li>
+  <li>jsfim.bat : the JSim functional imaging application.</li>
+  <li>jsserver.bat : the JSim remote server application.</li>
+  <li>jsreg.bat : adds JSim settings to the Windows registry</li>
+  <li>reg.exe : general purpose Windows registry tool used by jsreg.bat</li>
+  </ul>
+
+  <p> You may wish to make a short-cut to jsim.bat on your Desktop, or 
+other convenient location. Other executables are useful only from the 
+Windows command prompt.  </p>
+
+</li>
+
+<li>JSim 2.07 and above requests 1500MB of heap memory by default.  If 
+your system has less than 2GB of memory, you will probably need to <a 
+href="../docs/User_Memory.html#win32">reconfigure JSim to use less 
+memory<a/> before JSim can launch properly.</li>
+
+<li>The optional jsreg utility sets your Windows registry so 
+that certain JSim files (e.g. .proj) are loaded into JSim when double-clicked.
+See <a href="#jsreg">here</a> for more information.</li>
+
+<li> Most users do not require the command-line utilities 
+jsbatch.bat and jsfim.bat,
+which require some additional setup.  If you do,  do as follows
+(familiarity with .bat files and the DOS command line is assumed):
+In a text editor, modiry the PATH environment variable to include the directory containing
+jsim.bat and jsbatch.bat.  Also, modify the JSIMHOME definition in 
+jsbatch.bat or jsfim.bat to the the device:directory you have chosen for your JSim
+installation.</li>
+<li><strong>Windows 10 and high resolution screens </strong>: If your computer is running MS Windows 10 and has a screen resolution greater than 1080p (1920x1080) JSim may look really tiny and unreadable. This scaling issue can often be fixed by passing a Java flag turning off scaling when starting JSim. The Java 1.6 flag to use is "-Dsun.java2d.dpiaware=false". Insert it into the following line of jsim.bat file: 
+<p>%JAVA% "-Dsun.java2d.dpiaware=false" "-Djsim.home=%JSIMHOME%" -Xmx%JSIMMEM%m "-Djava.library.path=%JSIMNATIVE%" -Djsim.userdir=HOME JSim.gui.GLaunch %* </p></li>
+<li><a name="WindowsSBML"><strong>SBML</a>, Antimony, and Matlab </strong>users: JSim dynamically links to its own version of libsbml.dll. If you have a previously installed version of libsbml.dll in the Windows system dir (ie c:\windows\System32\) then JSim will not be able to load the correct dll and you will get an error when using JSim to translate models to/from SBML, to/from Antimony, and generating Matlab code. The current work-around is to install your previous version of libSBML into another directory and remove/rename libsbml.dll from the Windows system directory. Evidence of this issue is a <em>'libSBML native library not found'</em> message displayed from within the JSim application or a more detailed message at the console like this:
+<p>
+java.lang.UnsatisfiedLinkError: C:\..\sbmlj.dll: The specified procedure could not be found </p>
+</li>
+
+<li>Optional advanced administration:
+<ul>
+<li><a href="../docs/Admin_Custom.html">Customizing a JSim 
+Installation</a> :  
+describes
+customization options,  appropriate for advanced installation.</li>
+<li><a href="../docs/Admin_Server.html">Administering a JSim Server</a> : 
+how to 
+set up 
+a network-accessible JSim computation server.</li>
+<li><a href="../docs/Admin_WWW.html">Administering a JSim-enabled Web 
+Site</a> : 
+how to 
+write web pages incorporating live JSim applets.</li>
+</ul>
+</li>
+
+</ol>
+
+
+
+<h2><a name="jsreg">Using jsreg.bat</a></h2>
+<p>    jsreg.bat adds settings to the Windows Registry that allows you to
+open .proj, .tac and .jsml files within JSim by double-clicking on
+their icons in Windows Explorer.  These settings can cause problems for
+other programs in your system if they expect to open files with those same
+extensions.  Conversely, the opening of files with those extensions within
+JSim can be impaired by other programs. 
+</p>
+
+<ul>
+<li><strong>Windows 7 - </strong> jsreg.bat must be run with <strong>administrator privledges</strong>. To do this either right mouse-click jsreg.bat and pick 'Run as adminstrator' or run cmd.exe as administrator and execute jsreg.bat at the command line.</li>
+<li>After running jsreg.bat you must reboot your computer to refresh the icon file associations.</li>
+<li>JSim .mod (models) extension conflicts with MS Windows use of .mod for media files. Double-clicking a JSim .mod file will not open up JSim by default. You must chose it explicitly. </li>
+</ul>
+You may need to muck with your
+registry a bit manually to get things just right.  jsreg.bat is written so
+you can examine what is being done, and modify it if you are so inclined.
+If you relocate JSim on your system,  rerunning jsreg.bat will repoint
+the registry appropriately.</p>
+
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
+
+
