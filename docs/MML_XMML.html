@@ -1,11 +1,34 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim and XMML</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
 
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
 <h1>JSim XMML (Extensible MML)</h1>
 
 <h2>  Introduction</h2>
@@ -22,7 +45,7 @@ rough outline may be helpful to XMML tool writers.</p>
 <li><a href="#2.00">XMML specification - version 2.00</a> (current)</li>
 <li><a href="#2.01">XMML specification - version 2.01</a> (under 
 development)</li>
-<?php jscoqli() ?>
+
 </ul>
 
 <h3><a name="2.00">XMML Specification - version 2.00</a></h3>
@@ -50,17 +73,16 @@ href="http://www.thaiopensource.com/relaxng/trang.html">trang</a>):</p>
 <p>Manually generated outline:</p>
 
 <pre>
-<?php readfile("xmml_spec_2_01.txt"); ?>
+<a href="xmml_spec_2_01.txt"> xmml spec  2.01 (txt) </a>
 </pre> 
 
 
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php require_once("ptail.html") ?>

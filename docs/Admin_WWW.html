@@ -1,14 +1,37 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim Server</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
 
     <h1>Administering a JSim-enabled Web Site</h1>
-
-<?php include "topmsg.php"; ?>
 
 <h2>  Introduction</h2>
 
@@ -29,8 +52,8 @@ administration</a> .</p>
 <?php jscoqli() ?>
 </ul>
 <h2>  <a name="trust">Trusted and Untrusted Applets</a></h2>
-<p>    JSim can run as a java applet within an HTML Web page.  It may operate
-in either trusted or untrusted mode. In either mode, the JSim applet can
+<p>    JSim can run as a Java Web Start application through an HTML Web page.  It may operate
+in either trusted or untrusted mode. In either mode, the JSim client applet can
 load demonstration projects, run models and plot results.  However, when
 operating in untrusted mode the applet may not:</p>
 
@@ -68,33 +91,45 @@ in the JSim applet should consult HTML standard documentation for
 complete details and work with their local WWW server administrator.</p>
 <p>    An JSim applet is embedded in HTML via the object or applet tags
 using the java archive JSIMHOME/lib/JSimClient.jar from your JSim 
-distribution.  For example:
+distribution.  An example jnlp file for a model demo.mod:
 <pre>
-      &lt;object
-        type="application/x-java-applet"
-        classid="java:JSim.gui.GLaunch"
-        archive="JSimClient.jar"
-        width="1000"
-        height="600"
-        args="-f demo.proj"
-      &gt;
-      &lt;/object&gt;
-</pre>
+&lt; jnlp spec="1.0+" codebase=
+"https://www.physiome.org/jsim/models/jsim_jnlp" 
+    href="demo.mod.jnlp"&gt;
+    &lt;information&gt;
+        &lt;title&rt;JSim&lt;/title&gt;
+        &lt;vendor&rt;NSR Phsyiome.org Team&lt;/vendor&gt;
+		&lt;homepage href="https://physiome.org/jsim"/&gt;
+    &lt;/information&gt;
+    &lt;resources&gt;
+        &lt;!-- Application Resources --&gt;
+        &lt;j2se version="1.8+"
+              href="http://java.sun.com/products/autodl/j2se"/&gt;
+        &lt;jar href="https://www.physiome.org/jsim/jars/JSimClientSigned.jar"
+            main="true" /&gt;
+
+    &lt;/resources&gt;
+	&lt;security&rt;> &lt;all-permissions/&gt; &lt;/security&gt; 
+    &lt;applet-desc
+         name="JSim"
+		 documentBase="https://www.physiome.org/jsim/jars"
+         main-class= "JSim.gui.GLaunch"
+         width="100"
+         height="100"&gt;
+	    &lt;param name="archive" value="JSimClientSigned.jar" /&gt;
+        &lt;param name="code" value="JSim.gui.GLaunch.class" /&gt;
+        &lt;param name="JAVA_CODEBASE" value="https://www.physiome.org/jsim/jars/" /&gt;
+        &lt;param name="args"	value="-popout -f models/kegg/CURR/zmo/demo.mod" /&gt;
+     &lt;/applet-desc&gt;
+
+&lt;/jnlp&gt;                         
+
+ </pre>
+
 </p>
-<p>    or alternatively:
-<pre>
-      &lt;applet
-        code="JSim.gui.GLaunch"
-        archive="JSimClient.jar"
-        width="1000"
-        height="600"
-      &gt;
-      &lt;param name=args value="-f demo.proj"&gt;
-      &lt;/applet&gt;
-</pre>
-</p>
-<p>    These examples assume the file demo.proj is served (via HTTP) from
-the same directory as JSimClient.jar.</p>
+
+<p>    This example assumes the file demo.mod is served (via HTTP) from
+an accessible directory.</p>
 <p>    All the normal <a href="User_Ref.html#switch">command-line switches</a> are
 available via the <strong>args</strong> tag above,  however some switches have 
 slightly altered meanings in the applet context:</p>
@@ -120,13 +155,12 @@ directs traffic between those addresses. In such cases, the applet/object
 codebase attribute and the -server and -userurl JSim switches may need to
 all point to the primary IP address of the server.</p>
 <h2>  <a name="browser">Browser Requirements</a></h2>
-<p>    The JSim applet requires the user's browser have a Sun Java 1.6 
-compatible plug-in installed.  See <a href="User_WWW.html">Running JSim inside a Web 
+<p>    The JSim applet requires the user's computer have Java 1.8 installed.  See <a href="User_WWW.html">Running JSim inside a Web 
 Browser</a> for complete information.</p>
 <h2>  <a name="nsr">Applet Trust Implementation at NSR</a></h2>
 <p>    On the NSR web site, various pages use the JSim applet in both 
 trusted and untrusted mode.  Those that use trusted mode,  implement
-trust via a signed jar file.  Sun's keytool and jarsigner programs
+trust via a signed jar file.  Oracle's keytool and jarsigner programs
 are used to digitally sign JSimClient.jar.  For example:
 <pre>
       keytool -genkey -alias JSimApplet
@@ -146,14 +180,13 @@ alternative approaches to the one taken at NSR.  It is possible that we
 will change or refine our approach in the future to meet new security 
 concerns.</p>
 
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
 
-<?php require_once("ptail.html") ?>

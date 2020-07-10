@@ -1,14 +1,37 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
 
 <h1>JSim Optimization Algorithms</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim Optimizers</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
 
-<?php include "topmsg.php"; ?>
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
 
 <h2>  Introduction</h2>
 
@@ -38,7 +61,7 @@ available optimizers are listed below.  Other algorithms are in development.</p>
 <li><a href="#genetic">Genetic Algorithm</a> (version 2.01 and above)</li>
 <li><a href="#pswarm">Particle Swarm Algorithm</a> (version 2.19 and above)</li>
 <li><a href="#praxis">Principle Axis Algorithm</a> (version 2.20 and above)</li>
-<?php jscoqli() ?>
+
 </ul>
 
 <h2>  <a name="over">Overview</a></h2>
@@ -80,6 +103,9 @@ This algorithm does not currently support parallel processing.
 <li><strong>minimum par step:</strong> The optimizer will stop if it is
 considering a parameter step value that vary less than this value.  </li>
 </ul>
+<p>
+JSim Simplex code can be found <a href="https://github.com/NSR-Physiome/JSim/tree/master/SRC2.0/JSim/nonJava/opt/simplex">here, on GitHub.</a> 
+</p>
 <p>Reference: Dantzig GB, Orden A, Wolfe P: 
 The generalized simplex method for minimizing a linear form under linear inequality restraints. <a href="https://msp.org/pjm/1955/5-2/p04.xhtml"> Pacific J Math. 1955;5(2): 183–195.</a> </p>
 
@@ -380,13 +406,11 @@ Code reference: <a href="https://people.sc.fsu.edu/~jburkardt/cpp_src/praxis/pra
 
 </p>
 
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
-
-<?php require_once("ptail.html") ?>

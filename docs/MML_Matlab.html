@@ -1,20 +1,43 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim and Matlab</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
 
 <h1>Connecting JSim and Matlab</h1>
 
-<?php include "topmsg.php"; ?>
 
 
 <p><a href="http://www.mathworks.com/">Matlab</a> is a matrix-based
 computational system distributed by The MathWorks(Natick, MA) and widely
 used for scientific computation.  This document discusses several ways to
-use <a href="/jsim/">JSim</a> and Matlab in conjunction to solve
+use <a href="../index.html">JSim</a> and Matlab in conjunction to solve
 scientific problems.  Both JSim and Matlab offer possibilities for graphic
 data display, however this document will focus on combining the
 computational power of the two products.</p>
@@ -33,7 +56,7 @@ Sets</a></li>
 <h2>Contents</h2>
 
 <ul>
-<li><a href="#model">Exporting JSim models to Matlab</a> <img src=/jsim/pics/new.png /></li>
+<li><a href="#model">Exporting JSim models to Matlab</a> </li>
 <li><a href="#data">Exporting JSim data to Matlab</a></li>
 <li><a href="#prog">Programatic interaction between JSim and Matlab</a></li>
 <ul>
@@ -166,19 +189,19 @@ given the concentration of A.  Gene2 control the concentration of A,
 given the concentration of B.  The problem is to find the equilibrium
 concentration when both genes are active.</p>
 
-<p>The bash script below alternately calls the gene1 and gene2 to 
+<p>The bash script below alternately calls the gene1 and gene2 
 models, passing the results back and forth,  until the concentrations
 stabilize.</p>
 
-<?php jsTextDown("examples/MML_Matlab/example1.sh"); ?>
+<a href="../examples/MML_Matlab/example1.sh">Example 1 bash script</a>
 
-<p>Gene1 is a JSim model,  calculating B from A.</p>
+<p>Gene1 is a JSim model,  calculating B from A:
 
-<?php jsTextDown("examples/MML_Matlab/gene1.mod"); ?>
+<a href="../examples/MML_Matlab/gene1.mod"> gene1.mod </a></p>
 
-<p>Gene2 is a Matlab model,  calculating A from B.</p>
+<p>Gene2 is a Matlab model,  calculating A from B:
 
-<?php jsTextDown("examples/MML_Matlab/gene2.m"); ?>
+<a href="../examples/MML_Matlab/gene2.m"> gene2.m</a></p>
 
 <p>Notes:</p>
 
@@ -234,14 +257,14 @@ amplitude (parameter amp).  After each optimization, Matlab collects the
 optimized values into an array and performs simple statistical analyses 
 on them (calculating mean and variance).</p>
 
-<p>The Matlab control script is as follows:</p>
+<p>The Matlab control script is as follows:<br />
 
-<?php jsTextDown("examples/MML_Matlab/monte1.m"); ?>
+<a href="../examples/MML_Matlab/monte1.m"> monte1.m </a></p>
 
 <p>The JSim project,  containing the model and optimization 
-configuration my be downloaded below.</p>
+configuration my be downloaded below.<br />
 
-<?php jsDown("examples/MML_Matlab/monte1.proj"); ?>
+<a href="../examples/MML_Matlab/monte1.proj"> monte1.proj </a></p>
 
 <p>Notes:</p>
 
@@ -261,16 +284,15 @@ data format that is easy for Matlab to parse.</li>
 
 <h3>Example calling JSim engine API from Matlab</h3>
 <p><em>This example will be provided once revisions to the JSim API
-are complete (expected Fall 2008).
+are complete (TBD).
 </em></p>
 
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php require_once("ptail.html") ?>

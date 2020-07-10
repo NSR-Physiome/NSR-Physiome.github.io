@@ -1,11 +1,35 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim and SBML</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
 <h1>JSim and SBML</h1>
 
 <p><em>This document applies to JSim version 2.07 and above.  For
@@ -47,9 +71,9 @@ GUI </a> (recommended)</li>
 <ul>
 <li><a href="#export_bugs">SBML Export Bugs and Limitations</a></li>
 </ul>
-<li><a href="../models">The JSim Models page (includes SBML 
+<li><a href="https://www.physiome.org/jsim/models/index.html">The JSim Models page (includes SBML 
 models)</a></li>
-<?php jscoqli() ?>
+
 </ul>
 
 <h2>  <a name="import">Importing SBML Files into JSim</a></h2>
@@ -79,7 +103,7 @@ follows:</p>
 jsbatch -f somemodel.xml -omml &gt; somemodel.mod
 </pre>
 
-<p>Windows users: If you are receiving errors from JSim concerning libSBML please see <a href="../download/win32.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
+<p>Windows users: If you are receiving errors from JSim concerning libSBML please see <a href="../download/win64.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
 </p>
 
 <h2><a name="export">Exporting SBML Files from JSim</a></h2>
@@ -100,7 +124,7 @@ jsbatch -f somemodel.mod -osbml &gt; somemodel.xml
 jsbatch -f somemodel.proj -osbml &gt; somemodel.xml
 </pre>
 
-<p>Windows users: If you are receiving errors from JSim concerning libSBML please see <a href="../download/win32.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
+<p>Windows users: If you are receiving errors from JSim concerning libSBML please see <a href="../download/win64.html#WindowsSBML">Installing JSim under MS Windows:  SBML, Antimony, and Matlab.</a>
 </p>
 
 <h2>  <a name="stat">Project Status</a></h2>
@@ -314,12 +338,11 @@ get a warning message:</p>
  translated to SBML, and are ignored.</LI>
 </UL>
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php require_once("ptail.html") ?>

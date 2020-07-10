@@ -1,14 +1,39 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim Batch processing</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
 
 <h1>JSim Batch Processing Manual</h1>
 
-<?php include "topmsg.php"; ?>
+
 
 <p> JSim users normally use the Graphic User Interface(GUI) for routine modeling 
 work.  However, for debugging and batch processing, it is sometimes useful to run 
@@ -34,7 +59,7 @@ environment (recommended).</li>
 <li><a href="#func">A detailed example using jsbatch</a></li>
 <li><a href="#env">Environment Variables</a></li>
 </ul>
-<?php jscoqli() ?>
+
 
 <h2> <a name="over"> Overview </a> </h2>
 
@@ -221,7 +246,7 @@ For the input function (uses a Function generator as input):
 </ul>
 </p>
 <p>
-The two example files can be downloaded here: <a href="../models/examples/JSBATCH/myModel.mod">myModel.mod</a> and <a href="../models/examples/JSBATCH/data.csv">data.csv</a>.
+The two example files can be downloaded here: <a href="../examples/JSBATCH/myModel.mod">myModel.mod</a> and <a href="../examples/JSBATCH/data.csv">data.csv</a>.
 </p>
 
 <h3><a name="plot">-plot name ...</a></h3>
@@ -343,7 +368,7 @@ myModel.optim.optpar0.max=2 myModel.optim.optpar0.step=0.01</pre> Vary parameter
 
 </ul>
 <p>
-The two example files can be downloaded here: <a href="../models/examples/JSBATCH/myModel.mod">myModel.mod</a> and <a href="../models/examples/JSBATCH/data.csv">data.csv</a>.
+The two example files can be downloaded here: <a href="../examples/JSBATCH/myModel.mod">myModel.mod</a> and <a href="../examples/JSBATCH/data.csv">data.csv</a>.
 </p>
 <p>For more optimization parameter names that you may want to vary, please set up an optimization in the JSim gui then save the parameter set. Next, view the plain-text parameter set from within JSim. This lists all of the parameter names available.
 </p>
@@ -560,12 +585,11 @@ $HOME/.jsim/local:$JSIMHOME/local:$JSIMHOME/common:.</p>
 JSIMHOME specifies the Resources directory inside the JSim application 
 bundle.  This is important to JSIMPATH, see above.</p>
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php require_once("ptail.html") ?>
