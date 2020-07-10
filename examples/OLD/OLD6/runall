@@ -1,7 +1,0 @@
-#!/bin/sh
-
-for i in `cat mlist`
-do
-  echo ===== $i
-  jsbatch -f $i -o
-done
