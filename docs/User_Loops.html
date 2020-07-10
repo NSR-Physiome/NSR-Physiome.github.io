@@ -1,14 +1,36 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Page title</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
 
 <h1>Using Loops in JSim</h1>
-
-<?php include "topmsg.php"; ?>
 
 
 <p> The JSim "Loops" feature allows users to observe the effects of
@@ -26,12 +48,9 @@ changing model parameter values.</p>
 <li><a href="#solver">Looping on Solver Control Parameters</a></li>
 <li><a href="#next">The Next Loop Function</a></li>
 <li><a href="#bugs">Bugs and Limitations</a></li>
-<?php jscoqli() ?>
+
 </ul>
 
-<p>    <img src="../pics/movie.gif">A video designed to accompany this 
-document may be found <a href="../movies/index.html#User_Loops">here</a> 
-.</p>
 
 <h2><a name="basic">Basic Loops</a></h2>
 
@@ -179,12 +198,11 @@ skips the loop that has been running the  longest.</p>
 <p>    There is no "Next Loop" button,  skipping ahead before the current
 loop is completed.</p>
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php require_once("ptail.html") ?>

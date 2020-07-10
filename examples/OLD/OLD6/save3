@@ -1,0 +1,280 @@
+docStart("MML_Delay", "Using Delay Lines in MML");
+model("func", "Variable Function (VF) Delay Lines", 
+examples/MML_Delay/vf1.mod"); 
+examples/MML_Delay/vf2.mod"); 
+model("pde", "PDE Delay Lines", 
+model("ode", "ODE Series Delay Lines", 
+docStart("MML_Events", "Events in MML");
+model("state", "State variables and a simple example", 
+examples/MML_Events/count.mod"); 
+model("gate1", "Gate Example 1", 
+examples/MML_Events/gate1.mod"); 
+model("gate2", "Gate example 2", 
+examples/MML_Events/gate2.mod"); 
+model("gate3", "Gate example 3", 
+examples/MML_Events/gate3.mod"); 
+model("ode", "Pseudo-discontinuities in ODE variables", 
+examples/MML_Events/odedrop.mod"); 
+model("recursive", "Recursive functions", 
+examples/MML_Events/fibonacci.mod"); 
+model("details", "Some details and cautions", 
+docStart("MML_Func_C", "Calling C Code From MML");
+model("example1", "Example 1", 
+examples/MML_Func_C/cmean.mod"); 
+model("example2", "Example 2", 
+examples/MML_Func_C/cintegral.mod"); 
+model("example3", "Example 3", 
+examples/MML_Func_C/creverse.mod"); 
+model("example4", "Example 4", 
+examples/MML_Func_C/nmean.mod"); 
+examples/MML_Func_C/mylib.c"); 
+model("example5", "Example 5", 
+examples/MML_Func_C/ncombo.mod"); 
+examples/MML_Func_C/newlib.c"); 
+docStart("MML_Func_Intro", "Using Functions and Procedures in MML");
+model("fp", "Multiprocessing F&P", 
+examples/MML_Func_Intro/reentrant.mod"); 
+docStart("MML_Func_Java", "Calling Java Code From MML");
+model("example1", "Example 1", 
+examples/MML_Func_Java/jmean.mod"); 
+model("example2", "Example 2", 
+examples/MML_Func_Java/jintegral.mod"); 
+model("example3", "Example 3", 
+examples/MML_Func_Java/jreverse.mod"); 
+docStart("MML_Func_Matlab", "Calling Matlab Code from MML");
+model("start", "Getting Started", 
+model("command", "Calling Matlab via the command line", 
+model("example_jdet", "Example: Determinant calculated via Java 
+examples/MML_Matlab/jdet.mod"); 
+model("example_jinv", "Example: Matrix inversion calculated via Java 
+examples/MML_Matlab/jinv.mod"); 
+model("example_react4", "Example: 4 solute reaction network", " steady 
+examples/MML_Matlab/react4matlab.proj"); 
+examples/MML_Matlab/react4.proj"); 
+model("api", "Calling Matlab via an API", 
+model("future", "Future plans", 
+docStart("MML_Implicit", "Implicit Equations in MML");
+model("linear1", "Linear Implicit Equations in One Variable", 
+examples/MML_Implicit/implicit1.mod"); 
+model("linearM", "Linear Implicit Equations of Multiple Variables", 
+examples/MML_Implicit/implicit2.mod"); 
+model("ode", "Linear Implicit Equations in ODEs", 
+examples/MML_Implicit/implicit3.mod"); 
+examples/MML_Implicit/implicit4.mod"); 
+model("nonlinear", "Non-linear Implicit Equations", 
+model("bound", "Bounded and Unbounded Non-Linear Implicit Equations", 
+examples/MML_Implicit/implicit5.mod"); 
+model("approx", "The Approximately-Equals Relation", 
+model("controls", "Non-Linear Solver Run-Time Controls", 
+model("mult", "Non-linear Implicit Equations in Multiple Variables", 
+examples/MML_Implicit/implicit6.mod"); 
+model("limit", "Limitations", 
+docStart("MML_Integrals", "Using Integrals and Sums in MML");
+model("integrals", "Integrals", 
+examples/MML_Integrals/integral1.mod"); 
+examples/MML_Integrals/integral2.mod"); 
+model("sums", "Sums", 
+examples/MML_Integrals/sum1.mod"); 
+examples/MML_Integrals/sum2.mod"); 
+model("legacy", "Legacy Support", 
+examples/MML_Integrals/legacy.mod"); 
+model("limits", "Limitations", 
+docStart("MML_Intro", "Introductory Survey of MML");
+model("simple", "A Simple MML Model ", 
+examples/MML_Basics/intro_alg.mod"); 
+model("ode", "Ordinary Differential Equations (ODEs)</a> </h2>
+examples/MML_Basics/intro_ode.mod"); 
+model("units", "Physical Units</a> </h2>
+examples/MML_Basics/intro_unit.mod"); 
+model("extern", " Driving Data and Test Signals </a> </h2>
+examples/MML_Basics/intro_extern.mod"); 
+model("parms", " Parameters and Parameter Sets </a> </h2>
+model("constraints", " Understanding Constraints </a> </h2>
+examples/MML_Basics/intro_const.mod"); 
+model("topics", " Further Topics </a> </h2>
+model("", " </a> </h2>
+docStart("MML_Matlab", "Connecting JSim and Matlab");
+model("basics", "The Basics", 
+model("extern_master", "External master", " JSim and Matlab 
+examples/MML_Matlab/example1.sh"); 
+examples/MML_Matlab/gene1.mod"); 
+examples/MML_Matlab/gene2.m"); 
+model("jsim_master", "JSim master", " Matlab slave", 
+model("matlab_master", "Matlab Master", " JSim slave", 
+examples/MML_Matlab/monte1.m"); 
+examples/MML_Matlab/monte1.proj"); 
+docStart("MML_MFAX_Intro", "Introduction to the MFAX BCL");
+model("simple", "Simple example", 
+examples/MML_MFAX_Intro/mfax01.mod"); 
+model("units", "Using physical units", 
+examples/MML_MFAX_Intro/mfax02.mod"); 
+model("mml", "Incorporating MML into BCL models", 
+model("conc", "Setting concentrations", 
+examples/MML_MFAX_Intro/mfax03.mod"); 
+examples/MML_MFAX_Intro/mfax04.mod"); 
+examples/MML_MFAX_Intro/mfax05.mod"); 
+model("more", "More Component Types", 
+model("reac", "Reaction Types", 
+examples/MML_MFAX_Intro/mfax06.mod"); 
+examples/MML_MFAX_Intro/mfax07.mod"); 
+model("cons", "Consumption and Production", 
+examples/MML_MFAX_Intro/mfax09.mod"); 
+model("mem", "Membrane and Transport", 
+examples/MML_MFAX_Intro/mfax10.mod"); 
+examples/MML_MFAX_Intro/mfax10f.mod"); 
+model("flow", "Convective Flow", 
+examples/MML_MFAX_Intro/mfax11.mod"); 
+model("branch", "Branching Flows", 
+examples/MML_MFAX_Intro/mfax12.mod"); 
+model("recirc", "Recirculating Flow", 
+examples/MML_MFAX_Intro/mfax13.mod"); 
+model("inject", "Injections", 
+examples/MML_MFAX_Intro/mfax14.mod"); 
+examples/MML_MFAX_Intro/mfax15.mod"); 
+model("private", "Privatizing sub-variables", 
+examples/MML_MFAX_Intro/mfax16.mod"); 
+docStart("MML_ODE", "Using ODEs in MML");
+model("first", "First example", 
+examples/MML_ODE/ode1.mod"); 
+model("system", "Systems of ODEs", 
+examples/MML_ODE/ode_comp3.mod"); 
+model("order", "Second order equations", 
+examples/MML_ODE/ode_order2.mod"); 
+model("implicit", "Using implicit equations with ODEs", 
+examples/MML_ODE/ode_implicit.mod"); 
+model("parallel", "Parameterized parallel systems", 
+examples/MML_ODE/ode_parallel.mod"); 
+model("series", "Parameterized serial system", 
+examples/MML_ODE/ode_serial.mod"); 
+model("events", "Using events with ODEs", 
+docStart("MML_PDE_85", "Using Partial-Differential Equations in MML");
+model("first", "First Example", 
+examples/MML_PDE/pde1.mod"); 
+model("mult", "Multiple Variable Problems", 
+examples/MML_PDE/pde2.mod"); 
+model("icbc", "IC/BC Consistency in PDEs", 
+examples/MML_PDE/icbc1.mod"); 
+examples/MML_PDE/icbc2.mod"); 
+examples/MML_PDE/icbc3.mod"); 
+model("form", "General Form", 
+model("avail", "Available PDE Solvers", 
+model("lsfea", "The LSFEA Solver", 
+model("mccor", "The MacCormack Solver", 
+model("toms731", "The Toms731 Solver", 
+model("toms690", "The Toms690 Solver", 
+docStart("MML_PDE", "Using Partial-Differential Equations in MML");
+model("first", "First Examples", 
+model("adv", "Example 1: The Advection Equation", 
+examples/MML_PDE/Advection.proj"); 
+model("diff", "Example 2: The Diffusion Equation", 
+examples/MML_PDE/Diffusion.proj"); 
+model("advdiff", "Example 3: The Combined Advection/Diffusion 
+examples/MML_PDE/AdvectionDiffusion.proj"); 
+model("mult", "Example 4: A Multiple Variable Problem", 
+examples/MML_PDE/CounterCurrent.proj"); 
+model("bc", "Types of Boundary Conditions for advection diffusion 
+model("dirichlet", "Dirichlet:</a> C (at either x.min or x.max) = 
+model("neumann", "Neumann:</a> C:x (at either x.min or x.max) = 0", " 
+model("flux", "Total Flux:</a> -U*C + D*C:x = -U*Cin (at either 
+model("avail", "Available PDE Solvers", 
+model("lsfea", "The LSFEA Solver", 
+model("maccormack", "The MacCormack Solver", 
+model("toms731", "The Toms731 Solver", 
+docStart("MML_Templates", "Using Templates in MML");
+model("flat", "Understanding components and
+examples/MML_Templates/expdecay.mod"); 
+model("mfax", "Understanding the MFAX and XSIM template packages", 
+examples/MML_Templates/template1.mod"); 
+model("templ", "Template Declarations", 
+model("class", "Class Templates", 
+model("mml", "MML Templates", 
+examples/MML_Templates/template2.mod"); 
+examples/MML_Templates/template3.mod"); 
+model("limits", "Limitations of MML Templates", 
+docStart("MML_Topics", "Miscellaneous Short Topics in MML");
+model("public", "Public", " Private and Extern variables", 
+examples/MML_Topics/inverter.mod"); 
+examples/MML_Topics/rabbit.mod"); 
+examples/MML_Topics/startzero.mod"); 
+model("choice", "Choice variables", 
+model("deriv", "Symbolic Derivatives", 
+examples/MML_Topics/deriv1.mod"); 
+examples/MML_Topics/deriv3.mod"); 
+model("help", "Variable Properties", 
+examples/MML_Topics/prop1.mod"); 
+examples/MML_Topics/prop2.mod"); 
+docStart("MML_Units", "Using Physical Units in MML");
+model("phys", "Physical Units", 
+examples with units</a, "</h2>
+examples/MML_Units/units1.mod"); 
+examples/MML_Units/units2.mod"); 
+model("more", "More About Units", 
+examples/MML_Units/units4.mod"); 
+model("def", "Defining Additional Units", 
+examples/MML_Units/units3.mod"); 
+docStart("MML_VarFunc", "Using Variable Functions in MML");
+model("basics", "VF Basics", 
+examples/MML_VarFunc/vfb1.mod") 
+examples/MML_VarFunc/vfb2.mod") 
+model("summary", "Quick Summary of VF Basics", 
+model("delay", "Creating Delay Lines using VFs", 
+model("interp", "Importing External Data using VFs", 
+examples/MML_VarFunc/vfrc1.mod"); 
+examples/MML_VarFunc/vfrc3.mod"); 
+examples/MML_VarFunc/vfrc3.proj"); 
+model("bc", "VFs and PDE Boundaries", 
+examples/MML_VarFunc/vfbc1.mod"); 
+examples/MML_VarFunc/vfbc2.mod"); 
+docStart("User_Fgen", "Using Function Generators in JSim");
+model("simple", "  Simple Example", 
+examples/User/fgen1.mod"); 
+model("basic", " Basic Usage", 
+model("advanced", " Advanced Usage ", 
+docStart("User_Fgen", "Function generators available under JSim");
+model("pulses", "  Pulses and Wave Trains</a>:</h2>
+model("pulse1", "Pulse 1", 
+model("pulse2", "Pulse 2", 
+model("pulse3", "Pulse 3", 
+model("extended", "Extended Pulse 3", 
+model("ramp", "Ramp", 
+model("square", "Square Wave Train", 
+model("sawtooth", "Sawtooth Wave Train", 
+model("sine", "Sine Wave Train", 
+model("common", "Common Parameters for PDF's", 
+model("expon", "Exponential", 
+model("gauss", "Gaussian", 
+model("lagnormal", "LagNormal", 
+model("longtail", "Longtail", 
+model("gamma", "GammaVar", 
+model("poisson", "Poisson", 
+model("random", "Random Walk", 
+model("data", "Data Curve", 
+docStart("User_Fpack.html", "The JSim Fortran Package");
+model("avail", "Available models", 
+model("use", "Using the fpack models", 
+examples/fpack directory of your JSim distribution.  The models are
+model("caveat", "Some caveats", 
+docStart("User_Intro", "Introduction to the JSim GUI");
+model("start", "Starting JSim and loading an example model", 
+examples/User/intro1.mod')  to your computer. This
+examples/User/intro1.mod") . You may be asked to OK a 
+model("gui", "The JSim GUI ", 
+model("compile", "Compiling the model", 
+model("runtime", "Running the model", 
+model("plot", "Plotting Model Data", 
+model("save", "Saving your work", 
+examples/User/intro1.proj")  </p, "
+model("next", "Where to next?", 
+docStart("User_Optim", "Introduction to the JSim Optimizers");
+model("over", "Overview", 
+model("start", "Starting the tutorial", 
+examples/User/opt1.mod") ", " the model file for this
+examples/User/optdata1.tac") ", " the data file for this
+examples/User/opt1.proj") </li, "
+model("model", "Understanding the model", 
+model("setup1", "A Sample Optimization",  
+model("graph", "Graphs and Reports",  
+model("stop", "Stopping Criteria",  
+model("complex", "Complications", 
+docStart("User_Sens", "Introduction to JSim Sensitivity Analysis");
+examples/User/sens1.mod"); 

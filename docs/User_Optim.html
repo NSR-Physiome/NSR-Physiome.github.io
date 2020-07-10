@@ -1,14 +1,39 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSim Optimizers</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
 
 <h1>Introduction to the JSim Optimizers</h1>
 
-<?php include "topmsg.php"; ?>
+
 
 <h2>Preface</h2>
 
@@ -36,7 +61,7 @@ operating the optimizers.</p>
 <li><a href="#graph">Graphs and Reports</a></li>
 <li><a href="#stop">Stopping Criteria</a></li>
 <li><a href="#complex">Complications</a></li>
-<?php jscoqli() ?>
+
 </ul>
 
 <h2>  <a name="over">Overview</a></h2>
@@ -69,10 +94,10 @@ parameter values.  </p>
 <ol>
 <li>If you have not already done so, <a href="../download">download and
 install JSim on your computer</a>.</li>
-<li><?php jsDown("examples/User/opt1.mod") ?>, the model file for this
-tutorial.</li>
-<li><?php jsDown("examples/User/optdata1.tac") ?>, the data file for this
-tutorial.</li>
+<li><a href="../examples/User/opt1.mod"> The model file for this
+tutorial</a>.</li>
+<li><a href="../examples/User/optdata1.tac"> The data file for this
+tutorial</a>.</li>
 <li>Start JSim on your computer</li>
 <li>Select "Import model file..." from the "Project" tab "Add" menu and 
 load the opt1.mod model file.</li>
@@ -80,11 +105,7 @@ load the opt1.mod model file.</li>
 load the optdata1.tac data file.</li>
 </ol>
 
-<h3>in the JSim applet:</h3>
 
-<ol>
-<li><?php jsApp("examples/User/opt1.proj") ?></li>
-</ol>
 
 <h2><a name="model">Understanding the model</a></h2>
 
@@ -172,7 +193,7 @@ When using JSim versions 2.16 and above, the Optimization report now includes RM
 <p>
 One part of the report, that can be difficult to understand, is the "Condition number" 
 which gives you an idea about how useful the confidence intervals for the given optimization are. 
-Please see <a href="/jsim/docs/Solver_Condition_Number.html">JSim Optimization Report: 
+Please see <a href="Solver_Condition_Number.html">JSim Optimization Report: 
 Condition Number</a> for more details. Note that since we did no relative data
  weighting, the weighted and unweighted residual graphs are identical and 
 the "Point weigths" graph contains nothing useful.</p> 
@@ -207,7 +228,7 @@ error is calculated as
 <br><br>
 
 <img style="border: 10px solid #FFF; border-width: 0 0 5px 0;"
-    src="/cgi-bin/mimetex.cgi?
+    src="mimetex.cgi?
     \large
 
 
@@ -251,14 +272,13 @@ the larger the number of varying parameters.</li>
 
 </ul>
 
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
 
-<?php require_once("ptail.html") ?>

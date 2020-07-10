@@ -1,0 +1,23 @@
+JSim v1.1
+
+
+unit dimensionless = 1  dimensionless;
+unit radian = 1  dimensionless;
+math main {
+	real X.a;
+	real X.b;
+	real X.c;
+	real X.d;
+	X.a+X.b = X.c;
+	X.d = 2*X.c;
+	real Y.a;
+	real Y.b;
+	real Y.c;
+	real Y.d;
+	Y.a+Y.b = Y.c;
+	Y.d = 2*Y.c;
+	X.a = 1;
+	X.b = 2;
+	Y.b = 5;
+	X.c = Y.c;
+}

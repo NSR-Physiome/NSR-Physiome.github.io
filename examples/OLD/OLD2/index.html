@@ -1,0 +1,51 @@
+<?php
+    $fd = fopen (__FILE__, "r");
+    $contents = fread ($fd, filesize (__FILE__));
+    fclose ($fd);
+    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches);
+    $pagtit = $matches[1];
+    require_once("/home/httpd/html/PHYSIOME/tpt/phead.html"); ?>
+
+<h1>MML Examples Page</h1>
+
+<p>This is a collection of simple models illustrating the various
+MML constructs described in
+<a href="../../docs/MML.html">Writing JSim Models</a>.</p>
+
+<h2>This Page Is Under Construction</h2>
+
+<table border=true cellspacing=0 cellpadding=2>
+<tr>
+  <th>Model</th>
+  <th>View</th>
+  <th>Run</th>
+  <th>Description</th>
+</tr>
+
+<?php
+  $DIR="ALL";
+  $files=array();
+  $d = opendir($DIR); #open directory
+  while ($f = readdir($d)) { 
+    if (ereg("\.mod",$f)){
+      $b = ereg_replace("\.mod", "", $f);
+      $files[] = $b;
+    }
+  }
+  
+  foreach ($files as $key => $f) {
+    print "<tr>\n";
+    $MOD = $DIR . "/" . $f . ".mod";
+    print '<td>' . $f . "</td>\n";
+    print '<td><a href="' . $MOD . '">MML</a></td>' . "\n";
+    print '<td><a href="../applet.html?examples/' . $MOD 
+      . '">Applet</a></td>' . "\n";
+    $DESC=shell_exec("head -1 " . $MOD);
+    print '<td>' . $DESC . "</td>\n";
+    print "</tr>\n\n";   
+  }
+?>
+
+</table>
+
+<?php require_once("/home/httpd/html/PHYSIOME/tpt/ptail.html") ?>
