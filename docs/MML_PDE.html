@@ -1,14 +1,37 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Page title</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
+
 
 <h1>Using Partial-Differential Equations in MML</h1>
-
-<?php include "topmsg.php"; ?>
 
 
 <h2> Introduction</h2> 
@@ -47,7 +70,6 @@ Advection/Diffusion Problems</a></li>
 <li><a href="#lsfea">The LSFEA Solver</a></li>
 <li><a href="#mcccormack">The MacCormack Solver</a></li>
 <li><a href="#toms731">The Toms 731 Solver</a></li>
-<?php jscoqli() ?>
 </ul>
 
 <p> See also:</p>
@@ -65,7 +87,7 @@ the type of advection and diffusion equations  used to model
 concentrations of materials in capillaries.</p>
 
 <h3><a name="adv">Example 1: The Advection Equation</a></h3>
-
+<p><a href="../examples/MML_PDE/Advection.proj">PDE Advection example (project file).</a></p>
 <?php jsTextDownApp("examples/MML_PDE/Advection.proj"); ?>
 
 <p>This is a pure advection (aka wave) equation in a tube. What comes in 
@@ -95,7 +117,7 @@ See Figures 1 and 2 in the JSim applet.</p>
 
 <p>This models requires either the MacCormack or the Toms731
 solver because it lacks flow. </p>
-
+<p><a href="../examples/MML_PDE/Diffusion.proj">PDE diffusion example (project file).</a></p>
 <?php jsTextDownApp("examples/MML_PDE/Diffusion.proj"); ?>
 
 <p>A simple mass balance check is performed by integrating C with 
@@ -110,7 +132,7 @@ to x, shows that the amount of material is conserved.</p>
 
 <h3><a name="advdiff">Example 3: The Combined Advection/Diffusion 
 Equation</a></h3>
-
+<p><a href="../examples/MML_PDE/AdvectionDiffusion.proj">PDE Advection and diffusion example (project file).</a></p>
 <?php jsTextDownApp("examples/MML_PDE/AdvectionDiffusion.proj"); ?>
 
 <p>The left hand <a href="#bc">total flux boundary condition</a> is 
@@ -125,7 +147,7 @@ concentration. Figure 2, a contour plot of the concentration in time
 peak decaying and spreading out with time.</p>
 
 <h3><a name="mult">Example 4: A Multiple Variable Problem</a></h3>
-
+<p><a href="../examples/MML_PDE/CounterCurrent.proj">PDE counter current example (project file).</a></p>
 <?php jsTextDownApp("examples/MML_PDE/CounterCurrent.proj"); ?>
 
 <p>As with ODEs, PDE variables may interact with other PDE and ODE 
@@ -140,7 +162,7 @@ href="#bc">total flux boundary conditions</a> and right (lr) and left
 (rl) <a href="#bc">Neumann boundary conditions</a>.</p>
 
 <h3><a name="note">Example 5: A Cautionary Note About Mixing PDEs with ODEs</a></h3> 
-
+<p><a href="../examples/MML_PDE/BTEX20NoDisf.proj">PDEs mixing with ODEs example (project file).</a></p>
 <?php jsTextDownApp("examples/MML_PDE/BTEX20NoDisf.proj"); ?>
 
 <p>Mixing PDEs and ODEs can result in computational errors. This is an
@@ -350,12 +372,11 @@ variables or JSim <a href="MML_Func_Intro.html">F&P calls</a>);</li>
 Toms731</a></li>
 </ul>
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php require_once("ptail.html") ?>

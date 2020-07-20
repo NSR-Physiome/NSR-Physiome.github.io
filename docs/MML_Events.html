@@ -1,14 +1,38 @@
-<?php 
-    $fd = fopen (__FILE__, "r");
-    $contents = fread ($fd, filesize (__FILE__));
-    fclose ($fd);
-    preg_match("/<h1[^>]*>([^<]*)<\/h1>/","$contents",$matches); 
-    $pagtit = $matches[1];
-    require_once("phead.html"); ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MML Events</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="../scripts/acknowledgements.js"></script>
+	<link rel="stylesheet" href="../css/small.css"> 
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="../index.html">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+    <!--  <li class="nav-item">
+        <a class="nav-link" href="">JSim home</a>
+      </li> -->
+    
+    </ul>
+  </div>  
+</nav>
 <h1>Events in MML</h1>
 
-<?php include "topmsg.php"; ?>
+
 
 <h2>  Introduction</h2>
 
@@ -38,7 +62,7 @@ GUI </a> (recommended)</li>
 <li><a href="#ode">Events using ODE variables</a></li>
 <li><a href="#recursive">Recursive functions</a></li>
 <li><a href="#cautions">Some cautions</a></li>
-<?php jscoqli() ?>
+
 </ul>
 
 <h2>  <a name="overview">Overview</a></h2>
@@ -64,6 +88,7 @@ v(t) is altered based upon any triggered events.</p>
 externally provided voltage V exceeds a threshold voltage V0:</p>
 
 <?php jsTextDownApp("examples/MML_Events/count.proj"); ?>
+<p><a href="../examples/MML_Events/count.proj">Events count example (project file).</a></p>
 
 <p> The state variable ct(t) is initialized to 0 at time zero, and is incremented 
 each time the event (V>V0) is triggered.  The event contains a single event 
@@ -76,8 +101,7 @@ an MML equation,  but is acceptable as an event action.</p>
 voltage exceeds threshold V1,  and closes when it drops below 
 threshold V0:</p>
 
-<?php jsTextDownApp("examples/MML_Events/gate1.proj"); ?>
-
+<p><a href="../examples/MML_Events/gate.proj">Events gate example #1 (project file).</a></p>
 <p>By using two events, we have introduced memory into the system.  The
 value of "open" for V between V0 and V1 is dependent not upon the current
 value of V, but upon previous values.</p>
@@ -92,8 +116,7 @@ running count is kept of the number of gate openings is kept in variable ct.  Th
 time of the latest gate closure is kept in variable tlast. Multiple actions may 
 be associated with a single event by enclosing them in curly braces.  </p>
 
-<?php jsTextDownApp("examples/MML_Events/gate2.proj"); ?>
-
+<p><a href="../examples/MML_Events/gate2.proj">Events gate example #2 (project file).</a></p>
 
 <h2>  <a name="gate3">Gate example 3</a></h2>
 
@@ -103,8 +126,7 @@ trigger events.  In the following example, V either grows or shrinks
 exponentially based up whether the gate is open.  Whether the gate is
 open depends upon current and previous values of V:</p>
 
-<?php jsTextDownApp("examples/MML_Events/gate3.proj"); ?>
-
+<p><a href="../examples/MML_Events/gate3.proj">Events gate example #3 (project file).</a></p>
 <h2><a name="ode">Events using ODE variables</a></h2>
 
 <p>Events may act upon ODE variables (this is a new feature for JSim version 2).
@@ -113,13 +135,14 @@ u fall below .2,  an event resets it back to 1,  resulting in a periodic wave
 form:</p>
 
 <?php jsTextDownApp("examples/MML_Events/event_ode.proj"); ?>
+<p><a href="../examples/MML_Events/event_ode.proj">Events ode example (project file).</a></p>
 
 <h2>  <a name="recursive">Recursive functions</a></h2>
 
 <p>    JSim events support calculation of recursive functions which are
 not supported elsewhere in MML.  The following example calculates 
 the Fibonacci numbers:</p>
-
+<p><a href="../examples/MML_Events/fibonacci.proj">Events fibonacci example (project file).</a></p>
 <?php jsTextDownApp("examples/MML_Events/fibonacci.proj"); ?>
 
 <h2>  <a name="caution">Some cautions</a></h2>
@@ -154,12 +177,11 @@ trigger were tested first, the second event would never be triggered so ct
 would remain perpetually at 0.  If the second event trigger were tested
 first, ct would be calculated as in the original example.</p>
 
-<?php jscoqfoot(); ?>
-<p class="moddate">[This page was last modified 
-<?php $moddatet = date("dMy, g:i a",filemtime(__FILE__));
-    echo $moddatet; 
-    echo ".] ";
-?>
-</p>
+<br />
+<p id="acknowledge"></p>
+<script>
+document.getElementById("acknowledge").innerHTML = getAcknowledge();
+</script>
+</body>
+</html>
 
-<?php require_once("ptail.html") ?>
